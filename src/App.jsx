@@ -390,11 +390,15 @@ function MemberCard({ member }) {
       {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 bg-black object-contain" /> : null}
       {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
       {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
+
       <h3 className="text-xl font-bold uppercase">
         {member.name}
-        
       </h3>
-      <p className="mt-1 text-sm uppercase tracking-[0.2em] text-white/50">{member.role}</p>
+
+      <p className="mt-1 text-sm uppercase tracking-[0.2em] text-white/50">
+        {member.role}
+      </p>
+
       {member.name === 'Cadence' ? (
         <>
           <p className="mt-3 text-sm text-white/70">Cadence is a young vocalist known for her powerful tone, wide range, and natural ability to adapt across a broad spectrum of musical styles. Her voice carries strength and emotion with dynamic versatility, leaving a lasting impact on her listeners.</p>
@@ -405,11 +409,18 @@ function MemberCard({ member }) {
       ) : member.name === 'Joey' ? (
         <>
           <p className="mt-3 text-sm text-white/70">Joey Clark-Mori is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
-          <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar — a transition that helped shape his distinctive playing style and musical identity.</p>
+          <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar, a transition that helped shape his distinctive playing style and musical identity.</p>
           <p className="mt-3 text-sm text-white/70">Drawing influence from a wide range of alternative, nu-metal, and hard rock artists, Joey’s playing blends tight, driving rhythm work with expressive lead lines. His approach is instinctive and feel-driven, always pushing beyond his years as he continues to develop both technically and creatively.</p>
-          <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band’s sound — balancing melody, aggression, and tone across both live performances and original music.</p>
-          <p className="mt-3 text-sm text-white/70">He is the proud caretaker of a growing guitar lineup, including a Fender Telecaster, Fender Stratocaster, and a Gibson SG, each contributing to his expanding tonal range. His guitar quiver reflects his music mentors: Tom Morello (RATM); Jimi Hendrix (The Hendrix Experience); and Tony Iommi (Black Sabbath).</p>
+          <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band’s sound, balancing melody, aggression, and tone across both live performances and original music.</p>
+          <p className="mt-3 text-sm text-white/70">He is the proud caretaker of a growing guitar lineup, including a Fender Telecaster, Fender Stratocaster, and a Gibson SG, each contributing to his expanding tonal range. His guitar quiver reflects his music mentors: Tom Morello (RATM), Jimi Hendrix (The Hendrix Experience), and Tony Iommi (Black Sabbath).</p>
           <p className="mt-3 text-sm text-white/70">Still early in his journey, Joey is focused on writing, performing, and carving out his place in the next generation of rock musicians.</p>
+        </>
+      ) : member.name === 'Max' ? (
+        <>
+          <p className="mt-3 text-sm text-white/70">Max is the Exit Smiling bassist and has loved it since it all began in Julian’s office, struggling through a 12-bar blues. Now he brings a funky, solid element to the band, both musically and socially, getting lost in jams with Julian, writing with the band, and heading out to switch off and have fun when he can (not too much fun).</p>
+          <p className="mt-3 text-sm text-white/70">Max also enjoys mountain biking, skiing, hunting, and soccer, which he fuels with a lot of music, from shredding a pow day blasting Rage Against the Machine (not too loud, his parents don’t want him to damage his ears) to listening to Hilltop Hoods to focus before a game.</p>
+          <p className="mt-3 text-sm text-white/70">Max has a very wide taste in music, with bands like Rage Against the Machine, Linkin Park, Black Sabbath, The Beatles, Audioslave, Hilltop Hoods, and Powderfinger forming the backbone of his influence. However, local influences such as the legendary Dave Berry and The Spindrift Saga have been just as important. He takes lessons from Dave Berry in practical elements, from setting up an overdrive pedal to understanding the genius of an AC/DC song, while members of The Spindrift Saga have taught him the cold, hard theory required to tackle a range of musical challenges, no matter how repetitive it may seem. These local legends give him and the band real insight into the music industry and how bands operate within it.</p>
+          <p className="mt-3 text-sm text-white/70">Max is from the South Coast and brings a regional approach to problems, with a laid-back, fun-loving energy that is a core part of the band and a big reason why he and the others have formed such a strong bond.</p>
         </>
       ) : (
         <p className="mt-3 text-sm text-white/60">Bio coming soon.</p>
