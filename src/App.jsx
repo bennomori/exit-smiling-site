@@ -127,6 +127,14 @@ function TikTokIcon(props) {
   );
 }
 
+function FacebookIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M15 3h-2.5A3.5 3.5 0 0 0 9 6.5V9H7v3h2v9h3v-9h2.2l.5-3H12V6.7c0-.5.3-.7.7-.7H15V3Z" />
+    </svg>
+  );
+}
+
 const studioSessions = [
   {
     title: 'Studio Session 01',
@@ -167,21 +175,37 @@ function Header() {
             ))}
           </nav>
         </div>
+
         <div className="flex items-center gap-10">
           <div className="hidden items-center gap-3 md:flex">
+            
+            {/* Instagram */}
             <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
               <InstagramIcon className="h-4 w-4" />
             </a>
+
+            {/* Facebook (NEW) */}
+            <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
+              <FacebookIcon className="h-4 w-4" />
+            </a>
+
+            {/* YouTube */}
             <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
               <YoutubeIcon className="h-4 w-4" />
             </a>
+
+            {/* Spotify */}
             <a href="#" aria-label="Spotify" className={socialButtonClass}>
               <SpotifyIcon className="h-4 w-4" />
             </a>
+
+            {/* TikTok */}
             <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
               <TikTokIcon className="h-4 w-4" />
             </a>
+
           </div>
+
           <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black">
             Get Tickets
           </a>
@@ -509,37 +533,68 @@ function Footer() {
   return (
     <footer className="border-t border-white/10 px-6 py-10 text-sm text-white/50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
+        
         <div className="flex items-center gap-3">
           <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
           <span>© 2026 {brand.name}</span>
         </div>
+
         <div className="text-white/70">
           <p className="mb-2 text-xs uppercase tracking-[0.3em] text-white/50">Bookings</p>
           <p className="font-semibold text-white">Megan Small</p>
           <p>Good Vibes Entertainment</p>
-          <p><a href="mailto:megan@goodvibesentertainment.com.au" className="hover:text-white">megan@goodvibesentertainment.com.au</a></p>
-          <p><a href="tel:+61244080108" className="hover:text-white">(02) 4408 0108</a></p>
+          <p>
+            <a href="mailto:megan@goodvibesentertainment.com.au" className="hover:text-white">
+              megan@goodvibesentertainment.com.au
+            </a>
+          </p>
+          <p>
+            <a href="tel:+61244080108" className="hover:text-white">
+              (02) 4408 0108
+            </a>
+          </p>
         </div>
+
         <div className="text-white/70">
           <p className="mb-2 text-xs uppercase tracking-[0.3em] text-white/50">Band Contact</p>
           <p className="font-semibold text-white">Paul Dolphin</p>
           <p>Exit Smiling</p>
-          <p><a href="mailto:paul@pauldolphindesigns.com.au" className="hover:text-white">paul@pauldolphindesigns.com.au</a></p>
+          <p>
+            <a href="mailto:paul@pauldolphindesigns.com.au" className="hover:text-white">
+              paul@pauldolphindesigns.com.au
+            </a>
+          </p>
         </div>
+
         <div className="flex items-center gap-3 text-white/70 md:justify-start xl:justify-end">
+          
+          {/* Instagram */}
           <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
             <InstagramIcon className="h-4 w-4" />
           </a>
+
+          {/* Facebook (ADDED) */}
+          <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
+            <FacebookIcon className="h-4 w-4" />
+          </a>
+
+          {/* YouTube */}
           <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
             <YoutubeIcon className="h-4 w-4" />
           </a>
+
+          {/* Spotify */}
           <a href="#" aria-label="Spotify" className={socialButtonClass}>
             <SpotifyIcon className="h-4 w-4" />
           </a>
+
+          {/* TikTok */}
           <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
             <TikTokIcon className="h-4 w-4" />
           </a>
+
         </div>
+
       </div>
     </footer>
   );
