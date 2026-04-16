@@ -178,32 +178,25 @@ function Header() {
 
         <div className="flex items-center gap-10">
           <div className="hidden items-center gap-3 md:flex">
-            
-            {/* Instagram */}
             <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
               <InstagramIcon className="h-4 w-4" />
             </a>
 
-            {/* Facebook (NEW) */}
             <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
               <FacebookIcon className="h-4 w-4" />
             </a>
 
-            {/* YouTube */}
             <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
               <YoutubeIcon className="h-4 w-4" />
             </a>
 
-            {/* Spotify */}
             <a href="#" aria-label="Spotify" className={socialButtonClass}>
               <SpotifyIcon className="h-4 w-4" />
             </a>
 
-            {/* TikTok */}
             <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
               <TikTokIcon className="h-4 w-4" />
             </a>
-
           </div>
 
           <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black">
@@ -533,7 +526,6 @@ function Footer() {
   return (
     <footer className="border-t border-white/10 px-6 py-10 text-sm text-white/50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
-        
         <div className="flex items-center gap-3">
           <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
           <span>© 2026 {brand.name}</span>
@@ -567,36 +559,78 @@ function Footer() {
         </div>
 
         <div className="flex items-center gap-3 text-white/70 md:justify-start xl:justify-end">
-          
-          {/* Instagram */}
           <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
             <InstagramIcon className="h-4 w-4" />
           </a>
 
-          {/* Facebook (ADDED) */}
           <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
             <FacebookIcon className="h-4 w-4" />
           </a>
 
-          {/* YouTube */}
           <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
             <YoutubeIcon className="h-4 w-4" />
           </a>
 
-          {/* Spotify */}
           <a href="#" aria-label="Spotify" className={socialButtonClass}>
             <SpotifyIcon className="h-4 w-4" />
           </a>
 
-          {/* TikTok */}
           <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
             <TikTokIcon className="h-4 w-4" />
           </a>
-
         </div>
-
       </div>
     </footer>
+  );
+}
+
+function MobileSocialBar() {
+  const socialButtonClass = 'flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-300 hover:border-white/35 hover:bg-white/10 hover:text-white';
+
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-black/90 px-4 py-3 backdrop-blur md:hidden">
+      <div className="mx-auto flex max-w-md items-center justify-center gap-4">
+        <a
+          href="https://www.instagram.com/exitsmiling33/"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Instagram"
+          className={socialButtonClass}
+        >
+          <InstagramIcon className="h-5 w-5" />
+        </a>
+
+        <a
+          href="https://www.facebook.com/profile.php?id=61584318366927"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Facebook"
+          className={socialButtonClass}
+        >
+          <FacebookIcon className="h-5 w-5" />
+        </a>
+
+        <a
+          href="https://www.youtube.com/@exitsmiling-v8q/videos"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="YouTube"
+          className={socialButtonClass}
+        >
+          <YoutubeIcon className="h-5 w-5" />
+        </a>
+
+        <a
+          href="https://www.tiktok.com/@exit_smiling"
+          target="_blank"
+          rel="noreferrer"
+          aria-label="TikTok"
+          className={socialButtonClass}
+        >
+          <TikTokIcon className="h-5 w-5" />
+        </a>
+      </div>
+    </div>
   );
 }
 
@@ -701,7 +735,7 @@ export default function App() {
   };
 
   return (
-    <div id="top" className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+    <div id="top" className="min-h-screen bg-black pb-24 text-white selection:bg-white selection:text-black md:pb-0">
       <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }`}</style>
       <Header />
       <Hero currentImage={currentImage} />
@@ -712,6 +746,7 @@ export default function App() {
       <Band />
       <StudioSessions onOpenStudio={handleStudioAccess} />
       <Footer />
+      <MobileSocialBar />
       <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
       <PosterModal open={posterOpen} onClose={() => setPosterOpen(false)} />
       <StudioModal
