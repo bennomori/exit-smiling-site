@@ -430,6 +430,13 @@ function MemberCard({ member }) {
           <p className="mt-3 text-sm text-white/70">Julian has also competed and won the local St Cecilia Music Scholarships and competed with the top 20 drummers in Years 7–9 in NSW in the final of the OSIC drum competition. He has been taking lessons from one of Australia’s best jazz drummers, a former ANU drum teacher, using this to blend classical technique with more modern rock styles.</p>
           <p className="mt-3 text-sm text-white/70">Julian’s ambition would be to one day get sponsored by Heinz and Adidas, and he would like to receive unlimited free products from both companies.</p>
         </>
+      ) : member.name === 'Lando' ? (
+        <>
+          <p className="mt-3 text-sm text-white/70">Sharing the role of vocals, Lando brings high energy with a good dose of swagger to the stage.</p>
+          <p className="mt-3 text-sm text-white/70">An eclectic mix of musical styles from his early years has helped him develop a powerful and vibrant vocal tone, punching out rhymes in style.</p>
+          <p className="mt-3 text-sm text-white/70">Complementing his powerhouse vocals, Lando also delivers rhythm and artistic flair through backing guitar.</p>
+          <p className="mt-3 text-sm text-white/70">Drawing influence and inspiration from legendary bands such as Nirvana, Rage Against the Machine, and Linkin Park, Lando aspires to bring raw and honest energy to the stage.</p>
+        </>
       ) : (
         <p className="mt-3 text-sm text-white/60">Bio coming soon.</p>
       )}
