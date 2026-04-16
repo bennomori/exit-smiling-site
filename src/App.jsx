@@ -81,11 +81,11 @@ const merch = [
 ];
 
 const members = [
-  { name: 'Cadence Butler', role: 'Vocals' },
-  { name: 'Lando Cotte', role: 'Vocals / Rhythm Guitar' },
-  { name: 'Julian Dolphin', role: 'Drums' },
+  { name: 'Cadence', role: 'Vocals' },
+  { name: 'Lando', role: 'Vocals / Rhythm Guitar' },
+  { name: 'Julian', role: 'Drums' },
   { name: 'Max', role: 'Bass Guitar' },
-  { name: 'Joey Clark Mori', role: 'Lead Guitar' },
+  { name: 'Joey', role: 'Lead Guitar' },
 ];
 
 function InstagramIcon(props) {
@@ -385,19 +385,19 @@ function Store({ onOpenPoster }) {
 function MemberCard({ member }) {
   return (
     <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-5">
-      {member.name === 'Cadence Butler' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence Butler" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
-      {member.name === 'Lando Cotte' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando Cotte" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
-      {member.name === 'Julian Dolphin' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian Dolphin" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 bg-black object-contain" /> : null}
-      {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max White" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
-      {member.name === 'Joey Clark Mori' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey Clark Mori" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
+      {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
+      {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
+      {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 bg-black object-contain" /> : null}
+      {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
+      {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
       <h3 className="text-xl font-bold uppercase">
         {member.name}
         
       </h3>
       <p className="mt-1 text-sm uppercase tracking-[0.2em] text-white/50">{member.role}</p>
-      {member.name === 'Cadence Butler' ? (
+      {member.name === 'Cadence' ? (
         <>
-          <p className="mt-3 text-sm text-white/70">Cadence Butler is a young vocalist known for her powerful tone, wide range, and natural ability to adapt across a broad spectrum of musical styles. Her voice carries strength and emotion with dynamic versatility, leaving a lasting impact on her listeners.</p>
+          <p className="mt-3 text-sm text-white/70">Cadence is a young vocalist known for her powerful tone, wide range, and natural ability to adapt across a broad spectrum of musical styles. Her voice carries strength and emotion with dynamic versatility, leaving a lasting impact on her listeners.</p>
           <p className="mt-3 text-sm text-white/70">Cadence draws strong inspiration from iconic vocal artists such as Amy Lee of Evanescence and Emily Armstrong of Linkin Park, with these influences shaping her connection to a wide range of rock styles. However, her love of country, pop, and indie music follows closely behind, fuelling a musical journey that remains unconfined to any one genre, allowing her evolving skill to continually grow.</p>
           <p className="mt-3 text-sm text-white/70">Born and raised on the South Coast, Cadence’s passion for singing and music began at a young age, naturally guiding her into the creative young artist she is quickly becoming. At the age of 13 she joined the band that later became Exit Smiling, marking the beginning of her experience as a live performer and lead vocalist.</p>
           <p className="mt-3 text-sm text-white/70">Although still early in her formal training, Cadence began receiving professional vocal coaching in August 2025 from a renowned opera singer based in the UK. A blend of modern with classical training continues to refine her natural ability, further develop her technique, and support her growth as an emerging musician.</p>
