@@ -402,7 +402,7 @@ function MemberCard({ member }) {
           <p className="mt-3 text-sm text-white/70">Born and raised on the South Coast, Cadence’s passion for singing and music began at a young age, naturally guiding her into the creative young artist she is quickly becoming. At the age of 13 she joined the band that later became Exit Smiling, marking the beginning of her experience as a live performer and lead vocalist.</p>
           <p className="mt-3 text-sm text-white/70">Although still early in her formal training, Cadence began receiving professional vocal coaching in August 2025 from a renowned opera singer based in the UK. A blend of modern with classical training continues to refine her natural ability, further develop her technique, and support her growth as an emerging musician.</p>
         </>
-      ) : member.name === 'Joey Clark Mori' ? (
+      ) : member.name === 'Joey' ? (
         <>
           <p className="mt-3 text-sm text-white/70">Joey Clark-Mori is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
           <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar — a transition that helped shape his distinctive playing style and musical identity.</p>
