@@ -135,6 +135,14 @@ function FacebookIcon(props) {
   );
 }
 
+function AppleMusicIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M15 5v10.2a2.8 2.8 0 1 1-2-2.68V7.2l6-1.2v8.2a2.8 2.8 0 1 1-2-2.68V5.4L15 5Z" />
+    </svg>
+  );
+}
+
 const studioSessions = [
   {
     title: 'Studio Session 01',
@@ -192,6 +200,10 @@ function Header() {
 
             <a href="#" aria-label="Spotify" className={socialButtonClass}>
               <SpotifyIcon className="h-4 w-4" />
+            </a>
+
+            <a href="#" aria-label="Apple Music" className={socialButtonClass}>
+              <AppleMusicIcon className="h-4 w-4" />
             </a>
 
             <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
@@ -575,6 +587,10 @@ function Footer() {
             <SpotifyIcon className="h-4 w-4" />
           </a>
 
+          <a href="#" aria-label="Apple Music" className={socialButtonClass}>
+            <AppleMusicIcon className="h-4 w-4" />
+          </a>
+
           <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
             <TikTokIcon className="h-4 w-4" />
           </a>
@@ -618,6 +634,22 @@ function MobileSocialBar() {
           className={socialButtonClass}
         >
           <YoutubeIcon className="h-5 w-5" />
+        </a>
+
+        <a
+          href="#"
+          aria-label="Spotify"
+          className={socialButtonClass}
+        >
+          <SpotifyIcon className="h-5 w-5" />
+        </a>
+
+        <a
+          href="#"
+          aria-label="Apple Music"
+          className={socialButtonClass}
+        >
+          <AppleMusicIcon className="h-5 w-5" />
         </a>
 
         <a
