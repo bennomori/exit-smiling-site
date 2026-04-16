@@ -84,7 +84,7 @@ const members = [
   { name: 'Cadence Butler', role: 'Vocals' },
   { name: 'Lando Cotte', role: 'Vocals / Rhythm Guitar' },
   { name: 'Julian Dolphin', role: 'Drums' },
-  { name: 'Max White', role: 'Bass Guitar' },
+  { name: 'Max', role: 'Bass Guitar' },
   { name: 'Joey Clark Mori', role: 'Lead Guitar' },
 ];
 
@@ -388,7 +388,7 @@ function MemberCard({ member }) {
       {member.name === 'Cadence Butler' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence Butler" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
       {member.name === 'Lando Cotte' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando Cotte" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
       {member.name === 'Julian Dolphin' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian Dolphin" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 bg-black object-contain" /> : null}
-      {member.name === 'Max White' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max White" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
+      {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max White" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover" /> : null}
       {member.name === 'Joey Clark Mori' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey Clark Mori" className="mb-4 aspect-square w-full rounded-2xl border border-white/10 object-cover object-top" /> : null}
       <h3 className="text-xl font-bold uppercase">
         {member.name}
