@@ -1,4 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { getProducts } from "./getProducts";
+import StripeCheckoutModal from "./StripeCheckoutModal";
+import {
+  createCart,
+  addLineItem,
+  getCart,
+  initializeStripePayment,
+  completeCart,
+  updateLineItem,
+  removeLineItem,
+  updateCartDetails,
+  listCartShippingOptions,
+  addShippingMethod,
+} from "./cart";
 
 const primaryLogo = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615239/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png';
 const markLogo = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775614405/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png';
@@ -34,6 +49,14 @@ const tourDates = [
     time: 'Friday',
     href: 'https://events.humanitix.com/archie-at-smokey-dans-426/tickets?fbclid=IwY2xjawRKMDpleHRuA2FlbQIxMABicmlkETFGbmJIM3pkNXlDdklmWW9Vc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHin3kekDUp3KtzaNksuoRsJnoFDcdMcTgyPg986XG8ra6T20ev90Sl4nB4Gn_aem_7D5dBKgOLCSFaAtC_kBKjA',
     note: 'ARCHIE EP release tour (Together Apart) · with Grace Faletoese + Exit Smiling',
+  },
+  {
+    date: 'MAY 2',
+    city: 'Narooma, NSW',
+    venue: 'Narooma Oyster Festival',
+    time: '1PM',
+    href: '#',
+    note: 'Live show',
   },
   {
     date: 'MAY 16',
@@ -158,8 +181,9 @@ const studioSessions = [
   },
 ];
 
-function Header() {
-  const socialButtonClass = 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-300 hover:border-white/35 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]';
+function Header({ cart, onToggleMiniCart }) {
+  const socialButtonClass = 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-500 hover:border-white/35 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]';
+  const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
@@ -210,13 +234,34 @@ function Header() {
               <TikTokIcon className="h-4 w-4" />
             </a>
           </div>
-
+            <button
+              onClick={onToggleMiniCart}
+              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition hover:bg-white/10"
+              aria-label="Open cart"
+            >
+              <CartIcon className="h-5 w-5" />
+              {cartCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-black">
+                  {cartCount}
+                </span>
+              )}
+            </button>
           <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black">
             Get Tickets
           </a>
         </div>
       </div>
     </header>
+  );
+}
+
+function CartIcon(props) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="9" cy="20" r="1" />
+      <circle cx="18" cy="20" r="1" />
+      <path d="M3 4h2l2.2 10.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H7" />
+    </svg>
   );
 }
 
@@ -374,35 +419,126 @@ function FeaturedContent({ onOpenVideo }) {
   );
 }
 
-function Store({ onOpenPoster }) {
+function Store({ products, onOpenPoster, onAddToCart }) {
+  const fallbackMerch = [
+    {
+      title: 'Tour Tee',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png',
+    },
+    {
+      title: 'Blackout Hoodie',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776112855/Hoodies_with_bold__Exit_Smiling__prints_pmn1xn.png',
+    },
+    {
+      title: 'Caps',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113807/Colorful_caps_with_bold_lettering_niddcc.png',
+    },
+    {
+      title: 'Vinyl Bundle',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776114137/Exit_Smiling_vinyl_bundle_showcase_zqn6qt.png',
+    },
+    {
+      title: 'Signed Poster',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png',
+      isPoster: true,
+    },
+    {
+      title: 'Accessories',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776130540/Black_guitar_pick_accessories_with_band_logo_ru6m8i.png',
+    },
+    {
+      title: 'Guitar Picks',
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776123496/Exit_smiling_guitar_picks_detail_rx75ix.png',
+    },
+    {
+      title: "Signed Tee's",
+      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776129975/Band_T-shirt_with_signatures_displayed_k7kna6.png',
+    },
+  ];
+
+  const getPrice = (product) => {
+    const variant = product?.variants?.[0];
+    const amount =
+      variant?.calculated_price?.calculated_amount ??
+      variant?.calculated_price?.original_amount ??
+      variant?.prices?.[0]?.amount ??
+      null;
+
+    if (amount == null || Number.isNaN(Number(amount))) return null;
+    return `$${Number(amount).toFixed(2)}`;
+  };
+
+  const merchItems =
+    products && products.length
+      ? products.map((product) => ({
+          id: product.id,
+          title: product.title,
+          image:
+            product.thumbnail ||
+            product.images?.[0]?.url ||
+            'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png',
+          price: getPrice(product),
+        }))
+      : fallbackMerch;
+
   return (
     <section id="store" className="scroll-mt-32 border-t border-white/10">
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-10 flex items-end justify-between gap-4">
           <h2 className="text-4xl font-black uppercase md:text-6xl">Merch highlights</h2>
-          <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">Shop all</a>
+          <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">
+            Shop all
+          </a>
         </div>
+
         <div className="grid gap-6 md:grid-cols-4">
-          {merch.map((item, i) => (
-            <article key={item} className="group rounded-3xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06]">
+          {merchItems.map((item) => (
+            <article
+              key={item.id || item.title}
+              className="group rounded-3xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06]"
+            >
               <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-black">
-                {i === 0 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png')" }} />}
-                {i === 1 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776112855/Hoodies_with_bold__Exit_Smiling__prints_pmn1xn.png')" }} />}
-                {i === 2 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776113807/Colorful_caps_with_bold_lettering_niddcc.png')" }} />}
-                {i === 3 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776114137/Exit_Smiling_vinyl_bundle_showcase_zqn6qt.png')" }} />}
-                {i === 4 && (
-                  <button type="button" onClick={onOpenPoster} className="absolute inset-0 flex items-center justify-center bg-black p-4 text-left">
-                    <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster" className="max-h-full max-w-full object-contain" />
+                {item.isPoster ? (
+                  <button
+                    type="button"
+                    onClick={onOpenPoster}
+                    className="absolute inset-0 flex items-center justify-center bg-black p-4 text-left"
+                  >
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="max-h-full max-w-full object-contain"
+                    />
                   </button>
+                ) : (
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{ backgroundImage: `url('${item.image}')` }}
+                  />
                 )}
-                {i === 5 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776130540/Black_guitar_pick_accessories_with_band_logo_ru6m8i.png')" }} />}
-                {i === 6 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776123496/Exit_smiling_guitar_picks_detail_rx75ix.png')" }} />}
-                {i === 7 && <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776129975/Band_T-shirt_with_signatures_displayed_k7kna6.png')" }} />}
+
                 <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition duration-300 group-hover:opacity-100">
-                  <div className="rounded-full border border-white/40 bg-black/65 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white backdrop-blur-sm">Shop now</div>
+                  <div className="rounded-full border border-white/40 bg-black/65 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white backdrop-blur-sm">
+                    Shop now
+                  </div>
                 </div>
               </div>
-              <h3 className="mt-4 text-center text-lg font-semibold uppercase">{item}</h3>
+
+              <h3 className="mt-4 text-center text-lg font-semibold uppercase">{item.title}</h3>
+
+              {item.price ? (
+                <>
+                  <p className="mt-1 text-center text-sm text-white/60">{item.price}</p>
+                  <button
+                    onClick={() => onAddToCart(item.id)}
+                    className="mt-4 w-full rounded-full bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:opacity-90"
+                  >
+                    Add to Cart
+                  </button>
+                </>
+              ) : (
+                <p className="mt-1 text-center text-sm text-white/35">Price coming soon</p>
+              )}
             </article>
           ))}
         </div>
@@ -437,7 +573,7 @@ function MemberCard({ member }) {
         </>
       ) : member.name === 'Joey' ? (
         <>
-          <p className="mt-3 text-sm text-white/70">Joey Clark-Mori is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
+          <p className="mt-3 text-sm text-white/70">Joey is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
           <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar, a transition that helped shape his distinctive playing style and musical identity.</p>
           <p className="mt-3 text-sm text-white/70">Drawing influence from a wide range of alternative, nu-metal, and hard rock artists, Joey’s playing blends tight, driving rhythm work with expressive lead lines. His approach is instinctive and feel-driven, always pushing beyond his years as he continues to develop both technically and creatively.</p>
           <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band’s sound, balancing melody, aggression, and tone across both live performances and original music.</p>
@@ -453,7 +589,7 @@ function MemberCard({ member }) {
         </>
       ) : member.name === 'Julian' ? (
         <>
-          <p className="mt-3 text-sm text-white/70">Julian Dolphin is 14 years old and was born in Manchester, UK, the heart of music in 90s England, where big bands like Oasis, The Smiths, and The Stone Roses came from. Julian moved to Australia when he was just 1 and started drumming at the age of 5. The first gig he watched was Henge in England in 2017. He also learned to play the piano through COVID and continues to grow his musical skill set beyond just rhythm.</p>
+          <p className="mt-3 text-sm text-white/70">Julian is 14 years old and was born in Manchester, UK, the heart of music in 90s England, where big bands like Oasis, The Smiths, and The Stone Roses came from. Julian moved to Australia when he was just 1 and started drumming at the age of 5. The first gig he watched was Henge in England in 2017. He also learned to play the piano through COVID and continues to grow his musical skill set beyond just rhythm.</p>
           <p className="mt-3 text-sm text-white/70">Julian’s main drumming influence comes from drummers such as Brad Wilks (RATM), Ringo Starr (The Beatles), and John Otto (Limp Bizkit). This influence brings a wide range of styles, such as hip hop, funk, and nu metal, into his drumming.</p>
           <p className="mt-3 text-sm text-white/70">Julian started writing and creating music with his younger brother during lockdown at age 10 and released a couple of music videos, which can still be tracked down on YouTube if you search hard enough. These videos gained enough attention to make it to the front page of the local paper, feature in The Canberra Times, and the boys were interviewed, with their songs played on ABC Radio.</p>
           <p className="mt-3 text-sm text-white/70">Julian has also competed and won the local St Cecilia Music Scholarships and competed with the top 20 drummers in Years 7–9 in NSW in the final of the OSIC drum competition. He has been taking lessons from one of Australia’s best jazz drummers, a former ANU drum teacher, using this to blend classical technique with more modern rock styles.</p>
@@ -727,6 +863,279 @@ function StudioModal({ open, onClose, authorized, password, setPassword, onSubmi
   );
 }
 
+function MiniCart({
+  open,
+  cart,
+  onClose,
+  onCheckout,
+  onUpdateQuantity,
+  onRemoveItem,
+  checkoutLoading,
+  checkoutEmail,
+  setCheckoutEmail,
+  shippingForm,
+  setShippingForm,
+  shippingOptions,
+  shippingLoading,
+  shippingSaving,
+  onSaveShippingDetails,
+  onSelectShippingOption,
+  checkoutError,
+}) {
+  return (
+    <>
+      <div
+        onClick={onClose}
+        className={`fixed inset-0 z-[115] bg-black/40 backdrop-blur-[1px] transition-opacity duration-300 ${open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+          }`}
+      />
+
+      <div
+        className={`fixed right-6 top-24 z-[120] w-[360px] max-w-[calc(100vw-2rem)] rounded-3xl border border-white/10 bg-[#0b0b0b]/95 p-5 shadow-2xl backdrop-blur transition-all duration-300 ease-out ${open
+          ? "translate-x-0 opacity-100"
+          : "translate-x-full opacity-0 pointer-events-none"
+          }`}
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-bold uppercase">Your Cart</h3>
+            <p className="text-sm text-white/50">
+              {cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0} item
+              {(cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0) === 1 ? "" : "s"}
+            </p>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="rounded-full border border-white/15 px-3 py-1 text-xs uppercase tracking-[0.15em] text-white/70 hover:bg-white/10 hover:text-white"
+          >
+            Close
+          </button>
+        </div>
+
+        <div className="max-h-[320px] space-y-3 overflow-y-auto pr-1">
+          {cart?.items?.length ? (
+            cart.items.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.03] p-3"
+              >
+                <div className="h-16 w-16 overflow-hidden rounded-xl border border-white/10 bg-black">
+                  {item.thumbnail ? (
+                    <img src={item.thumbnail} alt={item.title} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-white/35">
+                      No image
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold uppercase">{item.title}</p>
+
+                  <div className="mt-2 flex items-center gap-2">
+                    <button
+                      onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
+                      className="h-8 w-8 rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white"
+                    >
+                      −
+                    </button>
+
+                    <span className="min-w-[24px] text-center text-sm text-white/80">
+                      {item.quantity}
+                    </span>
+
+                    <button
+                      onClick={() => onUpdateQuantity(item.id, item.quantity + 1)}
+                      className="h-8 w-8 rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white"
+                    >
+                      +
+                    </button>
+
+                    <button
+                      onClick={() => onRemoveItem(item.id)}
+                      className="ml-auto rounded-full border border-white/15 px-3 py-1 text-[10px] uppercase tracking-[0.15em] text-white/60 hover:bg-white/10 hover:text-white"
+                    >
+                      Remove
+                    </button>
+                  </div>
+
+                  <p className="mt-2 text-sm text-white/70">
+                    ${item.unit_price != null ? Number(item.unit_price).toFixed(2) : "0.00"}
+                  </p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <p className="text-sm text-white/45">Your cart is empty.</p>
+          )}
+        </div>
+
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <h4 className="text-sm font-semibold uppercase tracking-[0.15em] text-white/80">
+            Shipping Details
+          </h4>
+
+          <div className="mt-3 space-y-3">
+            <input
+              type="email"
+              value={checkoutEmail}
+              onChange={(e) => setCheckoutEmail(e.target.value)}
+              placeholder="Email"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={shippingForm.first_name}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, first_name: e.target.value }))
+                }
+                placeholder="First name"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+              <input
+                type="text"
+                value={shippingForm.last_name}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, last_name: e.target.value }))
+                }
+                placeholder="Last name"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+            </div>
+
+            <input
+              type="text"
+              value={shippingForm.address_1}
+              onChange={(e) =>
+                setShippingForm((prev) => ({ ...prev, address_1: e.target.value }))
+              }
+              placeholder="Street address"
+              className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+            />
+
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={shippingForm.city}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, city: e.target.value }))
+                }
+                placeholder="City"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+              <input
+                type="text"
+                value={shippingForm.province}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, province: e.target.value }))
+                }
+                placeholder="State"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                type="text"
+                value={shippingForm.postal_code}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, postal_code: e.target.value }))
+                }
+                placeholder="Postcode"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+              <input
+                type="text"
+                value={shippingForm.phone}
+                onChange={(e) =>
+                  setShippingForm((prev) => ({ ...prev, phone: e.target.value }))
+                }
+                placeholder="Phone"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+            </div>
+
+            <button
+              onClick={onSaveShippingDetails}
+              disabled={shippingSaving}
+              className="w-full rounded-full border border-white/20 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {shippingSaving ? "Saving..." : "Confirm Shipping Details"}
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <h4 className="text-sm font-semibold uppercase tracking-[0.15em] text-white/80">
+            Shipping Method
+          </h4>
+
+          {shippingLoading ? (
+            <p className="mt-3 text-sm text-white/45">Loading shipping options...</p>
+          ) : shippingOptions.length === 0 ? (
+            <p className="mt-3 text-sm text-white/45">
+              Save shipping details to load shipping options.
+            </p>
+          ) : (
+            <div className="mt-3 space-y-2">
+              {shippingOptions.map((option) => {
+                const isSelected = cart?.shipping_methods?.some(
+                  (method) => method.shipping_option_id === option.id
+                );
+
+                const amount =
+                  option.amount ??
+                  option.price ??
+                  option.calculated_price?.calculated_amount ??
+                  null;
+
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => onSelectShippingOption(option.id)}
+                    className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${isSelected
+                        ? "border-white bg-white text-black"
+                        : "border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]"
+                      }`}
+                  >
+                    <span className="text-sm font-medium">{option.name || option.label || option.id}</span>
+                    <span className="text-sm">
+                      {amount != null ? `$${Number(amount).toFixed(2)}` : "Calculated"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="mt-4 border-t border-white/10 pt-4">
+          <div className="mb-4 flex items-center justify-between text-sm">
+            <span className="text-white/60">Subtotal</span>
+            <span className="font-semibold text-white">
+              ${cart?.subtotal != null ? Number(cart.subtotal).toFixed(2) : "0.00"}
+            </span>
+          </div>
+
+          <button
+            onClick={onCheckout}
+            disabled={!cart?.items?.length || checkoutLoading}
+            className="w-full rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {checkoutError ? (
+              <p className="mb-4 text-sm text-red-400">{checkoutError}</p>
+            ) : null}
+            {checkoutLoading ? "Redirecting..." : "Checkout"}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
 export default function App() {
   const [videoOpen, setVideoOpen] = useState(false);
   const [posterOpen, setPosterOpen] = useState(false);
@@ -736,12 +1145,108 @@ export default function App() {
   const [studioError, setStudioError] = useState('');
   const [selectedStudioVideo, setSelectedStudioVideo] = useState(null);
   const [currentImage, setCurrentImage] = useState(0);
+  const [products, setProducts] = useState([]);
+  const [cartId, setCartId] = useState(null);
+  const [cart, setCart] = useState(null);
+  const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [stripeClientSecret, setStripeClientSecret] = useState("");
+  const [stripeModalOpen, setStripeModalOpen] = useState(false);
+  const [checkoutEmail, setCheckoutEmail] = useState("");
+  const [shippingForm, setShippingForm] = useState({
+    first_name: "",
+    last_name: "",
+    address_1: "",
+    city: "",
+    province: "",
+    postal_code: "",
+    country_code: "au",
+    phone: "",
+  });
+  const [shippingOptions, setShippingOptions] = useState([]);
+  const [shippingLoading, setShippingLoading] = useState(false);
+  const [shippingSaving, setShippingSaving] = useState(false);
+  const [checkoutError, setCheckoutError] = useState("");
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroImages.length);
     }, 3000);
     return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    async function loadProducts() {
+      try {
+        const data = await getProducts();
+        console.log("MEDUSA PRODUCTS:", data);
+        setProducts(data);
+      } catch (err) {
+        console.error("Error fetching products:", err);
+      }
+    }
+
+    loadProducts();
+  }, []);
+
+  useEffect(() => {
+    async function initCart() {
+      try {
+        const savedCartId = localStorage.getItem("exit_smiling_cart_id");
+
+        if (savedCartId) {
+          try {
+            const existingCart = await getCart(savedCartId);
+
+            const hasSucceededPaymentSession =
+              existingCart?.payment_collection?.payment_sessions?.some(
+                (session) =>
+                  session?.status === "authorized" ||
+                  session?.status === "captured" ||
+                  session?.data?.payment_intent?.status === "succeeded"
+              );
+
+            if (!hasSucceededPaymentSession) {
+              setCartId(existingCart.id);
+              setCart(existingCart);
+              console.log("RESTORED CART:", existingCart);
+              return;
+            }
+
+            localStorage.removeItem("exit_smiling_cart_id");
+          } catch (err) {
+            localStorage.removeItem("exit_smiling_cart_id");
+          }
+        }
+
+        const createdCart = await createCart();
+        console.log("CART CREATED:", createdCart);
+        setCartId(createdCart.id);
+        setCart(createdCart);
+        localStorage.setItem("exit_smiling_cart_id", createdCart.id);
+      } catch (err) {
+        console.error("Error creating cart:", err);
+      }
+    }
+
+    initCart();
+  }, []);
+
+  useEffect(() => {
+    if (cartId) {
+      loadShippingOptions(cartId);
+    }
+  }, [cartId]);
+
+  useEffect(() => {
+    function handleEsc(event) {
+      if (event.key === "Escape") {
+        setMiniCartOpen(false);
+      }
+    }
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
   }, []);
 
   const handleStudioAccess = (video) => {
@@ -766,19 +1271,242 @@ export default function App() {
     setSelectedStudioVideo(null);
   };
 
+  const refreshCartSafely = async (expectedMinItems = null) => {
+    if (!cartId) return null;
+
+    let lastCart = null;
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const latestCart = await getCart(cartId);
+      lastCart = latestCart;
+
+      const itemCount =
+        latestCart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+
+      if (expectedMinItems == null || itemCount >= expectedMinItems) {
+        setCart(latestCart);
+        return latestCart;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    setCart(lastCart);
+    return lastCart;
+  };
+
+  const handleAddToCart = async (productId) => {
+    try {
+      const product = products.find((p) => p.id === productId);
+      const variantId = product?.variants?.[0]?.id;
+
+      if (!cartId) {
+        console.error("No cart available");
+        return;
+      }
+
+      if (!variantId) {
+        console.error("No variant found for product");
+        return;
+      }
+
+      await addLineItem(cartId, variantId, 1);
+      const refreshedCart = await refreshCartSafely();
+      setMiniCartOpen(true);
+
+      console.log("ADDED TO CART:", refreshedCart);
+    } catch (err) {
+      console.error("Error adding to cart:", err);
+    }
+  };
+  
+  const handleUpdateQuantity = async (lineItemId, quantity) => {
+    try {
+      if (!cartId) return;
+
+      if (quantity <= 0) {
+        await removeLineItem(cartId, lineItemId);
+      } else {
+        await updateLineItem(cartId, lineItemId, quantity);
+      }
+
+      const refreshedCart = await refreshCartSafely();
+
+      if (!refreshedCart?.items?.length) {
+        setMiniCartOpen(false);
+      }
+    } catch (err) {
+      console.error("Error updating quantity:", err);
+    }
+  };
+
+  const handleRemoveItem = async (lineItemId) => {
+    try {
+      if (!cartId) return;
+
+      await removeLineItem(cartId, lineItemId);
+
+      const refreshedCart = await refreshCartSafely();
+
+      if (!refreshedCart?.items?.length) {
+        setMiniCartOpen(false);
+      }
+    } catch (err) {
+      console.error("Error removing item:", err);
+    }
+  };
+
+  const handleCheckout = async () => {
+    try {
+      if (!cart?.email) {
+        setCheckoutError("Please enter your email and shipping details first.");
+        return;
+      }
+
+      if (!cart?.shipping_methods?.length) {
+        setCheckoutError("Please select a shipping method before paying.");
+        return;
+      }
+      
+      if (!cartId) {
+        console.error("No cart available");
+        return;
+      }
+
+      if (checkoutLoading) return;
+      setCheckoutLoading(true);
+
+      const updatedCart = await initializeStripePayment(cart);
+
+      const session = updatedCart?.payment_collection?.payment_sessions?.find(
+        (s) => s.provider_id === "pp_stripe_stripe"
+      );
+
+      const clientSecret =
+        session?.data?.client_secret ||
+        session?.data?.clientSecret ||
+        "";
+
+      if (!clientSecret) {
+        console.error("No Stripe client secret found", updatedCart);
+        setCheckoutLoading(false);
+        return;
+      }
+
+      setCart(updatedCart);
+      setStripeClientSecret(clientSecret);
+      setStripeModalOpen(true);
+    } catch (err) {
+      console.error("Error starting checkout:", err);
+    } finally {
+      setCheckoutLoading(false);
+    }
+  };
+
+  const loadShippingOptions = async (activeCartId = cartId) => {
+    try {
+      if (!activeCartId) return [];
+
+      setShippingLoading(true);
+
+      const options = await listCartShippingOptions(activeCartId);
+      setShippingOptions(options);
+
+      return options;
+    } catch (err) {
+      console.error("Error loading shipping options:", err);
+      setShippingOptions([]);
+      return [];
+    } finally {
+      setShippingLoading(false);
+    }
+  };
+
+  const handleSaveShippingDetails = async () => {
+    try {
+      if (!cartId) return;
+
+      setShippingSaving(true);
+      setCheckoutError("");
+
+      const updatedCart = await updateCartDetails(cartId, {
+        email: checkoutEmail,
+        shipping_address: {
+          ...shippingForm,
+        },
+        billing_address: {
+          ...shippingForm,
+        },
+      });
+
+      setCart(updatedCart);
+
+      const options = await loadShippingOptions(cartId);
+      console.log("SHIPPING OPTIONS:", options);
+    } catch (err) {
+      console.error("Error saving shipping details:", err);
+      setCheckoutError(err.message || "Failed to save shipping details.");
+    } finally {
+      setShippingSaving(false);
+    }
+  };
+
+  const handleSelectShippingOption = async (optionId) => {
+    try {
+      if (!cartId) return;
+
+      setCheckoutError("");
+
+      const updatedCart = await addShippingMethod(cartId, optionId);
+      setCart(updatedCart);
+    } catch (err) {
+      console.error("Error selecting shipping option:", err);
+      setCheckoutError(err.message || "Failed to select shipping option.");
+    }
+  };
+
+  const handleStripeSuccess = async (order) => {
+    localStorage.removeItem("exit_smiling_cart_id");
+    setStripeModalOpen(false);
+    setStripeClientSecret("");
+    setMiniCartOpen(false);
+    setCart(null);
+    setCartId(null);
+
+    try {
+      const newCart = await createCart();
+      setCartId(newCart.id);
+      setCart(newCart);
+      localStorage.setItem("exit_smiling_cart_id", newCart.id);
+    } catch (err) {
+      console.error("Error creating fresh cart after success:", err);
+    }
+
+    navigate("/checkout/success");
+  };
+
+  const navigate = useNavigate();
+
   return (
     <div id="top" className="min-h-screen bg-black pb-24 text-white selection:bg-white selection:text-black md:pb-0">
       <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }`}</style>
-      <Header />
+      <Header
+        cart={cart}
+        onToggleMiniCart={() => setMiniCartOpen((prev) => !prev)}
+      />
       <Hero currentImage={currentImage} />
       <Releases />
       <Gigs />
       <FeaturedContent onOpenVideo={() => setVideoOpen(true)} />
-      <Store onOpenPoster={() => setPosterOpen(true)} />
+      <Store
+        products={products}
+        onOpenPoster={() => setPosterOpen(true)}
+        onAddToCart={handleAddToCart}
+      />
       <Band />
       <StudioSessions onOpenStudio={handleStudioAccess} />
+      
       <Footer />
-      <MobileSocialBar />
       <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
       <PosterModal open={posterOpen} onClose={() => setPosterOpen(false)} />
       <StudioModal
@@ -790,6 +1518,35 @@ export default function App() {
         onSubmit={submitStudioPassword}
         error={studioError}
         selectedStudioVideo={selectedStudioVideo}
+      />
+      <MiniCart
+        open={miniCartOpen}
+        cart={cart}
+        onClose={() => setMiniCartOpen(false)}
+        onCheckout={handleCheckout}
+        onUpdateQuantity={handleUpdateQuantity}
+        onRemoveItem={handleRemoveItem}
+        checkoutLoading={checkoutLoading}
+        checkoutEmail={checkoutEmail}
+        setCheckoutEmail={setCheckoutEmail}
+        shippingForm={shippingForm}
+        setShippingForm={setShippingForm}
+        shippingOptions={shippingOptions}
+        shippingLoading={shippingLoading}
+        shippingSaving={shippingSaving}
+        onSaveShippingDetails={handleSaveShippingDetails}
+        onSelectShippingOption={handleSelectShippingOption}
+        checkoutError={checkoutError}
+      />
+      <StripeCheckoutModal
+        open={stripeModalOpen}
+        clientSecret={stripeClientSecret}
+        cartId={cartId}
+        onClose={() => {
+          setStripeModalOpen(false);
+          setStripeClientSecret("");
+        }}
+        onSuccess={handleStripeSuccess}
       />
     </div>
   );
