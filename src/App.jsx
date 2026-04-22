@@ -419,128 +419,145 @@ function FeaturedContent({ onOpenVideo }) {
   );
 }
 
-function Store({ products, onOpenPoster, onAddToCart }) {
-  const fallbackMerch = [
-    {
-      title: 'Tour Tee',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png',
-    },
-    {
-      title: 'Blackout Hoodie',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776112855/Hoodies_with_bold__Exit_Smiling__prints_pmn1xn.png',
-    },
-    {
-      title: 'Caps',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113807/Colorful_caps_with_bold_lettering_niddcc.png',
-    },
-    {
-      title: 'Vinyl Bundle',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776114137/Exit_Smiling_vinyl_bundle_showcase_zqn6qt.png',
-    },
-    {
-      title: 'Signed Poster',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png',
-      isPoster: true,
-    },
-    {
-      title: 'Accessories',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776130540/Black_guitar_pick_accessories_with_band_logo_ru6m8i.png',
-    },
-    {
-      title: 'Guitar Picks',
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776123496/Exit_smiling_guitar_picks_detail_rx75ix.png',
-    },
-    {
-      title: "Signed Tee's",
-      image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776129975/Band_T-shirt_with_signatures_displayed_k7kna6.png',
-    },
-  ];
-
-  const getPrice = (product) => {
-    const variant = product?.variants?.[0];
-    const amount =
-      variant?.calculated_price?.calculated_amount ??
-      variant?.calculated_price?.original_amount ??
-      variant?.prices?.[0]?.amount ??
-      null;
-
-    if (amount == null || Number.isNaN(Number(amount))) return null;
-    return `$${Number(amount).toFixed(2)}`;
+function Store({
+  products,
+  onAddToCart,
+  selectedOptionsByProduct,
+  setSelectedOptionsByProduct,
+}) {
+  const getVariantOptionMap = (variant) => {
+    const map = {};
+    variant?.options?.forEach((opt) => {
+      const optionName = opt.option?.title || opt.option?.name;
+      if (optionName) {
+        map[optionName] = opt.value;
+      }
+    });
+    return map;
   };
 
-  const merchItems =
-    products && products.length
-      ? products.map((product) => ({
-          id: product.id,
-          title: product.title,
-          image:
-            product.thumbnail ||
-            product.images?.[0]?.url ||
-            'https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png',
-          price: getPrice(product),
-        }))
-      : fallbackMerch;
+  const findMatchingVariant = (product, selectedOptions) => {
+    if (!product?.variants?.length) return null;
+
+    return (
+      product.variants.find((variant) => {
+        const variantOptionMap = getVariantOptionMap(variant);
+
+        return Object.entries(selectedOptions || {}).every(
+          ([optionName, optionValue]) => variantOptionMap[optionName] === optionValue
+        );
+      }) || product.variants[0]
+    );
+  };
 
   return (
     <section id="store" className="scroll-mt-32 border-t border-white/10">
       <div className="mx-auto max-w-7xl px-6 py-20">
         <div className="mb-10 flex items-end justify-between gap-4">
-          <h2 className="text-4xl font-black uppercase md:text-6xl">Merch highlights</h2>
-          <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">
-            Shop all
-          </a>
+          <h2 className="text-4xl font-black uppercase md:text-6xl">Merch</h2>
         </div>
 
         <div className="grid gap-6 md:grid-cols-4">
-          {merchItems.map((item) => (
-            <article
-              key={item.id || item.title}
-              className="group rounded-3xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06]"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-black">
-                {item.isPoster ? (
-                  <button
-                    type="button"
-                    onClick={onOpenPoster}
-                    className="absolute inset-0 flex items-center justify-center bg-black p-4 text-left"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.title}
-                      className="max-h-full max-w-full object-contain"
-                    />
-                  </button>
-                ) : (
-                  <div
-                    className="absolute inset-0 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${item.image}')` }}
+          {products?.length === 0 && (
+            <p className="text-white/50">Loading merch...</p>
+          )}
+
+          {products?.map((product) => {
+            const selectedOptions = selectedOptionsByProduct[product.id] || {};
+            const selectedVariant = findMatchingVariant(product, selectedOptions);
+
+            const amount =
+              selectedVariant?.calculated_price?.calculated_amount ??
+              selectedVariant?.calculated_price?.original_amount ??
+              selectedVariant?.prices?.[0]?.amount ??
+              null;
+
+            const price =
+              amount == null || Number.isNaN(Number(amount))
+                ? null
+                : `$${Number(amount).toFixed(2)}`;
+
+            const image =
+              product.thumbnail ||
+              product.images?.[0]?.url ||
+              "https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png";
+
+            return (
+              <article
+                key={product.id}
+                className="group rounded-3xl border border-white/10 bg-white/[0.03] p-4"
+              >
+                <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-black">
+                  <img
+                    src={image}
+                    alt={product.title}
+                    className="h-full w-full object-cover"
                   />
+                </div>
+
+                <h3 className="mt-4 text-center text-lg font-semibold uppercase">
+                  {product.title}
+                </h3>
+
+                {product.options?.map((option) => {
+                  const optionName = option.title || option.name;
+                  const values = option.values || [];
+
+                  return (
+                    <div key={option.id} className="mt-3">
+                      <p className="mb-2 text-center text-[10px] uppercase tracking-[0.2em] text-white/45">
+                        {optionName}
+                      </p>
+
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {values.map((valueObj) => {
+                          const value = valueObj.value;
+                          const isActive = selectedOptions[optionName] === value;
+
+                          return (
+                            <button
+                              key={valueObj.id}
+                              type="button"
+                              onClick={() =>
+                                setSelectedOptionsByProduct((prev) => ({
+                                  ...prev,
+                                  [product.id]: {
+                                    ...(prev[product.id] || {}),
+                                    [optionName]: value,
+                                  },
+                                }))
+                              }
+                              className={`rounded-full border px-3 py-1 text-xs uppercase tracking-[0.15em] transition ${isActive
+                                  ? "border-white bg-white text-black"
+                                  : "border-white/20 text-white/70 hover:border-white/50 hover:text-white"
+                                }`}
+                            >
+                              {value}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {price ? (
+                  <p className="mt-3 text-center text-sm text-white/60">{price}</p>
+                ) : (
+                  <p className="mt-3 text-center text-sm text-white/35">
+                    Price coming soon
+                  </p>
                 )}
 
-                <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition duration-300 group-hover:opacity-100">
-                  <div className="rounded-full border border-white/40 bg-black/65 px-5 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-white backdrop-blur-sm">
-                    Shop now
-                  </div>
-                </div>
-              </div>
-
-              <h3 className="mt-4 text-center text-lg font-semibold uppercase">{item.title}</h3>
-
-              {item.price ? (
-                <>
-                  <p className="mt-1 text-center text-sm text-white/60">{item.price}</p>
-                  <button
-                    onClick={() => onAddToCart(item.id)}
-                    className="mt-4 w-full rounded-full bg-white px-4 py-2 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:opacity-90"
-                  >
-                    Add to Cart
-                  </button>
-                </>
-              ) : (
-                <p className="mt-1 text-center text-sm text-white/35">Price coming soon</p>
-              )}
-            </article>
-          ))}
+                <button
+                  onClick={() => onAddToCart(product.id)}
+                  className="mt-4 w-full rounded-full bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:opacity-90"
+                >
+                  Add to Cart
+                </button>
+              </article>
+            );
+          })}
         </div>
       </div>
     </section>
@@ -931,7 +948,41 @@ function MiniCart({
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold uppercase">{item.title}</p>
+                  <p className="truncate text-sm font-semibold uppercase">{item.product_title || item.title}</p>
+
+                  {(() => {
+                    const options = item.variant?.options || [];
+
+                    const size =
+                      options.find((opt) =>
+                        (opt.option?.title || "").toLowerCase().includes("size")
+                      )?.value ||
+                      null;
+
+                    const fontColor =
+                      options.find((opt) =>
+                        (opt.option?.title || "").toLowerCase().includes("font")
+                      )?.value ||
+                      null;
+
+                    if (!size && !fontColor && item.variant_title) {
+                      return (
+                        <p className="mt-1 text-xs text-white/50">
+                          {item.variant_title}
+                        </p>
+                      );
+                    }
+
+                    const pieces = [];
+                    if (size) pieces.push(`Size: ${size}`);
+                    if (fontColor) pieces.push(`Font Color: ${fontColor}`);
+
+                    return pieces.length ? (
+                      <p className="mt-1 text-xs text-white/50">
+                        {pieces.join(" • ")}
+                      </p>
+                    ) : null;
+                  })()}
 
                   <div className="mt-2 flex items-center gap-2">
                     <button
@@ -1149,6 +1200,7 @@ export default function App() {
   const [cartId, setCartId] = useState(null);
   const [cart, setCart] = useState(null);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
+  const [selectedOptionsByProduct, setSelectedOptionsByProduct] = useState({});
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [stripeClientSecret, setStripeClientSecret] = useState("");
   const [stripeModalOpen, setStripeModalOpen] = useState(false);
@@ -1168,6 +1220,8 @@ export default function App() {
   const [shippingSaving, setShippingSaving] = useState(false);
   const [checkoutError, setCheckoutError] = useState("");
 
+  const navigate = useNavigate();
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImage((prev) => (prev + 1) % heroImages.length);
@@ -1181,6 +1235,25 @@ export default function App() {
         const data = await getProducts();
         console.log("MEDUSA PRODUCTS:", data);
         setProducts(data);
+
+        const defaults = {};
+
+        data.forEach((product) => {
+          const firstVariant = product?.variants?.[0];
+          if (!firstVariant) return;
+
+          const optionMap = {};
+          firstVariant.options?.forEach((opt) => {
+            const optionName = opt.option?.title || opt.option?.name;
+            if (optionName) {
+              optionMap[optionName] = opt.value;
+            }
+          });
+
+          defaults[product.id] = optionMap;
+        });
+
+        setSelectedOptionsByProduct(defaults);
       } catch (err) {
         console.error("Error fetching products:", err);
       }
@@ -1295,23 +1368,58 @@ export default function App() {
     return lastCart;
   };
 
+  const getVariantOptionMap = (variant) => {
+    const map = {};
+    variant?.options?.forEach((opt) => {
+      const optionName = opt.option?.title || opt.option?.name;
+      if (optionName) {
+        map[optionName] = opt.value;
+      }
+    });
+    return map;
+  };
+
+  const findMatchingVariant = (product, selectedOptions) => {
+    if (!product?.variants?.length) return null;
+
+    return (
+      product.variants.find((variant) => {
+        const variantOptionMap = getVariantOptionMap(variant);
+
+        return Object.entries(selectedOptions || {}).every(
+          ([optionName, optionValue]) => variantOptionMap[optionName] === optionValue
+        );
+      }) || product.variants[0]
+    );
+  };
+
   const handleAddToCart = async (productId) => {
     try {
       const product = products.find((p) => p.id === productId);
-      const variantId = product?.variants?.[0]?.id;
 
       if (!cartId) {
         console.error("No cart available");
         return;
       }
 
+      if (!product) {
+        console.error("No product found");
+        return;
+      }
+
+      const selectedOptions = selectedOptionsByProduct[productId] || {};
+      const matchedVariant = findMatchingVariant(product, selectedOptions);
+      const variantId = matchedVariant?.id;
+
       if (!variantId) {
-        console.error("No variant found for product");
+        console.error("No matching variant found for product");
         return;
       }
 
       await addLineItem(cartId, variantId, 1);
-      const refreshedCart = await refreshCartSafely();
+
+      const refreshedCart = await getCart(cartId);
+      setCart(refreshedCart);
       setMiniCartOpen(true);
 
       console.log("ADDED TO CART:", refreshedCart);
@@ -1485,9 +1593,7 @@ export default function App() {
     navigate("/checkout/success");
   };
 
-  const navigate = useNavigate();
-
-  return (
+    return (
     <div id="top" className="min-h-screen bg-black pb-24 text-white selection:bg-white selection:text-black md:pb-0">
       <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(10px);} to { opacity: 1; transform: translateY(0);} }`}</style>
       <Header
@@ -1500,8 +1606,9 @@ export default function App() {
       <FeaturedContent onOpenVideo={() => setVideoOpen(true)} />
       <Store
         products={products}
-        onOpenPoster={() => setPosterOpen(true)}
         onAddToCart={handleAddToCart}
+        selectedOptionsByProduct={selectedOptionsByProduct}
+        setSelectedOptionsByProduct={setSelectedOptionsByProduct}
       />
       <Band />
       <StudioSessions onOpenStudio={handleStudioAccess} />
