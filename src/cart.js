@@ -1,4 +1,3 @@
-import { sdk } from "./medusa";
 const baseUrl = import.meta.env.VITE_MEDUSA_URL || "";
 const publishableKey = import.meta.env.VITE_MEDUSA_PUBLISHABLE_KEY;
 
@@ -27,11 +26,14 @@ export async function createCart() {
 }
 
 export async function getCart(cartId) {
-  const res = await fetch(`${baseUrl}/store/carts/${cartId}`, {
-    method: "GET",
-    headers: commonHeaders,
-    cache: "no-store",
-  });
+  const res = await fetch(
+    `${baseUrl}/store/carts/${cartId}?fields=*items,+items.metadata,+items.variant,+items.variant.options,+items.variant.options.option,+items.thumbnail,+items.product_title,+items.variant_title`,
+    {
+      method: "GET",
+      headers: commonHeaders,
+      cache: "no-store",
+    }
+  );
 
   if (!res.ok) {
     throw new Error(`Failed to get cart: ${await res.text()}`);
@@ -41,13 +43,14 @@ export async function getCart(cartId) {
   return data.cart;
 }
 
-export async function addLineItem(cartId, variantId, quantity = 1) {
+export async function addLineItem(cartId, variantId, quantity = 1, metadata = {}) {
   const res = await fetch(`${baseUrl}/store/carts/${cartId}/line-items`, {
     method: "POST",
     headers: commonHeaders,
     body: JSON.stringify({
       variant_id: variantId,
       quantity,
+      metadata,
     }),
   });
 

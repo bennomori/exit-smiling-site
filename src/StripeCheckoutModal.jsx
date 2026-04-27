@@ -1,9 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
 import { completeCart } from "./cart";
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
     const stripe = useStripe();
@@ -87,6 +85,14 @@ export default function StripeCheckoutModal({
     onClose,
     onSuccess,
 }) {
+    const [stripePromise, setStripePromise] = useState(null);
+
+    useEffect(() => {
+        if (!open || !clientSecret) return;
+
+        setStripePromise(loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY));
+    }, [open, clientSecret]);
+
     const options = useMemo(
         () => ({
             clientSecret,
@@ -121,9 +127,11 @@ export default function StripeCheckoutModal({
                     </button>
                 </div>
 
-                <Elements stripe={stripePromise} options={options}>
-                    <StripeCheckoutForm cartId={cartId} onSuccess={onSuccess} onClose={onClose} />
-                </Elements>
+                {stripePromise ? (
+                    <Elements stripe={stripePromise} options={options}>
+                        <StripeCheckoutForm cartId={cartId} onSuccess={onSuccess} onClose={onClose} />
+                    </Elements>
+                ) : null}
             </div>
         </div>
     );

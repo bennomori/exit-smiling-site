@@ -16,6 +16,9 @@ module.exports = defineConfig({
 
   modules: [
     {
+      resolve: "./src/modules/fan-subscribers",
+    },
+    {
       resolve: "@medusajs/medusa/payment",
       options: {
         providers: [
