@@ -2843,6 +2843,8 @@ export default function App() {
 
   const handleCheckout = async () => {
     try {
+      setCheckoutError("");
+
       if (!cart?.email) {
         setCheckoutError("Please enter your email and shipping details first.");
         return;
@@ -2880,6 +2882,7 @@ export default function App() {
       setStripeClientSecret(clientSecret);
       setStripeModalOpen(true);
     } catch (err) {
+      setCheckoutError(err.message || "Failed to start checkout.");
     } finally {
       setCheckoutLoading(false);
     }
@@ -3050,5 +3053,4 @@ export default function App() {
     </div>
   );
 }
-
 

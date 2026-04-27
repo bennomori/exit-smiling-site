@@ -6,6 +6,9 @@ const commonHeaders = {
   "Content-Type": "application/json",
 };
 
+const cartFields =
+  "*items,+items.metadata,+items.variant,+items.variant.options,+items.variant.options.option,+items.thumbnail,+items.product_title,+items.variant_title,+payment_collection,+payment_collection.payment_sessions";
+
 export async function createCart() {
   const res = await fetch(`${baseUrl}/store/carts`, {
     method: "POST",
@@ -27,7 +30,7 @@ export async function createCart() {
 
 export async function getCart(cartId) {
   const res = await fetch(
-    `${baseUrl}/store/carts/${cartId}?fields=*items,+items.metadata,+items.variant,+items.variant.options,+items.variant.options.option,+items.thumbnail,+items.product_title,+items.variant_title`,
+    `${baseUrl}/store/carts/${cartId}?fields=${encodeURIComponent(cartFields)}`,
     {
       method: "GET",
       headers: commonHeaders,
@@ -93,11 +96,54 @@ export async function removeLineItem(cartId, lineItemId) {
 
 // 1) Initialize Stripe payment session on the cart
 export async function initializeStripePayment(cart) {
-  const updatedCart = await sdk.store.payment.initiatePaymentSession(cart, {
-    provider_id: "pp_stripe_stripe",
-  });
+  const cartId = cart?.id;
 
-  return updatedCart;
+  if (!cartId) {
+    throw new Error("Cart ID is missing.");
+  }
+
+  const freshCart = await getCart(cartId);
+  let paymentCollectionId = freshCart?.payment_collection?.id;
+
+  if (!paymentCollectionId) {
+    const collectionRes = await fetch(`${baseUrl}/store/payment-collections`, {
+      method: "POST",
+      headers: commonHeaders,
+      body: JSON.stringify({
+        cart_id: cartId,
+      }),
+    });
+
+    if (!collectionRes.ok) {
+      throw new Error(`Failed to create payment collection: ${await collectionRes.text()}`);
+    }
+
+    const collectionData = await collectionRes.json();
+    paymentCollectionId = collectionData?.payment_collection?.id;
+  }
+
+  if (!paymentCollectionId) {
+    throw new Error("Payment collection is missing from the cart.");
+  }
+
+  const res = await fetch(
+    `${baseUrl}/store/payment-collections/${paymentCollectionId}/payment-sessions`,
+    {
+      method: "POST",
+      headers: commonHeaders,
+      body: JSON.stringify({
+        provider_id: "pp_stripe_stripe",
+      }),
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to initialize payment session: ${await res.text()}`);
+  }
+
+  await res.json();
+
+  return getCart(cartId);
 }
 
 // 2) Complete cart after Stripe confirms payment
