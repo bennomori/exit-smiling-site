@@ -30,6 +30,9 @@ const brand = {
   logoAlt: 'Exit Smiling official logo',
 };
 
+const privateMemberDetailsEnabled =
+  String(import.meta.env.VITE_ENABLE_PRIVATE_MEMBER_DETAILS || "").toLowerCase() === "true";
+
 const defaultSlideDurationMs = 3000;
 const heroImages = [
   { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615943/Exit_Smiling_-_01b_aiag6j.jpg', position: 'center' },
@@ -96,7 +99,7 @@ const tourDates = [
 const videos = [
   { title: 'Latest Single', label: 'Official Video' },
   { title: 'Live Session', label: 'Behind the Scenes' },
-  { title: 'Studio Cut', label: 'Visualiser' },
+  { title: 'Studio Session', label: 'Recording' },
 ];
 
 const pastGigPosterImages = [
@@ -1085,8 +1088,8 @@ function MemberCard({ member }) {
           {
             src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777247857/max_fishing_2_uygwgl.jpg',
             className: '',
-          },
-        ]
+            },
+          ]
       : member.name === 'Joey'
         ? [
             {
@@ -1095,8 +1098,9 @@ function MemberCard({ member }) {
             },
           ]
       : null;
+  const visibleLighterSideImages = privateMemberDetailsEnabled ? lighterSideImages : null;
   const hoverImageSegmentDuration = 3.15;
-  const hoverImageCycleDuration = (lighterSideImages?.length || 1) * hoverImageSegmentDuration;
+  const hoverImageCycleDuration = (visibleLighterSideImages?.length || 1) * hoverImageSegmentDuration;
   const liveVideoRef = useRef(null);
   const bioClipVideoRef = useRef(null);
   const liveVideoFadeDuration = 0.6;
@@ -1143,6 +1147,8 @@ function MemberCard({ member }) {
       : member.name === 'Max'
         ? "Max brings a calm confidence and natural leadership to Exit Smiling. As the bands bass player, lyric writer, and oldest member, he helps anchor the group both musically and personally. His steady presence gives the younger members someone to look up to, while his songwriting and ideas help shape the bands sound and direction.\n\nAway from the stage, Max has always been active, curious, and quietly driven. He was school captain in Year 6, represented his school in cross country, and has played both club and representative soccer, often taking on the role of captain. He also loves mountain biking with his dad and has represented his school in MTB riding, bringing the same focus, balance, and determination to sport that he brings to music.\n\nMax learned to ski when he was 10 and has frothed on it ever since. He also learned to fish from his grandparents and still loves going out with them whenever he can. At different times he has been heavily into chess and tabletop gaming, although these days band life, school, sport, and bass practice do not leave much room for downtime.\n\nHe is also an avid reader and someone who thinks deeply about ideas, words, and stories - a quality that naturally feeds into his songwriting and lyrics. Whether he is locking in the groove on bass, helping shape a song, or offering quiet leadership behind the scenes, Max brings maturity, creativity, and a glimpse of the future for Exit Smiling."
       : null;
+  const canShowPrivateMemberDetails =
+    privateMemberDetailsEnabled && Boolean(memberAchievements);
   const detailVideos =
     member.name === 'Joey'
       ? [
@@ -1201,31 +1207,31 @@ function MemberCard({ member }) {
   const bioClipVideo =
     member.name === 'Cadence'
       ? {
-          title: 'Cadence',
+          title: null,
           src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777270913/cadence_bio_clip_sxvvyh.mp4',
           poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/cadence_bio_clip_sxvvyh.jpg',
         }
       : member.name === 'Joey'
       ? {
-          title: 'Joey "Hendrix"',
+          title: null,
           src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777253439/joey_hendrix_wj6jsu.mp4',
           poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_hendrix_wj6jsu.jpg',
         }
       : member.name === 'Julian'
         ? {
-            title: 'Julian "Grohl"',
+            title: null,
             src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777257286/JD_drums_bg1bg6.mp4',
             poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/JD_drums_bg1bg6.jpg',
           }
       : member.name === 'Lando'
         ? {
-            title: 'Lando "Osborne"',
+            title: null,
             src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777153684/lando_bombtrack_cuseb2.mp4',
             poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/lando_bombtrack_cuseb2.jpg',
           }
       : member.name === 'Max'
         ? {
-            title: 'Max "Commerford"',
+            title: null,
             src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777267831/max_bass_pedz6b.mp4',
             poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_bass_pedz6b.jpg',
           }
@@ -1275,7 +1281,7 @@ function MemberCard({ member }) {
   };
 
   const handleBioImageEnter = () => {
-    if (!lighterSideImages?.length) return;
+    if (!visibleLighterSideImages?.length) return;
 
     setHoverCycleKey((prev) => prev + 1);
     setIsHoveringBioImage(true);
@@ -1345,26 +1351,26 @@ function MemberCard({ member }) {
       >
         <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.16),transparent_62%)] opacity-0 transition duration-300 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition duration-300 group-hover:opacity-40" />
-        {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" className={`${imageClassName} object-cover ${lighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" className={`${imageClassName} object-cover object-top ${lighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" className={`${imageClassName} bg-black object-contain ${lighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" className={`${imageClassName} object-cover ${lighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" className={`${imageClassName} object-cover object-top ${lighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {lighterSideImages?.length ? (
+        {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {visibleLighterSideImages?.length ? (
           <>
             <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex items-center justify-between opacity-0 transition duration-300 group-hover:opacity-100">
               <div className="rounded-full border border-white/20 bg-black/55 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/75 shadow-[0_0_18px_rgba(255,255,255,0.1)] backdrop-blur-sm">
                 Off Stage
               </div>
             </div>
-            {lighterSideImages.map((image, index) => (
+            {visibleLighterSideImages.map((image, index) => (
               <img
                 key={`${member.name}-off-stage-${index}-${hoverCycleKey}`}
                 src={image.src}
                 alt={`${member.name} off stage ${index + 1}`}
-                className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${lighterSideImages.length === 1 ? "group-hover:opacity-100" : ""} ${image.className}`}
+                className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${visibleLighterSideImages.length === 1 ? "group-hover:opacity-100" : ""} ${image.className}`}
                 style={
-                  lighterSideImages.length === 1 || !isHoveringBioImage
+                  visibleLighterSideImages.length === 1 || !isHoveringBioImage
                     ? undefined
                     : {
                         animation: `hoverImageCycle ${hoverImageCycleDuration}s linear infinite`,
@@ -1504,13 +1510,15 @@ function MemberCard({ member }) {
             preload="metadata"
             className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/bioclip:scale-[1.03] group-hover/bioclip:brightness-110"
           />
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-4 pt-10">
-            <p className="text-sm font-semibold uppercase text-white">{bioClipVideo.title}</p>
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-4 pt-10">
+            <div className="rounded-full border border-white/30 bg-black/60 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white shadow-[0_0_20px_rgba(255,255,255,0.12)] backdrop-blur-sm">
+              Click to enlarge
+            </div>
           </div>
         </button>
       ) : null}
 
-      {memberAchievements ? (
+      {canShowPrivateMemberDetails ? (
         <button
           type="button"
           onClick={() => setDetailOpen(true)}
@@ -1521,7 +1529,7 @@ function MemberCard({ member }) {
       ) : null}
       </div>
 
-      {detailOpen && memberAchievements ? (
+      {detailOpen && canShowPrivateMemberDetails ? (
         <div
           className="fixed inset-0 z-[120] flex items-center justify-center bg-black/88 p-4"
           onClick={() => setDetailOpen(false)}
@@ -1652,9 +1660,11 @@ function MemberCard({ member }) {
             >
               Close
             </button>
-            <div className="mb-4 pr-24">
+            <div className={`pr-24 ${selectedBioClip.title ? "mb-4" : "mb-1"}`}>
               <p className="text-[10px] uppercase tracking-[0.32em] text-white/45">Video Clip</p>
-              <h4 className="mt-2 text-2xl font-black uppercase text-white">{selectedBioClip.title}</h4>
+              {selectedBioClip.title ? (
+                <h4 className="mt-2 text-2xl font-black uppercase text-white">{selectedBioClip.title}</h4>
+              ) : null}
             </div>
             <video
               src={selectedBioClip.src}
@@ -3053,4 +3063,3 @@ export default function App() {
     </div>
   );
 }
-
