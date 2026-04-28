@@ -102,7 +102,7 @@ const tourDates = [
 const videos = [
   { title: 'Latest Single', label: 'Official Video' },
   { title: 'Live Session', label: 'Behind the Scenes' },
-  { title: 'Studio Session', label: 'Recording' },
+  { title: 'ABC RADIO LIVE SHOW', label: 'LIVE RADIO' },
 ];
 
 const pastGigPosterImages = [
@@ -459,6 +459,8 @@ function Releases() {
 function Gigs() {
   const [isHoveringPastGigs, setIsHoveringPastGigs] = useState(false);
   const [activePastGigPosterIndex, setActivePastGigPosterIndex] = useState(0);
+  const [activeGigPosterKey, setActiveGigPosterKey] = useState(null);
+  const [selectedGigPoster, setSelectedGigPoster] = useState(null);
   const posterSegmentDuration = 3.0;
 
   useEffect(() => {
@@ -481,6 +483,19 @@ function Gigs() {
   const handlePastGigsLeave = () => {
     setIsHoveringPastGigs(false);
   };
+
+  useEffect(() => {
+    if (!selectedGigPoster) return;
+
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        setSelectedGigPoster(null);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [selectedGigPoster]);
 
   return (
     <section id="tour" className="scroll-mt-32 border-y border-white/10 bg-white/[0.02]">
@@ -529,15 +544,25 @@ function Gigs() {
           {tourDates.map((show, index) => {
             const trimmedHref = typeof show.href === "string" ? show.href.trim() : "";
             const hasTickets = trimmedHref.startsWith("http");
+            const showKey = `${show.date}-${show.city}`;
+            const isPosterActive = activeGigPosterKey === showKey;
 
             return (
             <div
-              key={show.date + show.city}
+              key={showKey}
               className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto] md:items-center ${index === 0 ? 'bg-white/5' : ''}`}
+              onMouseEnter={() => setActiveGigPosterKey(show.posterImage ? showKey : null)}
+              onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
             >
               <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent opacity-0 transition duration-300 group-hover:border-white/30 group-hover:opacity-100" />
               {show.posterImage ? (
-                <div className="pointer-events-none absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 translate-x-4 opacity-0 transition duration-300 group-hover:translate-x-0 group-hover:opacity-100 xl:block">
+                <button
+                  type="button"
+                  onClick={() => setSelectedGigPoster({ src: show.posterImage, title: `${show.city} gig poster` })}
+                  onMouseEnter={() => setActiveGigPosterKey(showKey)}
+                  onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
+                  className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
+                >
                   <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
                     <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
                     <img
@@ -546,7 +571,7 @@ function Gigs() {
                       className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
                     />
                   </div>
-                </div>
+                </button>
               ) : null}
               <div className="text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.22)]">{show.date}</div>
               <div>
@@ -561,7 +586,7 @@ function Gigs() {
                   <span className="text-white/72">{show.mapHref ? 'Venue map available' : 'Venue highlighted'}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="flex flex-wrap items-start justify-between gap-3 md:min-w-[210px]">
                 {show.mapHref ? (
                   <a
                     href={show.mapHref}
@@ -572,13 +597,27 @@ function Gigs() {
                     Map
                   </a>
                 ) : null}
-                <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className="rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black">
+                <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className="ml-auto rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black">
                   {hasTickets ? 'Tickets' : 'Soon'}
                 </a>
               </div>
             </div>
           )})}
         </div>
+        {selectedGigPoster ? (
+          <div
+            className="fixed inset-0 z-[130] flex items-center justify-center bg-black/90 p-4"
+            onClick={() => setSelectedGigPoster(null)}
+          >
+            <div className="max-h-[86vh] w-full max-w-5xl">
+              <img
+                src={selectedGigPoster.src}
+                alt={selectedGigPoster.title}
+                className="max-h-[86vh] w-full rounded-3xl object-contain shadow-[0_0_40px_rgba(255,255,255,0.12)]"
+              />
+            </div>
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -1344,6 +1383,30 @@ function MemberCard({ member }) {
     video.currentTime = 0;
   };
 
+  useEffect(() => {
+    const hasOpenModal = detailOpen || selectedFlashback || selectedBioClip;
+    if (!hasOpenModal) return;
+
+    const handleEsc = (event) => {
+      if (event.key !== "Escape") return;
+
+      if (selectedBioClip) {
+        setSelectedBioClip(null);
+        return;
+      }
+
+      if (selectedFlashback) {
+        setSelectedFlashback(null);
+        return;
+      }
+
+      setDetailOpen(false);
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [detailOpen, selectedFlashback, selectedBioClip]);
+
   return (
     <>
       <div className="group rounded-3xl border border-white/10 bg-white/[0.03] p-5 transition duration-300 ease-out hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_0_36px_rgba(255,255,255,0.1)]">
@@ -1737,6 +1800,19 @@ function BandLivePreview() {
     video.volume = 1;
   };
 
+  useEffect(() => {
+    if (!previewOpen) return;
+
+    const handleEsc = (event) => {
+      if (event.key === "Escape") {
+        setPreviewOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [previewOpen]);
+
   return (
     <>
       <div
@@ -1900,7 +1976,7 @@ function StudioSessions({ onOpenStudio }) {
     <section className="mx-auto max-w-7xl px-6 pb-20">
       <div className="mb-10 border-t border-white/10 pt-20">
         <SectionTitle>Studio Sessions <span className="text-white/45">(Registered Fans)</span></SectionTitle>
-        <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65 md:text-base">A private selection of rough studio-session edits. Join Fan Updates with your email and consent to unlock viewing in this browser.</p>
+        <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65 md:text-base">A private selection of rough studio-session edits. Register your email by clicking on either video and opting in to our email list. You'll only receive new gig updates!</p>
       </div>
       <div className="grid gap-6 md:grid-cols-1 xl:grid-cols-1">
         {studioSessions.map((video) => (
@@ -2665,14 +2741,39 @@ export default function App() {
 
   useEffect(() => {
     function handleEsc(event) {
-      if (event.key === "Escape") {
-        setMiniCartOpen(false);
+      if (event.key !== "Escape") return;
+
+      if (stripeModalOpen) {
+        setStripeModalOpen(false);
+        return;
       }
+
+      if (merchImageOpen) {
+        setMerchImageOpen(false);
+        return;
+      }
+
+      if (studioOpen) {
+        closeStudioModal();
+        return;
+      }
+
+      if (posterOpen) {
+        setPosterOpen(false);
+        return;
+      }
+
+      if (videoOpen) {
+        setVideoOpen(false);
+        return;
+      }
+
+      setMiniCartOpen(false);
     }
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, []);
+  }, [merchImageOpen, posterOpen, stripeModalOpen, studioOpen, videoOpen]);
 
   const handleStudioAccess = (video) => {
     setSelectedStudioVideo(video);
