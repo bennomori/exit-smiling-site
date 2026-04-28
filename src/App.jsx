@@ -30,6 +30,9 @@ const brand = {
   logoAlt: 'Exit Smiling official logo',
 };
 
+const previewAccessStorageKey = "exit_smiling_preview_access";
+const previewUsername = "ES";
+const previewPassword = "bakedbeans";
 const privateMemberDetailsEnabled =
   String(import.meta.env.VITE_ENABLE_PRIVATE_MEMBER_DETAILS || "").toLowerCase() === "true";
 
@@ -2520,6 +2523,10 @@ function MiniCart({
 
 export default function App() {
   const studioAccessStorageKey = "exit_smiling_studio_access_token";
+  const [previewAuthorized, setPreviewAuthorized] = useState(false);
+  const [previewUserInput, setPreviewUserInput] = useState("");
+  const [previewPasswordInput, setPreviewPasswordInput] = useState("");
+  const [previewAccessError, setPreviewAccessError] = useState("");
   const [videoOpen, setVideoOpen] = useState(false);
   const [posterOpen, setPosterOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
@@ -2559,6 +2566,12 @@ export default function App() {
   const [checkoutError, setCheckoutError] = useState("");
 
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (localStorage.getItem(previewAccessStorageKey) === "granted") {
+      setPreviewAuthorized(true);
+    }
+  }, []);
 
   useEffect(() => {
     const timeout = window.setTimeout(() => {
@@ -2974,6 +2987,65 @@ export default function App() {
 
     navigate("/checkout/success");
   };
+
+  const handlePreviewAccessSubmit = (event) => {
+    event.preventDefault();
+
+    if (
+      previewUserInput.trim() === previewUsername &&
+      previewPasswordInput === previewPassword
+    ) {
+      localStorage.setItem(previewAccessStorageKey, "granted");
+      setPreviewAuthorized(true);
+      setPreviewAccessError("");
+      return;
+    }
+
+    setPreviewAccessError("Incorrect username or password.");
+  };
+
+  if (!previewAuthorized) {
+    return (
+      <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
+        <div className="mx-auto flex min-h-screen max-w-md items-center px-6 py-12">
+          <div className="w-full rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_0_40px_rgba(255,255,255,0.08)]">
+            <div className="mb-6 text-center">
+              <img src={brand.markLogo} alt={brand.logoAlt} className="mx-auto h-16 w-16 object-contain" />
+              <p className="mt-5 text-[10px] uppercase tracking-[0.32em] text-white/45">Preview Access</p>
+              <h1 className="mt-3 text-3xl font-black uppercase text-white">Exit Smiling</h1>
+              <p className="mt-3 text-sm text-white/60">This preview is temporarily password protected.</p>
+            </div>
+
+            <form onSubmit={handlePreviewAccessSubmit} className="space-y-4">
+              <input
+                type="text"
+                value={previewUserInput}
+                onChange={(event) => setPreviewUserInput(event.target.value)}
+                placeholder="Username"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+              <input
+                type="password"
+                value={previewPasswordInput}
+                onChange={(event) => setPreviewPasswordInput(event.target.value)}
+                placeholder="Password"
+                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+              />
+              {previewAccessError ? (
+                <p className="text-sm text-red-400">{previewAccessError}</p>
+              ) : null}
+              <button
+                type="submit"
+                className="w-full rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black transition hover:opacity-90"
+              >
+                Enter Site
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
     return (
     <div id="top" className="min-h-screen bg-black pb-24 text-white selection:bg-white selection:text-black md:pb-0">
