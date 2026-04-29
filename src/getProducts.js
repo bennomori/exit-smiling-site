@@ -20,5 +20,21 @@ export async function getProducts() {
   }
 
   const data = await res.json();
-  return data.products || [];
+
+  const normalizeMediaUrl = (url) => {
+    const value = String(url || "").trim();
+
+    if (!value) return value;
+
+    return value.replace(/^https?:\/\/localhost:9000\/static\//i, "/static/");
+  };
+
+  return (data.products || []).map((product) => ({
+    ...product,
+    thumbnail: normalizeMediaUrl(product.thumbnail),
+    images: (product.images || []).map((image) => ({
+      ...image,
+      url: normalizeMediaUrl(image.url),
+    })),
+  }));
 }
