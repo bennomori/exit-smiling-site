@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "./getProducts";
 import StripeCheckoutModal from "./StripeCheckoutModal";
@@ -13,7 +13,7 @@ import {
   removeLineItem,
   updateCartDetails,
   listCartShippingOptions,
-  addShippingMethod,
+  replaceShippingMethods,
 } from "./cart";
 import { registerFanUpdatesAccess, verifyFanUpdatesAccess } from "./fanUpdates";
 
@@ -50,22 +50,22 @@ const tourDates = [
   {
     date: 'APR 18',
     city: 'Moruya, NSW',
-    venue: 'RSL Memorial Hall · 11 Page St, Moruya NSW 2537',
-    time: '4PM–9PM AEST',
+    venue: 'RSL Memorial Hall - 11 Page St, Moruya NSW 2537',
+    time: '4PM-9PM AEST',
     href: 'https://www.eventbrite.com/e/currents-battle-of-the-bands-2026-live-youth-music-event-tickets-1981828560574',
     mapHref: 'https://maps.app.goo.gl/mTMXRXCejsmioYwb6',
     posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777242237/BOBS_q8x6y3.jpg',
-    note: 'Currents: Battle of the Bands · Youth Week live music competition · Free event · Pizza, DJs, chill out spaces',
+    note: 'Currents: Battle of the Bands - Youth Week live music competition - Free event - Pizza, DJs, chill out spaces',
   },
   {
     date: 'APR 24',
     city: 'Tomakin, NSW',
-    venue: 'Smokey Dan’s',
+    venue: "Smokey Dan's",
     time: 'Friday',
     href: 'https://events.humanitix.com/archie-at-smokey-dans-426/tickets?fbclid=IwY2xjawRKMDpleHRuA2FlbQIxMABicmlkETFGbmJIM3pkNXlDdklmWW9Vc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHin3kekDUp3KtzaNksuoRsJnoFDcdMcTgyPg986XG8ra6T20ev90Sl4nB4Gn_aem_7D5dBKgOLCSFaAtC_kBKjA',
     mapHref: 'https://maps.app.goo.gl/5GcQGcPbFMi9R5Rx8',
     posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777225102/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg',
-    note: 'ARCHIE EP release tour (Together Apart) · with Grace Faletoese + Exit Smiling',
+    note: 'ARCHIE EP release tour (Together Apart) - with Grace Faletoese + Exit Smiling',
   },
   {
     date: 'MAY 2',
@@ -91,7 +91,7 @@ const tourDates = [
     date: 'JUN 12',
     city: 'Batemans Bay, NSW',
     venue: 'The Starfish Deli - Starfish Sessions (Upstairs)',
-    time: '6:30PM–10PM AEST',
+    time: '6:30PM-10PM AEST',
     href: 'https://events.humanitix.com/exit-smiling/tickets',
     mapHref: 'https://maps.app.goo.gl/7i9yxXRrR6kNqKd49',
     posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777272233/starfishdeli_gig_poster_2_gz3yyv.png',
@@ -102,40 +102,59 @@ const tourDates = [
 const videos = [
   { title: 'Latest Single', label: 'Official Video' },
   { title: 'Live Session', label: 'Behind the Scenes' },
-  { title: 'ABC RADIO LIVE SHOW', label: 'LIVE RADIO' },
+  { title: 'ABC RADIO LIVE SHOW', label: 'LIVE IN ABC STUDIOS APRIL 29 2026' },
 ];
 
 const pastGigPosterImages = [
   "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225190/IMG_0835_b1otk4.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225147/archie_smokey_dans_nknyj5.jpg",
   "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225102/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg",
   "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225092/545094081_1354974783302185_1251938289003598998_n_nqn2or.jpg",
+  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777321764/halloween_v6s0bg.jpg",
 ];
 
 const releases = [
   {
     title: 'Debut Single - Exit Smiling',
-    meta: 'Single • Releases Friday June 12, 2026',
+    meta: 'Single - Releases Friday June 12, 2026',
     href: 'https://events.humanitix.com/exit-smiling/tickets',
     blurb: 'Launching live at Starfish Sessions in Batemans Bay.',
     image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png',
     imageAlt: 'Exit Smiling Debut Single',
-  },
-  {
-    title: 'Lost In You',
-    meta: 'Single • 2026',
-    href: '#',
-    blurb: 'Next single release.',
-    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776055890/Lost_in_space_found_in_you_nudvc3.png',
-    imageAlt: 'Lost In You Single',
+    previewVideo: {
+      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4',
+      disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+    },
+    overlayText: 'PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26',
   },
   {
     title: 'Home Town Hero',
-    meta: 'Single • TBD',
+    meta: 'Single - TBD',
     href: '#',
     blurb: 'TBD single release.',
-    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777273781/hometwonhero_flzp8o.png',
+    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777593491/hometown_hero_il9lzy.png',
     imageAlt: 'Home Town Hero',
+    previewVideo: {
+      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777172335/band_bio_n5bkm7.mp4',
+      startAt: 6,
+      endAt: 46,
+      note: 'Band bio preview clip',
+      disclaimer: 'LIVE PREVIEW - HOMETOWN HERO - OFFICIAL MASTERED SINGLE COMING SOON',
+    },
+  },
+  {
+    title: 'Lost In You',
+    meta: 'Single - TBD',
+    href: '#',
+    blurb: 'TBD single release.',
+    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777591804/Lost_in_space_found_in_you_nudvc3.png',
+    imageAlt: 'Lost In You Single',
+    previewVideo: {
+      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1776198516/LIY_czohda.mp4',
+      startAt: 34,
+      endAt: 54,
+      note: 'Selected female-vocal preview clip',
+      disclaimer: "LIVE PREVIEW OF 'LOST IN YOU' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+    },
   },
 ];
 
@@ -208,7 +227,7 @@ const studioSessions = [
   {
     title: 'Studio Session 02',
     subtitle: 'Private rough edit',
-    thumb: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776197355/lostinnnyouthumbnail_pecy9q.png',
+    thumb: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_60/LIY_czohda.jpg',
     video: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1776197722/LIY_czohda.mp4',
   },
 ];
@@ -309,11 +328,23 @@ function SectionTitle({ children, className = "" }) {
   );
 }
 
-function Hero({ currentImage, onSlideDurationChange }) {
+function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
   const currentHeroMedia = heroImages[currentImage];
 
   return (
     <section className="relative overflow-hidden border-b border-white/10">
+      <style>{`
+        @keyframes heroReleaseOverlayPulse {
+          0%, 18%, 82%, 100% {
+            opacity: 0.76;
+            transform: rotate(-24deg) scale(0.94);
+          }
+          26%, 74% {
+            opacity: 0;
+            transform: rotate(-24deg) scale(0.9);
+          }
+        }
+      `}</style>
       {currentHeroMedia.type === 'video' ? (
         <video
           key={currentHeroMedia.src}
@@ -394,9 +425,18 @@ function Hero({ currentImage, onSlideDurationChange }) {
         <div className="grid gap-4 self-end">
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">Featured release</p>
-            <div className="group relative mt-4 aspect-square overflow-hidden rounded-2xl border border-white/10">
+            <button
+              type="button"
+              onClick={() =>
+                onOpenReleasePreview({
+                  src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                  disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+                })
+              }
+              className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left"
+            >
               <div
-                className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter grayscale contrast-110 brightness-105 group-hover:grayscale-0 group-hover:brightness-110"
+                className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
                 style={{
                   backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')",
                   backgroundSize: 'cover',
@@ -404,16 +444,34 @@ function Hero({ currentImage, onSlideDurationChange }) {
                 }}
               />
               <div className="absolute inset-0 bg-black/20 transition duration-500 group-hover:opacity-0" />
-              <div className="absolute inset-0 flex items-start justify-start p-6 md:p-8">
-                <img src={brand.markLogo} alt={brand.logoAlt} className="h-auto w-[45%] max-w-[140px] object-contain opacity-95" />
+              <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
+                <div
+                  className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
+                  style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
+                >
+                  <p className="max-w-[11rem] text-center text-sm font-black uppercase leading-tight tracking-[0.12em] text-white md:max-w-[13rem] md:text-lg">
+                    PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+                  </p>
+                </div>
               </div>
-            </div>
+            </button>
             <div className="mt-4 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold uppercase">Debut Single</h2>
                 <p className="text-sm text-white/60">Releases live on Friday June 12, 2026</p>
               </div>
-              <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black">Listen</a>
+              <button
+                type="button"
+                onClick={() =>
+                  onOpenReleasePreview({
+                    src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                    disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+                  })
+                }
+                className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+              >
+                Click for a teaser
+              </button>
             </div>
           </div>
         </div>
@@ -422,9 +480,21 @@ function Hero({ currentImage, onSlideDurationChange }) {
   );
 }
 
-function Releases() {
+function Releases({ onOpenReleasePreview }) {
   return (
     <section id="music" className="scroll-mt-32 mx-auto max-w-7xl px-6 py-20">
+      <style>{`
+        @keyframes heroReleaseOverlayPulse {
+          0%, 18%, 82%, 100% {
+            opacity: 0.76;
+            transform: rotate(-24deg) scale(0.94);
+          }
+          26%, 74% {
+            opacity: 0;
+            transform: rotate(-24deg) scale(0.9);
+          }
+        }
+      `}</style>
       <div className="mb-10 flex items-end justify-between gap-4">
         <SectionTitle>Latest releases</SectionTitle>
         <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">View all</a>
@@ -436,18 +506,54 @@ function Releases() {
           const label = hasSplit ? parts[0] : null;
           const name = hasSplit ? parts.slice(1).join(' - ') : item.title;
           return (
-            <article key={item.title} className="group rounded-3xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06]">
+            <article
+              key={item.title}
+              className={`group flex h-full flex-col rounded-3xl border border-white/10 bg-white/[0.03] p-4 transition hover:bg-white/[0.06] ${item.previewVideo ? 'cursor-pointer' : ''}`}
+              onClick={item.previewVideo ? () => onOpenReleasePreview(item.previewVideo) : undefined}
+            >
               <div className="mb-3 h-5">{label && <p className="text-[10px] uppercase tracking-[0.35em] text-white/60">{label}</p>}</div>
-              <div className="overflow-hidden rounded-2xl border border-white/10 bg-black">
-                <img
-                  src={item.image}
-                  alt={item.imageAlt}
-                  className="aspect-square w-full object-cover scale-[1.03] transition duration-500 ease-out filter contrast-110 brightness-105 group-hover:grayscale group-hover:brightness-95 group-hover:scale-[1.06]"
-                />
+              <div
+                className={`overflow-hidden rounded-2xl border border-white/10 bg-black ${item.previewVideo ? 'cursor-pointer' : ''}`}
+                onClick={item.previewVideo ? () => onOpenReleasePreview(item.previewVideo) : undefined}
+              >
+                <div className="relative">
+                  <img
+                    src={item.image}
+                    alt={item.imageAlt}
+                    className="aspect-square w-full object-cover scale-[1.03] transition duration-500 ease-out filter contrast-110 brightness-105 group-hover:grayscale group-hover:brightness-95 group-hover:scale-[1.06]"
+                  />
+                  {item.overlayText ? (
+                    <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
+                      <div
+                        className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
+                        style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
+                      >
+                        <p className="max-w-[11rem] text-center text-sm font-black uppercase leading-tight tracking-[0.12em] text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.6)] md:max-w-[13rem] md:text-lg">
+                          {item.overlayText}
+                        </p>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
               </div>
               <h3 className="mt-4 text-xl font-bold uppercase md:text-2xl">{name}</h3>
               <p className="mt-1 text-sm uppercase tracking-[0.2em] text-white/50">{item.meta}</p>
-              <p className="mt-3 text-sm leading-6 text-white/65">{item.blurb}</p>
+              <p className="mt-3 flex-1 text-sm leading-6 text-white/65">{item.blurb}</p>
+              <button
+                type="button"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  if (item.previewVideo) onOpenReleasePreview(item.previewVideo);
+                }}
+                disabled={!item.previewVideo}
+                className={`mt-4 self-end rounded-full border px-4 py-2 text-right text-xs uppercase tracking-[0.2em] transition ${
+                  item.previewVideo
+                    ? "border-white text-white hover:bg-white hover:text-black"
+                    : "cursor-not-allowed border-white/15 text-white/35"
+                }`}
+              >
+                {item.previewVideo ? "Click for a teaser" : "Soon"}
+              </button>
             </article>
           );
         })}
@@ -556,28 +662,45 @@ function Gigs() {
             >
               <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent opacity-0 transition duration-300 group-hover:border-white/30 group-hover:opacity-100" />
               {show.posterImage ? (
-                <button
-                  type="button"
-                  onClick={() => setSelectedGigPoster({ src: show.posterImage, title: `${show.city} gig poster` })}
-                  onMouseEnter={() => setActiveGigPosterKey(showKey)}
-                  onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
-                  className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
-                >
-                  <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
-                    <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
-                    <img
-                      src={show.posterImage}
-                      alt={`${show.city} gig poster`}
-                      className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
-                    />
+                index < 3 ? (
+                  <button
+                    type="button"
+                    onClick={() => setSelectedGigPoster({ src: show.posterImage, title: `${show.city} gig poster` })}
+                    onMouseEnter={() => setActiveGigPosterKey(showKey)}
+                    onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
+                    className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
+                  >
+                    <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
+                      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
+                      <img
+                        src={show.posterImage}
+                        alt={`${show.city} gig poster`}
+                        className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
+                      />
+                    </div>
+                  </button>
+                ) : (
+                  <div
+                    onMouseEnter={() => setActiveGigPosterKey(showKey)}
+                    onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
+                    className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
+                  >
+                    <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
+                      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
+                      <img
+                        src={show.posterImage}
+                        alt={`${show.city} gig poster`}
+                        className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
+                      />
+                    </div>
                   </div>
-                </button>
+                )
               ) : null}
               <div className="text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.22)]">{show.date}</div>
               <div>
                 <div className="text-lg font-semibold uppercase transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.18)]">{show.city}</div>
                 <div className="text-sm text-white/60 transition duration-300 group-hover:text-white/80">{show.venue}</div>
-                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/45 transition duration-300 group-hover:text-white/65">{show.time} · {show.note}</div>
+                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/45 transition duration-300 group-hover:text-white/65">{show.time} - {show.note}</div>
                 <div className="mt-3 flex max-h-0 items-center gap-2 overflow-hidden text-[10px] uppercase tracking-[0.24em] text-white/60 opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100">
                   <span className="relative flex h-3 w-3 items-center justify-center">
                     <span className="absolute inline-flex h-3 w-3 rounded-full bg-white/25 animate-ping" />
@@ -623,7 +746,7 @@ function Gigs() {
   );
 }
 
-function FeaturedContent({ onOpenVideo }) {
+function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }) {
   return (
     <section id="videos" className="scroll-mt-32 mx-auto max-w-7xl px-6 py-20">
       <div className="mb-10">
@@ -633,9 +756,24 @@ function FeaturedContent({ onOpenVideo }) {
         {videos.map((video, i) => (
           <article key={video.title} className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition duration-300 ease-out hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_0_34px_rgba(255,255,255,0.1)]">
             {i === 0 ? (
-              <div className="relative overflow-hidden">
+              <div
+                className="relative cursor-pointer overflow-hidden"
+                onClick={() =>
+                  onOpenReleasePreview({
+                    src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                    disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+                  })
+                }
+              >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
                 <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')" }} />
+                <div className="pointer-events-none absolute inset-[-18%] z-20 flex items-center justify-center">
+                  <div className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-2.5 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm">
+                    <p className="max-w-[10rem] text-center text-xs font-black uppercase leading-tight tracking-[0.12em] text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.6)] md:max-w-[12rem] md:text-base">
+                      PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+                    </p>
+                  </div>
+                </div>
               </div>
             ) : i === 1 ? (
               <div className="relative cursor-pointer overflow-hidden" onClick={onOpenVideo}>
@@ -652,9 +790,24 @@ function FeaturedContent({ onOpenVideo }) {
                 </div>
               </div>
             ) : (
-              <div className="relative overflow-hidden">
+              <div
+                className="relative cursor-pointer overflow-hidden"
+                onClick={() =>
+                  onOpenAudioImage({
+                    image: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777543242/abc_radio_studio_kvt1cg.jpg",
+                    title: "ABC Radio Live Show",
+                    audio: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777547088/abc_radio_interview_f772rc.mp4",
+                  })
+                }
+              >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video bg-gradient-to-br from-white/10 to-transparent transition duration-500 ease-out group-hover:scale-[1.04] group-hover:from-white/20" />
+                <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1777543242/abc_radio_studio_kvt1cg.jpg')" }} />
+                <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6 text-center">
+                  <div className="text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.7)]">
+                    <p className="text-xl font-normal uppercase tracking-[0.22em] md:text-2xl">LIVE WITH</p>
+                    <p className="mt-1 text-2xl font-black uppercase tracking-[0.08em] md:text-3xl">ALICE ANSARA</p>
+                  </div>
+                </div>
               </div>
             )}
             <div className="p-5">
@@ -814,6 +967,63 @@ function Store({
     );
   };
 
+  const getVariantStockInfo = (variant) => {
+    if (!variant) return null;
+
+    const inventoryQuantityCandidates = [
+      variant.inventory_quantity,
+      variant.stocked_quantity,
+      variant.available_quantity,
+    ];
+
+    const rawQuantity = inventoryQuantityCandidates.find(
+      (value) => value != null && !Number.isNaN(Number(value))
+    );
+
+    const quantity = rawQuantity == null ? null : Number(rawQuantity);
+    const allowBackorder = Boolean(variant.allow_backorder);
+    const manageInventory =
+      variant.manage_inventory == null ? true : Boolean(variant.manage_inventory);
+
+    if (!manageInventory) {
+      return {
+        toneClassName: "text-white/45",
+        message: "Stock not tracked for this item",
+      };
+    }
+
+    if (quantity == null) {
+      return allowBackorder
+        ? {
+            toneClassName: "text-amber-300",
+            message: "Custom made - allow 7 extra days",
+          }
+        : {
+            toneClassName: "text-white/45",
+            message: "Stock level unavailable",
+          };
+    }
+
+    if (quantity > 0) {
+      return {
+        toneClassName: "text-emerald-300",
+        message: `${quantity} in stock`,
+      };
+    }
+
+    if (allowBackorder) {
+      return {
+        toneClassName: "text-amber-300",
+        message: "0 in stock - custom made - allow 7 extra days",
+      };
+    }
+
+    return {
+      toneClassName: "text-rose-300",
+      message: "Out of stock",
+    };
+  };
+
   return (
     <section id="store" className="scroll-mt-32 border-t border-white/10">
       <div className="mx-auto max-w-7xl px-6 py-20">
@@ -897,6 +1107,16 @@ function Store({
               amount == null || Number.isNaN(Number(amount))
                 ? null
                 : `$${Number(amount).toFixed(2)}`;
+            const hasSelectedTypeAndSize =
+              Boolean(normalizeOptionValue(selectedOptions["type"])) &&
+              Boolean(normalizeOptionValue(selectedOptions["size"]));
+            const stockInfo =
+              hasSelectedTypeAndSize && selectedVariant
+                ? getVariantStockInfo(selectedVariant)
+                : null;
+            const isMadeToOrder =
+              Boolean(selectedVariant?.allow_backorder) &&
+              stockInfo?.message?.toLowerCase().includes("custom made");
 
             const image =
               product.thumbnail ||
@@ -994,6 +1214,30 @@ function Store({
                             const isActive =
                               normalizeOptionValue(selectedOptions[optionName]) ===
                               normalizeOptionValue(value);
+                            const sizePreviewVariant =
+                              optionName === "size" && selectedType
+                                ? (product.variants || []).find((variant) => {
+                                    const variantOptionMap = getVariantOptionMap(variant);
+                                    if (
+                                      variantOptionMap["type"] !== normalizeOptionValue(selectedType) ||
+                                      variantOptionMap["size"] !== normalizeOptionValue(value)
+                                    ) {
+                                      return false;
+                                    }
+
+                                    return Object.entries(selectedOptions || {}).every(([selectedKey, selectedValue]) => {
+                                      const normalizedKey = normalizeOptionKey(selectedKey);
+                                      const normalizedValue = normalizeOptionValue(selectedValue);
+
+                                      if (!normalizedValue || normalizedKey === "size") return true;
+                                      return variantOptionMap[normalizedKey] === normalizedValue;
+                                    });
+                                  })
+                                : null;
+                            const sizePreviewStockInfo =
+                              optionName === "size" && selectedType
+                                ? getVariantStockInfo(sizePreviewVariant)
+                                : null;
 
                             return (
                               <button
@@ -1045,7 +1289,14 @@ function Store({
                                     : "border-white/10 bg-zinc-800 text-white/70 hover:bg-zinc-700 hover:text-white"
                                   }`}
                               >
-                                {value}
+                                <span className="block">{value}</span>
+                                {sizePreviewStockInfo ? (
+                                  <span
+                                    className={`mt-1 block text-[9px] font-medium normal-case tracking-normal ${sizePreviewStockInfo.toneClassName}`}
+                                  >
+                                    {sizePreviewStockInfo.message}
+                                  </span>
+                                ) : null}
                               </button>
                             );
                           })}
@@ -1073,11 +1324,17 @@ function Store({
                   </p>
                 )}
 
+                {stockInfo ? (
+                  <p className={`mt-2 text-center text-xs uppercase tracking-[0.16em] ${stockInfo.toneClassName}`}>
+                    {stockInfo.message}
+                  </p>
+                ) : null}
+
                 <button
                   onClick={() => onAddToCart(product.id)}
                   className="mt-4 w-full rounded-full border border-white/10 bg-zinc-800 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-zinc-700"
                 >
-                  Add to Cart
+                  {isMadeToOrder ? "Add to Cart - Item will be made to order" : "Add to Cart"}
                 </button>
               </article>
             );
@@ -1092,13 +1349,19 @@ function MemberCard({ member }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedFlashback, setSelectedFlashback] = useState(null);
   const [selectedBioClip, setSelectedBioClip] = useState(null);
+  const [hoverGalleryOpen, setHoverGalleryOpen] = useState(false);
   const [isHoveringBioImage, setIsHoveringBioImage] = useState(false);
-  const [hoverCycleKey, setHoverCycleKey] = useState(0);
+  const [activeHoverImageIndex, setActiveHoverImageIndex] = useState(0);
+  const [activeHoverGalleryIndex, setActiveHoverGalleryIndex] = useState(0);
   const imageClassName =
     "aspect-square w-full rounded-2xl border border-white/10 transition duration-500 ease-out group-hover:scale-[1.045] group-hover:brightness-110";
   const lighterSideImages =
     member.name === 'Max'
       ? [
+          {
+            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg',
+            className: '',
+          },
           {
             src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777173329/max_asleep_tht95m.jpg',
             className: '',
@@ -1130,19 +1393,87 @@ function MemberCard({ member }) {
           {
             src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777247857/max_fishing_2_uygwgl.jpg',
             className: '',
-            },
+          },
+          {
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_waterslide_neqc0a.jpg',
+            className: '',
+          },
+          {
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_fendertokyo_qodsws.jpg',
+            className: '',
+          },
+          {
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_jamberoo_giorua.jpg',
+            className: '',
+          },
           ]
       : member.name === 'Joey'
         ? [
             {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg',
+              className: 'object-top',
+            },
+            {
               src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777174022/joey_helmet_qu5nid.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259171/joey_flying_wwqh15.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259729/joey_fender_cxctl2.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_4/joeysnowcat_whfx9o.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_ts_o6r3ma.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_wakesurfing_nfxtqj.jpg',
+              className: '',
+            },
+          ]
+      : member.name === 'Lando'
+        ? [
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg',
+              className: 'object-top',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/lando_crowd_zf6g0w.jpg',
+              className: '',
+            },
+          ]
+      : member.name === 'Cadence'
+        ? [
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/cadence_crowd_sh5bik.jpg',
+              className: '',
+            },
+          ]
+      : member.name === 'Julian'
+        ? [
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg',
+              className: '',
+            },
+            {
+              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777609081/julian_rotation_colored_fofequ.jpg',
               className: '',
             },
           ]
       : null;
-  const visibleLighterSideImages = privateMemberDetailsEnabled ? lighterSideImages : null;
-  const hoverImageSegmentDuration = 3.15;
-  const hoverImageCycleDuration = (visibleLighterSideImages?.length || 1) * hoverImageSegmentDuration;
+  const visibleLighterSideImages = useMemo(() => lighterSideImages || [], [member.name]);
+  const hoverImageSegmentDuration = 2.1;
   const liveVideoRef = useRef(null);
   const bioClipVideoRef = useRef(null);
   const liveVideoFadeDuration = 0.6;
@@ -1154,8 +1485,9 @@ function MemberCard({ member }) {
         }
       : member.name === 'Joey'
         ? {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777152126/joey_bombtrack_fp1sz9.mp4',
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_0,eo_26/v1777152126/joey_bombtrack_fp1sz9.mp4?trim=26',
             label: 'Joey on lead guitar',
+            endAtSeconds: 26,
           }
       : member.name === 'Lando'
         ? {
@@ -1164,23 +1496,24 @@ function MemberCard({ member }) {
           }
       : member.name === 'Julian'
         ? {
-            src: null,
-            label: 'Coming Soon',
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777610254/julian_closeup_ukme9s.mp4',
+            label: 'Julian on drums',
           }
       : member.name === 'Max'
         ? {
-            src: null,
-            label: 'Coming Soon',
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777608826/max_closeup_vrzhqx.mp4',
+            label: 'Max on bass',
           }
       : null;
   const liveVideoSrc = livePreview?.src || null;
-  const liveVideoTrimSeconds = member.name === 'Joey' ? 10 : 0;
+  const liveVideoTrimSeconds = Number(livePreview?.trimEndSeconds || 0);
   const liveVideoLabel = livePreview?.label || '';
   const liveClipVideo =
     liveVideoSrc
       ? {
           title: liveVideoLabel,
           src: liveVideoSrc,
+          endAtSeconds: livePreview?.endAtSeconds,
         }
       : null;
   const memberAchievements =
@@ -1268,8 +1601,8 @@ function MemberCard({ member }) {
       : member.name === 'Lando'
         ? {
             title: null,
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777153684/lando_bombtrack_cuseb2.mp4',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/lando_bombtrack_cuseb2.jpg',
+            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777264563/Lando_vocals_mooesv.mp4',
+            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/Lando_vocals_mooesv.jpg',
           }
       : member.name === 'Max'
         ? {
@@ -1325,13 +1658,38 @@ function MemberCard({ member }) {
   const handleBioImageEnter = () => {
     if (!visibleLighterSideImages?.length) return;
 
-    setHoverCycleKey((prev) => prev + 1);
+    setActiveHoverImageIndex(0);
     setIsHoveringBioImage(true);
   };
 
   const handleBioImageLeave = () => {
     setIsHoveringBioImage(false);
+    setActiveHoverImageIndex(0);
   };
+
+  useEffect(() => {
+    if (!isHoveringBioImage || visibleLighterSideImages.length <= 1) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setActiveHoverImageIndex((prev) => (prev + 1) % visibleLighterSideImages.length);
+    }, hoverImageSegmentDuration * 1000);
+
+    return () => window.clearInterval(interval);
+  }, [isHoveringBioImage, visibleLighterSideImages.length, hoverImageSegmentDuration]);
+
+  useEffect(() => {
+    if (!hoverGalleryOpen || visibleLighterSideImages.length <= 1) {
+      return;
+    }
+
+    const interval = window.setInterval(() => {
+      setActiveHoverGalleryIndex((prev) => (prev + 1) % visibleLighterSideImages.length);
+    }, hoverImageSegmentDuration * 1000);
+
+    return () => window.clearInterval(interval);
+  }, [hoverGalleryOpen, visibleLighterSideImages.length, hoverImageSegmentDuration]);
 
   const handleBioClipEnter = async () => {
     const video = bioClipVideoRef.current;
@@ -1354,6 +1712,18 @@ function MemberCard({ member }) {
 
     video.muted = true;
     video.volume = 1;
+  };
+
+  const handleBioClipTimeUpdate = () => {
+    const video = bioClipVideoRef.current;
+    const endAtSeconds = Number(bioClipVideo?.endAtSeconds || 0);
+    if (!video || !endAtSeconds) return;
+
+    if (video.currentTime >= endAtSeconds) {
+      video.pause();
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    }
   };
 
   const handleDetailVideoEnter = async (event) => {
@@ -1384,11 +1754,16 @@ function MemberCard({ member }) {
   };
 
   useEffect(() => {
-    const hasOpenModal = detailOpen || selectedFlashback || selectedBioClip;
+    const hasOpenModal = detailOpen || selectedFlashback || selectedBioClip || hoverGalleryOpen;
     if (!hasOpenModal) return;
 
     const handleEsc = (event) => {
       if (event.key !== "Escape") return;
+
+      if (hoverGalleryOpen) {
+        setHoverGalleryOpen(false);
+        return;
+      }
 
       if (selectedBioClip) {
         setSelectedBioClip(null);
@@ -1405,15 +1780,20 @@ function MemberCard({ member }) {
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [detailOpen, selectedFlashback, selectedBioClip]);
+  }, [detailOpen, hoverGalleryOpen, selectedFlashback, selectedBioClip]);
 
   return (
     <>
       <div className="group rounded-3xl border border-white/10 bg-white/[0.03] p-5 transition duration-300 ease-out hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.05] hover:shadow-[0_0_36px_rgba(255,255,255,0.1)]">
       <div
-        className="relative mb-4 overflow-hidden rounded-2xl"
+        className={`relative mb-4 overflow-hidden rounded-2xl ${visibleLighterSideImages.length ? 'cursor-pointer' : ''}`}
         onMouseEnter={handleBioImageEnter}
         onMouseLeave={handleBioImageLeave}
+        onClick={() => {
+          if (!visibleLighterSideImages.length) return;
+          setActiveHoverGalleryIndex(activeHoverImageIndex);
+          setHoverGalleryOpen(true);
+        }}
       >
         <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.16),transparent_62%)] opacity-0 transition duration-300 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition duration-300 group-hover:opacity-40" />
@@ -1429,19 +1809,21 @@ function MemberCard({ member }) {
                 Off Stage
               </div>
             </div>
+            <div className="pointer-events-none absolute inset-x-4 bottom-4 z-20 flex justify-center">
+              <div className="rounded-full border border-white/18 bg-black/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.28em] text-white/80 shadow-[0_0_18px_rgba(255,255,255,0.08)] backdrop-blur-sm">
+                Click to enlarge
+              </div>
+            </div>
             {visibleLighterSideImages.map((image, index) => (
               <img
-                key={`${member.name}-off-stage-${index}-${hoverCycleKey}`}
+                key={`${member.name}-off-stage-${index}`}
                 src={image.src}
                 alt={`${member.name} off stage ${index + 1}`}
-                className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${visibleLighterSideImages.length === 1 ? "group-hover:opacity-100" : ""} ${image.className}`}
+                className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${image.className}`}
                 style={
-                  visibleLighterSideImages.length === 1 || !isHoveringBioImage
-                    ? undefined
-                    : {
-                        animation: `hoverImageCycle ${hoverImageCycleDuration}s linear infinite`,
-                        animationDelay: `${index * hoverImageSegmentDuration}s`,
-                      }
+                  isHoveringBioImage && activeHoverImageIndex === index
+                    ? { opacity: 1 }
+                    : undefined
                 }
               />
             ))}
@@ -1513,32 +1895,32 @@ function MemberCard({ member }) {
         <>
           <p className="mt-3 text-sm text-white/70">Cadence is a young vocalist known for her powerful tone, wide range, and natural ability to adapt across a broad spectrum of musical styles. Her voice carries strength and emotion with dynamic versatility, leaving a lasting impact on her listeners.</p>
           <p className="mt-3 text-sm text-white/70">Cadence draws strong inspiration from iconic vocal artists such as Amy Lee of Evanescence and Emily Armstrong of Linkin Park, with these influences shaping her connection to a wide range of rock styles. However, her love of country, pop, and indie music follows closely behind, fuelling a musical journey that remains unconfined to any one genre, allowing her evolving skill to continually grow.</p>
-          <p className="mt-3 text-sm text-white/70">Born and raised on the South Coast, Cadence’s passion for singing and music began at a young age, naturally guiding her into the creative young artist she is quickly becoming. At the age of 13 she joined the band that later became Exit Smiling, marking the beginning of her experience as a live performer and lead vocalist.</p>
+          <p className="mt-3 text-sm text-white/70">Born and raised on the South Coast, Cadence's passion for singing and music began at a young age, naturally guiding her into the creative young artist she is quickly becoming. At the age of 13 she joined the band that later became Exit Smiling, marking the beginning of her experience as a live performer and lead vocalist.</p>
           <p className="mt-3 text-sm text-white/70">Although still early in her formal training, Cadence began receiving professional vocal coaching in August 2025 from a renowned opera singer based in the UK. A blend of modern with classical training continues to refine her natural ability, further develop her technique, and support her growth as an emerging musician.</p>
         </>
       ) : member.name === 'Joey' ? (
         <>
           <p className="mt-3 text-sm text-white/70">Joey is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
           <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar, a transition that helped shape his distinctive playing style and musical identity.</p>
-          <p className="mt-3 text-sm text-white/70">Drawing influence from a wide range of alternative, nu-metal, and hard rock artists, Joey’s playing blends tight, driving rhythm work with expressive lead lines. His approach is instinctive and feel-driven, always pushing beyond his years as he continues to develop both technically and creatively.</p>
-          <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band’s sound, balancing melody, aggression, and tone across both live performances and original music.</p>
+          <p className="mt-3 text-sm text-white/70">Drawing influence from a wide range of alternative, nu-metal, and hard rock artists, Joey's playing blends tight, driving rhythm work with expressive lead lines. His approach is instinctive and feel-driven, always pushing beyond his years as he continues to develop both technically and creatively.</p>
+          <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band's sound, balancing melody, aggression, and tone across both live performances and original music.</p>
           <p className="mt-3 text-sm text-white/70">He is the proud caretaker of a growing guitar lineup, including a Fender Telecaster, Fender Stratocaster, and a Gibson SG, each contributing to his expanding tonal range. His guitar quiver reflects his music mentors: Tom Morello (RATM), Jimi Hendrix (The Hendrix Experience), and Tony Iommi (Black Sabbath).</p>
           <p className="mt-3 text-sm text-white/70">Still early in his journey, Joey is focused on writing, performing, and carving out his place in the next generation of rock musicians.</p>
         </>
       ) : member.name === 'Max' ? (
         <>
-          <p className="mt-3 text-sm text-white/70">Max is the Exit Smiling bassist and has loved it since it all began in Julian’s office, struggling through a 12-bar blues. Now he brings a funky, solid element to the band, both musically and socially, getting lost in jams with Julian, writing with the band, and heading out to switch off and have fun when he can (not too much fun).</p>
-          <p className="mt-3 text-sm text-white/70">Max also enjoys mountain biking, skiing, hunting, and soccer, which he fuels with a lot of music, from shredding a pow day blasting Rage Against the Machine (not too loud, his parents don’t want him to damage his ears) to listening to Hilltop Hoods to focus before a game.</p>
+          <p className="mt-3 text-sm text-white/70">Max is the Exit Smiling bassist and has loved it since it all began in Julian's office, struggling through a 12-bar blues. Now he brings a funky, solid element to the band, both musically and socially, getting lost in jams with Julian, writing with the band, and heading out to switch off and have fun when he can (not too much fun).</p>
+          <p className="mt-3 text-sm text-white/70">Max also enjoys mountain biking, skiing, hunting, and soccer, which he fuels with a lot of music, from shredding a pow day blasting Rage Against the Machine (not too loud, his parents don't want him to damage his ears) to listening to Hilltop Hoods to focus before a game.</p>
           <p className="mt-3 text-sm text-white/70">Max has a very wide taste in music, with bands like Rage Against the Machine, Linkin Park, Black Sabbath, The Beatles, Audioslave, Hilltop Hoods, and Powderfinger forming the backbone of his influence. However, local influences such as the legendary Dave Berry and The Spindrift Saga have been just as important. He takes lessons from Dave Berry in practical elements, from setting up an overdrive pedal to understanding the genius of an AC/DC song, while members of The Spindrift Saga have taught him the cold, hard theory required to tackle a range of musical challenges, no matter how repetitive it may seem. These local legends give him and the band real insight into the music industry and how bands operate within it.</p>
           <p className="mt-3 text-sm text-white/70">Max is from the South Coast and brings a regional approach to problems, with a laid-back, fun-loving energy that is a core part of the band and a big reason why he and the others have formed such a strong bond.</p>
         </>
       ) : member.name === 'Julian' ? (
         <>
           <p className="mt-3 text-sm text-white/70">Julian is 14 years old and was born in Manchester, UK, the heart of music in 90s England, where big bands like Oasis, The Smiths, and The Stone Roses came from. Julian moved to Australia when he was just 1 and started drumming at the age of 5. The first gig he watched was Henge in England in 2017. He also learned to play the piano through COVID and continues to grow his musical skill set beyond just rhythm.</p>
-          <p className="mt-3 text-sm text-white/70">Julian’s main drumming influence comes from drummers such as Brad Wilks (RATM), Ringo Starr (The Beatles), and John Otto (Limp Bizkit). This influence brings a wide range of styles, such as hip hop, funk, and nu metal, into his drumming.</p>
+          <p className="mt-3 text-sm text-white/70">Julian's main drumming influence comes from drummers such as Brad Wilks (RATM), Ringo Starr (The Beatles), and John Otto (Limp Bizkit). This influence brings a wide range of styles, such as hip hop, funk, and nu metal, into his drumming.</p>
           <p className="mt-3 text-sm text-white/70">Julian started writing and creating music with his younger brother during lockdown at age 10 and released a couple of music videos, which can still be tracked down on YouTube if you search hard enough. These videos gained enough attention to make it to the front page of the local paper, feature in The Canberra Times, and the boys were interviewed, with their songs played on ABC Radio.</p>
-          <p className="mt-3 text-sm text-white/70">Julian has also competed and won the local St Cecilia Music Scholarships and competed with the top 20 drummers in Years 7–9 in NSW in the final of the OSIC drum competition. He has been taking lessons from one of Australia’s best jazz drummers, a former ANU drum teacher, using this to blend classical technique with more modern rock styles.</p>
-          <p className="mt-3 text-sm text-white/70">Julian’s ambition would be to one day get sponsored by Heinz and Adidas, and he would like to receive unlimited free products from both companies.</p>
+          <p className="mt-3 text-sm text-white/70">Julian has also competed and won the local St Cecilia Music Scholarships and competed with the top 20 drummers in Years 7-9 in NSW in the final of the OSIC drum competition. He has been taking lessons from one of Australia's best jazz drummers, a former ANU drum teacher, using this to blend classical technique with more modern rock styles.</p>
+          <p className="mt-3 text-sm text-white/70">Julian's ambition would be to one day get sponsored by Heinz and Adidas, and he would like to receive unlimited free products from both companies.</p>
         </>
       ) : member.name === 'Lando' ? (
         <>
@@ -1574,6 +1956,7 @@ function MemberCard({ member }) {
             loop
             playsInline
             preload="metadata"
+            onTimeUpdate={handleBioClipTimeUpdate}
             className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/bioclip:scale-[1.03] group-hover/bioclip:brightness-110"
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-4 pt-10">
@@ -1738,8 +2121,51 @@ function MemberCard({ member }) {
               controls
               autoPlay
               playsInline
+              onTimeUpdate={(event) => {
+                const endAtSeconds = Number(selectedBioClip.endAtSeconds || 0);
+                if (!endAtSeconds) return;
+
+                if (event.currentTarget.currentTime >= endAtSeconds) {
+                  event.currentTarget.pause();
+                  event.currentTarget.currentTime = 0;
+                }
+              }}
               className="max-h-[78vh] w-full rounded-2xl bg-black object-contain"
             />
+          </div>
+        </div>
+      ) : null}
+
+      {hoverGalleryOpen ? (
+        <div
+          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/92 p-4"
+          onClick={() => setHoverGalleryOpen(false)}
+        >
+          <div className="w-full max-w-5xl">
+            <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-[#090909] p-4 shadow-[0_0_40px_rgba(255,255,255,0.12)] md:p-6">
+              <button
+                type="button"
+                onClick={() => setHoverGalleryOpen(false)}
+                className="absolute right-5 top-5 z-20 text-sm uppercase tracking-[0.24em] text-white/55 transition hover:text-white"
+              >
+                Close
+              </button>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black">
+                {visibleLighterSideImages.map((image, index) => (
+                  <img
+                    key={`${member.name}-hover-gallery-${index}`}
+                    src={image.src}
+                    alt={`${member.name} gallery ${index + 1}`}
+                    className={`absolute inset-0 h-full w-full object-contain transition duration-700 ease-out ${index === activeHoverGalleryIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]'} ${image.className}`}
+                  />
+                ))}
+                <div className="aspect-[4/5] w-full" />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent px-5 pb-5 pt-12">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-white/55">Off Stage</p>
+                  <p className="mt-2 text-2xl font-black uppercase text-white">{member.name}</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       ) : null}
@@ -1828,7 +2254,7 @@ function BandLivePreview() {
           </div>
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center">
             <div className="rounded-full border border-white/35 bg-black/65 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-white shadow-[0_0_24px_rgba(255,255,255,0.14)] backdrop-blur-sm">
-              Hover for audio • click to expand
+              Hover for audio - click to expand
             </div>
           </div>
           <video
@@ -1911,7 +2337,17 @@ function Band() {
     },
     {
       type: "image",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777609335/smoke_band_w9ktya.jpg",
+      className: "grayscale group-hover/bandmoments:grayscale-0",
+    },
+    {
+      type: "image",
       src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775625623/Exit_Smiling_-_Live_Photo_01_lj5nhg.jpg",
+      className: "grayscale group-hover/bandmoments:grayscale-0",
+    },
+    {
+      type: "image",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777173329/max_asleep_tht95m.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
   ];
@@ -2010,7 +2446,7 @@ function Footer() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
         <div className="flex items-center gap-3">
           <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
-          <span>© 2026 {brand.name}</span>
+          <span>(c) 2026 {brand.name}</span>
         </div>
 
         <div className="text-white/70">
@@ -2141,7 +2577,7 @@ function VideoModal({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
       <div className="relative w-full max-w-7xl px-4 md:px-8">
-        <button onClick={onClose} className="absolute -top-10 right-0 text-white text-xl">✕</button>
+        <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <video src="https://res.cloudinary.com/dkffwzpba/video/upload/v1776069327/bombtrack_4_xfxuvd.mp4" controls autoPlay className="w-full rounded-2xl max-h-[85vh] bg-black" />
       </div>
     </div>
@@ -2153,9 +2589,93 @@ function PosterModal({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4">
       <div className="relative w-full max-w-5xl">
-        <button onClick={onClose} className="absolute -top-10 right-0 text-white text-xl">✕</button>
+        <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <div className="flex items-center justify-center rounded-2xl bg-black p-4 md:p-8">
           <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster enlarged" className="max-h-[85vh] w-auto max-w-full object-contain" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FeaturedAudioImageModal({ item, onClose }) {
+  if (!item?.image) return null;
+  return (
+    <div className="fixed inset-0 z-[102] flex items-center justify-center bg-black/92 p-4" onClick={onClose}>
+      <div className="relative w-full max-w-6xl">
+        <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
+        <div className="flex items-center justify-center rounded-3xl border border-white/10 bg-black p-4 md:p-6">
+          <img
+            src={item.image}
+            alt={item.title || "Featured content enlarged"}
+            className="max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
+          />
+        </div>
+        {item.audio ? <audio src={item.audio} autoPlay controls className="mt-4 w-full" /> : null}
+      </div>
+    </div>
+  );
+}
+
+function ReleasePreviewModal({ video, onClose }) {
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const element = videoRef.current;
+    if (!video || !element) return;
+
+    const preview = typeof video === "string" ? { src: video } : video;
+    const startAt = Number(preview.startAt || 0);
+    const endAt = Number(preview.endAt || 0);
+
+    const handleLoadedMetadata = () => {
+      if (startAt > 0) {
+        element.currentTime = startAt;
+      }
+      if (endAt > 0) {
+        element.currentTime = startAt;
+      }
+      element.play().catch(() => {});
+    };
+
+    const handleTimeUpdate = () => {
+      if (endAt > 0 && element.currentTime >= endAt) {
+        element.pause();
+        if (startAt > 0) {
+          element.currentTime = startAt;
+        }
+      }
+    };
+
+    element.addEventListener("loadedmetadata", handleLoadedMetadata);
+    element.addEventListener("timeupdate", handleTimeUpdate);
+
+    return () => {
+      element.pause();
+      element.currentTime = 0;
+      element.removeEventListener("loadedmetadata", handleLoadedMetadata);
+      element.removeEventListener("timeupdate", handleTimeUpdate);
+    };
+  }, [video]);
+
+  if (!video) return null;
+
+  const preview = typeof video === "string" ? { src: video } : video;
+  return (
+    <div className="fixed inset-0 z-[103] flex items-center justify-center bg-black/92 p-4" onClick={onClose}>
+      <div className="relative w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
+        <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
+        <div className="rounded-3xl border border-white/10 bg-black p-3 md:p-5">
+          <video
+            ref={videoRef}
+            src={preview.src}
+            controls
+            autoPlay
+            className="max-h-[85vh] w-full rounded-2xl bg-black"
+          />
+          <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/65 md:text-sm">
+            {preview.disclaimer || "LIVE PREVIEW - OFFICIAL MASTERED SINGLE COMING SOON"}
+          </p>
         </div>
       </div>
     </div>
@@ -2186,7 +2706,7 @@ function MerchImageModal({ open, onClose, image, title }) {
           onClick={onClose}
           className="absolute -top-10 right-0 text-xl text-white hover:text-white/70"
         >
-          ✕
+          Close
         </button>
 
         <div className="flex max-h-[90vh] items-center justify-center rounded-3xl border border-white/10 bg-[#0a0a0a] p-4 md:p-6">
@@ -2230,7 +2750,7 @@ function StudioModal({
   return (
     <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/92 p-4">
       <div className="relative w-full max-w-6xl rounded-3xl border border-white/10 bg-[#090909] p-6 md:p-8">
-        <button onClick={onClose} className="absolute right-5 top-5 text-white/70 hover:text-white">✕</button>
+        <button onClick={onClose} className="absolute right-5 top-5 text-white/70 hover:text-white">Close</button>
         {!authorized ? (
           <div className="mx-auto max-w-xl py-8 text-center">
             <p className="text-[10px] uppercase tracking-[0.32em] text-yellow-300/70">Fan Updates</p>
@@ -2371,16 +2891,28 @@ function MiniCart({
                       optionMap["font colour"] ||
                       null;
                     const type = optionMap["type"] || null;
+                    const rawInventoryQuantity = [
+                      fullVariant?.inventory_quantity,
+                      fullVariant?.stocked_quantity,
+                      fullVariant?.available_quantity,
+                    ].find((value) => value != null && !Number.isNaN(Number(value)));
+                    const inventoryQuantity =
+                      rawInventoryQuantity == null ? null : Number(rawInventoryQuantity);
+                    const isPrintOnDemand =
+                      Boolean(fullVariant?.allow_backorder) &&
+                      inventoryQuantity != null &&
+                      inventoryQuantity <= 0;
 
                     const pieces = [];
                     if (size) pieces.push(`Size: ${size}`);
                     if (fontColor) pieces.push(`Font: ${fontColor}`);
                     if (type) pieces.push(`Type: ${type}`);
+                    if (isPrintOnDemand) pieces.push("Print on Demand = +7 days (+shipping)");
 
                     if (pieces.length) {
                       return (
                         <p className="mt-1 text-xs text-white/50">
-                          {pieces.join(" • ")}
+                          {pieces.join(" - ")}
                         </p>
                       );
                     }
@@ -2397,7 +2929,7 @@ function MiniCart({
                       onClick={() => onUpdateQuantity(item.id, item.quantity - 1)}
                       className="h-8 w-8 rounded-full border border-white/15 text-white/70 hover:bg-white/10 hover:text-white"
                     >
-                      −
+                      -
                     </button>
 
                     <span className="min-w-[24px] text-center text-sm text-white/80">
@@ -2541,18 +3073,12 @@ function MiniCart({
           ) : (
             <div className="mt-3 space-y-2">
               {shippingOptions.map((option) => {
-                const isSelected = cart?.shipping_methods?.some(
-                  (method) => method.shipping_option_id === option.id
-                );
-
-                const amount =
-                  option.amount ??
-                  option.price ??
-                  option.calculated_price?.calculated_amount ??
-                  null;
+                const isSelected = option.isSelected;
+                const amount = option.amount;
 
                 return (
                   <button
+                    type="button"
                     key={option.id}
                     onClick={() => onSelectShippingOption(option.id)}
                     className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left transition ${isSelected
@@ -2615,7 +3141,8 @@ export default function App() {
   const [heroSlideDurationMs, setHeroSlideDurationMs] = useState(defaultSlideDurationMs);
   const [products, setProducts] = useState([]);
   const [merchImageOpen, setMerchImageOpen] = useState(false);
-  const [selectedImage, setSelectedImage] = useState(null)
+  const [selectedFeaturedAudioImage, setSelectedFeaturedAudioImage] = useState(null)
+  const [releasePreviewVideo, setReleasePreviewVideo] = useState("");
   const [selectedMerchImage, setSelectedMerchImage] = useState("");
   const [selectedMerchTitle, setSelectedMerchTitle] = useState("");
   const [cartId, setCartId] = useState(null);
@@ -2753,6 +3280,16 @@ export default function App() {
         return;
       }
 
+      if (releasePreviewVideo) {
+        setReleasePreviewVideo("");
+        return;
+      }
+
+      if (selectedFeaturedAudioImage) {
+        setSelectedFeaturedAudioImage(null);
+        return;
+      }
+
       if (studioOpen) {
         closeStudioModal();
         return;
@@ -2773,7 +3310,7 @@ export default function App() {
 
     window.addEventListener("keydown", handleEsc);
     return () => window.removeEventListener("keydown", handleEsc);
-  }, [merchImageOpen, posterOpen, stripeModalOpen, studioOpen, videoOpen]);
+  }, [merchImageOpen, posterOpen, releasePreviewVideo, selectedFeaturedAudioImage, stripeModalOpen, studioOpen, videoOpen]);
 
   const handleStudioAccess = (video) => {
     setSelectedStudioVideo(video);
@@ -2842,6 +3379,38 @@ export default function App() {
     return lastCart;
   };
 
+  const refreshCartUntilShippingMethods = async (requiredOptionIds = []) => {
+    if (!cartId) return null;
+
+    const expectedIds = new Set((requiredOptionIds || []).filter(Boolean));
+    let lastCart = null;
+
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      const latestCart = await getCart(cartId);
+      lastCart = latestCart;
+
+      const presentIds = new Set(
+        (latestCart?.shipping_methods || [])
+          .map((method) => method?.shipping_option_id || method?.shipping_option?.id)
+          .filter(Boolean)
+      );
+
+      const hasAllRequiredIds =
+        expectedIds.size === 0 ||
+        Array.from(expectedIds).every((optionId) => presentIds.has(optionId));
+
+      if (hasAllRequiredIds) {
+        setCart(latestCart);
+        return latestCart;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+
+    setCart(lastCart);
+    return lastCart;
+  };
+
   const normalizeOptionKey = (value) =>
     String(value || "").trim().toLowerCase();
 
@@ -2894,6 +3463,250 @@ export default function App() {
     );
   };
 
+  const getSelectedShippingOptionIds = (activeCart) =>
+    new Set(
+      (activeCart?.shipping_methods || [])
+        .map((method) => method.shipping_option_id || method.shipping_option?.id)
+        .filter(Boolean)
+    );
+
+  const getActiveCartShippingProfileIds = (activeCart) => {
+    const profileIds = new Set();
+
+    for (const item of activeCart?.items || []) {
+      const directProfileId =
+        item?.variant?.product?.shipping_profile_id ||
+        item?.variant?.product?.shipping_profile?.id;
+
+      if (directProfileId) {
+        profileIds.add(directProfileId);
+        continue;
+      }
+
+      const variantId = item?.variant?.id;
+      const productId = item?.variant?.product_id;
+      const matchedProduct = products.find((product) => {
+        if (productId && product.id === productId) return true;
+        if (variantId && product.variants?.some((variant) => variant.id === variantId)) return true;
+        return false;
+      });
+
+      const fallbackProfileId =
+        matchedProduct?.shipping_profile_id || matchedProduct?.shipping_profile?.id;
+
+      if (fallbackProfileId) {
+        profileIds.add(fallbackProfileId);
+      }
+    }
+
+    return profileIds;
+  };
+
+  const getCartItemWeight = (item) => {
+    const directWeight = Number(
+      item?.variant?.weight ??
+      item?.variant?.product?.weight ??
+      0
+    );
+
+    if (Number.isFinite(directWeight) && directWeight > 0) {
+      return directWeight;
+    }
+
+    const variantId = item?.variant?.id;
+    const productId = item?.variant?.product_id;
+    const matchedProduct = products.find((product) => {
+      if (productId && product.id === productId) return true;
+      if (variantId && product.variants?.some((variant) => variant.id === variantId)) return true;
+      return false;
+    });
+
+    const fallbackWeight = Number(
+      matchedProduct?.weight ??
+      matchedProduct?.variants?.find((variant) => variant.id === variantId)?.weight ??
+      0
+    );
+
+    return Number.isFinite(fallbackWeight) ? fallbackWeight : 0;
+  };
+
+  const getCartShippingMode = (activeCart) => {
+    const weights = (activeCart?.items || [])
+      .map((item) => getCartItemWeight(item))
+      .filter((weight) => weight > 0);
+
+    if (!weights.length) return "unknown";
+
+    const hasBulky = weights.some((weight) => weight >= 300);
+    const hasLight = weights.some((weight) => weight > 0 && weight < 300);
+
+    if (hasBulky && hasLight) return "mixed";
+    if (hasBulky) return "bulky";
+    return "light";
+  };
+
+  const getRelevantShippingProfileIdsFromOptions = (activeOptions, activeCart) => {
+    const explicitProfileIds = getActiveCartShippingProfileIds(activeCart);
+    if (explicitProfileIds.size) {
+      return explicitProfileIds;
+    }
+
+    const mode = getCartShippingMode(activeCart);
+    const profileGroups = new Map();
+
+    for (const option of activeOptions || []) {
+      const profileId = option?.shipping_profile_id || option?.shipping_profile?.id;
+      if (!profileId) continue;
+
+      if (!profileGroups.has(profileId)) {
+        profileGroups.set(profileId, {
+          profileId,
+          total: 0,
+          count: 0,
+        });
+      }
+
+      const entry = profileGroups.get(profileId);
+      const amount = getShippingOptionAmount(option);
+
+      if (amount != null) {
+        entry.total += Number(amount);
+        entry.count += 1;
+      }
+    }
+
+    const rankedProfiles = Array.from(profileGroups.values())
+      .map((entry) => ({
+        ...entry,
+        average: entry.count ? entry.total / entry.count : Number.POSITIVE_INFINITY,
+      }))
+      .sort((a, b) => a.average - b.average);
+
+    if (mode === "light" && rankedProfiles.length) {
+      return new Set([rankedProfiles[0].profileId]);
+    }
+
+    if (mode === "bulky" && rankedProfiles.length) {
+      return new Set([rankedProfiles[rankedProfiles.length - 1].profileId]);
+    }
+
+    if (mode === "mixed") {
+      return new Set(rankedProfiles.map((entry) => entry.profileId));
+    }
+
+    return new Set();
+  };
+
+  const getShippingOptionAmount = (option) =>
+    option?.amount ??
+    option?.price ??
+    option?.calculated_price?.calculated_amount ??
+    null;
+
+  const getShippingOptionDisplayName = (option) => {
+    const rawName = String(option?.name || option?.label || option?.id || "").trim();
+
+    if (!rawName) return "";
+
+    return rawName.replace(
+      /\s*-\s*(light merch|bulky merch|default shipping profile)\s*$/i,
+      ""
+    );
+  };
+
+  const getGroupedShippingOptions = (activeOptions, activeCart) => {
+    const selectedIds = getSelectedShippingOptionIds(activeCart);
+    const activeProfileIds = getRelevantShippingProfileIdsFromOptions(activeOptions, activeCart);
+    const cartShippingMode = getCartShippingMode(activeCart);
+    const relevantOptions = (activeOptions || []).filter((option) => {
+      if (!activeProfileIds.size) return true;
+
+      const optionProfileId =
+        option?.shipping_profile_id || option?.shipping_profile?.id;
+
+      return !optionProfileId || activeProfileIds.has(optionProfileId);
+    });
+    const grouped = new Map();
+
+    for (const option of relevantOptions) {
+      const displayName = getShippingOptionDisplayName(option);
+      const amount = getShippingOptionAmount(option);
+      const key = displayName || option.id;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          id: key,
+          name: displayName || option.name || option.label || option.id,
+          amount: 0,
+          optionIds: [],
+          isSelected: false,
+          hasUnknownAmount: false,
+        });
+      }
+
+      const entry = grouped.get(key);
+      entry.optionIds.push(option.id);
+
+      if (amount == null) {
+        entry.hasUnknownAmount = true;
+      } else {
+        const numericAmount = Number(amount);
+
+        if (cartShippingMode === "mixed") {
+          entry.amount = Math.max(entry.amount, numericAmount);
+        } else {
+          entry.amount += numericAmount;
+        }
+      }
+
+    }
+
+    return Array.from(grouped.values()).map((entry) => {
+      const requiredOptionIds = entry.optionIds.filter(Boolean);
+      const isSelected =
+        requiredOptionIds.length > 0 &&
+        requiredOptionIds.every((optionId) => selectedIds.has(optionId));
+
+      return {
+        ...entry,
+        amount: entry.hasUnknownAmount ? null : entry.amount,
+        isSelected,
+      };
+    });
+  };
+
+  const getShippingSelectionError = (activeCart, activeOptions) => {
+    if (!activeCart?.items?.length) return "";
+
+    const hasCheckoutDetails =
+      Boolean(activeCart?.email) &&
+      Boolean(activeCart?.shipping_address?.address_1) &&
+      Boolean(activeCart?.shipping_address?.country_code);
+
+    if (!hasCheckoutDetails) {
+      return "";
+    }
+
+    if (!activeOptions?.length) {
+      return "Shipping options need to be refreshed for this cart. Please confirm shipping details again.";
+    }
+
+    const selectedIds = getSelectedShippingOptionIds(activeCart);
+
+    if (!selectedIds.size) {
+      return "Please select a shipping method before paying.";
+    }
+
+    const groupedOptions = getGroupedShippingOptions(activeOptions, activeCart);
+    const hasFullySelectedGroupedOption = groupedOptions.some((option) => option.isSelected);
+
+    if (!hasFullySelectedGroupedOption) {
+      return "Cart contents changed. Please re-select your shipping method before paying.";
+    }
+
+    return "";
+  };
+
   const handleAddToCart = async (productId) => {
     try {
       const product = products.find((p) => p.id === productId);
@@ -2927,6 +3740,12 @@ export default function App() {
       const refreshedCart = await getCart(cartId);
       setCart(refreshedCart);
       setMiniCartOpen(true);
+
+      try {
+        await loadShippingOptions(cartId);
+        setCheckoutError("");
+      } catch {
+      }
     } catch (err) {
     }
   };
@@ -2945,6 +3764,14 @@ export default function App() {
 
       if (!refreshedCart?.items?.length) {
         setMiniCartOpen(false);
+      } else {
+        setMiniCartOpen(true);
+      }
+
+      try {
+        await loadShippingOptions(cartId);
+        setCheckoutError("");
+      } catch {
       }
     } catch (err) {
     }
@@ -2960,6 +3787,14 @@ export default function App() {
 
       if (!refreshedCart?.items?.length) {
         setMiniCartOpen(false);
+      } else {
+        setMiniCartOpen(true);
+      }
+
+      try {
+        await loadShippingOptions(cartId);
+        setCheckoutError("");
+      } catch {
       }
     } catch (err) {
     }
@@ -2986,7 +3821,16 @@ export default function App() {
       if (checkoutLoading) return;
       setCheckoutLoading(true);
 
-      const updatedCart = await initializeStripePayment(cart);
+      const latestCart = await refreshCartSafely();
+      const latestOptions = await loadShippingOptions(cartId);
+      const shippingSelectionError = getShippingSelectionError(latestCart, latestOptions);
+
+      if (shippingSelectionError) {
+        setCheckoutError(shippingSelectionError);
+        return;
+      }
+
+      const updatedCart = await initializeStripePayment(latestCart || cart);
 
       const session = updatedCart?.payment_collection?.payment_sessions?.find(
         (s) => s.provider_id === "pp_stripe_stripe"
@@ -3037,7 +3881,7 @@ export default function App() {
       setShippingSaving(true);
       setCheckoutError("");
 
-      const updatedCart = await updateCartDetails(cartId, {
+      await updateCartDetails(cartId, {
         email: checkoutEmail,
         shipping_address: {
           ...shippingForm,
@@ -3047,9 +3891,10 @@ export default function App() {
         },
       });
 
-      setCart(updatedCart);
+      const refreshedCart = await refreshCartSafely();
 
-      const options = await loadShippingOptions(cartId);
+      await loadShippingOptions(cartId);
+      setCheckoutError("");
     } catch (err) {
       setCheckoutError(err.message || "Failed to save shipping details.");
     } finally {
@@ -3057,14 +3902,25 @@ export default function App() {
     }
   };
 
-  const handleSelectShippingOption = async (optionId) => {
+  const handleSelectShippingOption = async (groupId) => {
     try {
       if (!cartId) return;
 
       setCheckoutError("");
+      const targetGroup = getGroupedShippingOptions(shippingOptions, cart).find(
+        (option) => option.id === groupId
+      );
 
-      const updatedCart = await addShippingMethod(cartId, optionId);
-      setCart(updatedCart);
+      if (!targetGroup?.optionIds?.length) return;
+
+      const desiredOptionIds = targetGroup.optionIds.filter(Boolean);
+
+      await replaceShippingMethods(cartId, desiredOptionIds);
+
+      const refreshedCart = await refreshCartUntilShippingMethods(desiredOptionIds);
+      setCart(refreshedCart || cart);
+      await loadShippingOptions(cartId);
+      setCheckoutError("");
     } catch (err) {
       setCheckoutError(err.message || "Failed to select shipping option.");
     }
@@ -3088,6 +3944,11 @@ export default function App() {
 
     navigate("/checkout/success");
   };
+
+  const groupedShippingOptions = useMemo(
+    () => getGroupedShippingOptions(shippingOptions, cart),
+    [shippingOptions, cart]
+  );
 
   const handlePreviewAccessSubmit = (event) => {
     event.preventDefault();
@@ -3155,10 +4016,18 @@ export default function App() {
         cart={cart}
         onToggleMiniCart={() => setMiniCartOpen((prev) => !prev)}
       />
-      <Hero currentImage={currentImage} onSlideDurationChange={setHeroSlideDurationMs} />
-      <Releases />
+      <Hero
+        currentImage={currentImage}
+        onSlideDurationChange={setHeroSlideDurationMs}
+        onOpenReleasePreview={setReleasePreviewVideo}
+      />
+      <Releases onOpenReleasePreview={setReleasePreviewVideo} />
       <Gigs />
-      <FeaturedContent onOpenVideo={() => setVideoOpen(true)} />
+      <FeaturedContent
+        onOpenVideo={() => setVideoOpen(true)}
+        onOpenAudioImage={setSelectedFeaturedAudioImage}
+        onOpenReleasePreview={setReleasePreviewVideo}
+      />
       <StudioSessions onOpenStudio={handleStudioAccess} />
       <Band />
       <Store
@@ -3211,7 +4080,7 @@ export default function App() {
           setCheckoutEmail={setCheckoutEmail}
           shippingForm={shippingForm}
           setShippingForm={setShippingForm}
-          shippingOptions={shippingOptions}
+          shippingOptions={groupedShippingOptions}
           shippingLoading={shippingLoading}
           shippingSaving={shippingSaving}
           onSaveShippingDetails={handleSaveShippingDetails}
@@ -3228,10 +4097,14 @@ export default function App() {
         }}
         onSuccess={handleStripeSuccess}
       />
-        <MerchImageModal
-          image={selectedImage}
-          onClose={() => setSelectedImage(null)}
-        />
+      <FeaturedAudioImageModal
+        item={selectedFeaturedAudioImage}
+        onClose={() => setSelectedFeaturedAudioImage(null)}
+      />
+      <ReleasePreviewModal
+        video={releasePreviewVideo}
+        onClose={() => setReleasePreviewVideo("")}
+      />
       
     </div>
   );

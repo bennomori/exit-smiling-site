@@ -1,13 +1,36 @@
 const baseUrl = import.meta.env.VITE_MEDUSA_URL || "";
 const publishableKey = import.meta.env.VITE_MEDUSA_PUBLISHABLE_KEY;
+const regionId = import.meta.env.VITE_MEDUSA_REGION_ID || "reg_01KPDGM7GBNF3N9NX06YTQDRR4";
+const salesChannelId =
+  import.meta.env.VITE_MEDUSA_SALES_CHANNEL_ID || "sc_01KPCFP6TAVDF75JY4P66GD4JM";
 
 const commonHeaders = {
   "x-publishable-api-key": publishableKey,
   "Content-Type": "application/json",
 };
 
+function normalizeMediaUrl(url) {
+  const value = String(url || "").trim();
+
+  if (!value) return value;
+
+  return value.replace(/^https?:\/\/localhost:9000\/static\//i, "/static/");
+}
+
+function normalizeCart(cart) {
+  if (!cart) return cart;
+
+  return {
+    ...cart,
+    items: (cart.items || []).map((item) => ({
+      ...item,
+      thumbnail: normalizeMediaUrl(item.thumbnail),
+    })),
+  };
+}
+
 const cartFields =
-  "*items,+items.metadata,+items.variant,+items.variant.options,+items.variant.options.option,+items.thumbnail,+items.product_title,+items.variant_title,+payment_collection,+payment_collection.payment_sessions";
+  "*items,+items.metadata,+items.variant,+items.variant.options,+items.variant.options.option,+items.variant.product,+items.variant.product.shipping_profile,+items.variant.product.shipping_profile_id,+items.thumbnail,+items.product_title,+items.variant_title,+shipping_methods,+shipping_methods.shipping_option,+shipping_address,+billing_address,+payment_collection,+payment_collection.payment_sessions";
 
 export async function createCart() {
   const res = await fetch(`${baseUrl}/store/carts`, {
@@ -15,8 +38,8 @@ export async function createCart() {
     headers: commonHeaders,
     body: JSON.stringify({
       currency_code: "aud",
-      region_id: "reg_01KPDGM7GBNF3N9NX06YTQDRR4",
-      sales_channel_id: "sc_01KPCFP6TAVDF75JY4P66GD4JM",
+      region_id: regionId,
+      sales_channel_id: salesChannelId,
     }),
   });
 
@@ -25,7 +48,7 @@ export async function createCart() {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 export async function getCart(cartId) {
@@ -43,7 +66,7 @@ export async function getCart(cartId) {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 export async function addLineItem(cartId, variantId, quantity = 1, metadata = {}) {
@@ -62,7 +85,7 @@ export async function addLineItem(cartId, variantId, quantity = 1, metadata = {}
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 export async function updateLineItem(cartId, lineItemId, quantity) {
@@ -77,7 +100,7 @@ export async function updateLineItem(cartId, lineItemId, quantity) {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 export async function removeLineItem(cartId, lineItemId) {
@@ -91,7 +114,7 @@ export async function removeLineItem(cartId, lineItemId) {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 // 1) Initialize Stripe payment session on the cart
@@ -171,7 +194,7 @@ export async function updateCartDetails(cartId, payload) {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
 
 export async function listCartShippingOptions(cartId) {
@@ -205,5 +228,40 @@ export async function addShippingMethod(cartId, optionId) {
   }
 
   const data = await res.json();
-  return data.cart;
+  return normalizeCart(data.cart);
 }
+
+export async function replaceShippingMethods(cartId, optionIds = []) {
+  const res = await fetch(`${baseUrl}/store/custom/cart-shipping-methods`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      cart_id: cartId,
+      option_ids: optionIds,
+    }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Failed to replace shipping methods: ${await res.text()}`);
+  }
+
+  return getCart(cartId);
+}
+
+export async function removeShippingMethod(cartId, shippingMethodId) {
+  const res = await fetch(
+    `${baseUrl}/store/carts/${cartId}/shipping-methods/${shippingMethodId}`,
+    {
+      method: "DELETE",
+      headers: commonHeaders,
+    }
+  );
+
+  if (!res.ok) {
+    throw new Error(`Failed to remove shipping method: ${await res.text()}`);
+  }
+
+  const data = await res.json();
+  return normalizeCart(data.cart);
+}
+
