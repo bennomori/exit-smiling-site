@@ -148,7 +148,7 @@ const titleColorMatchers = [
 
 function getActionSummary(action) {
   if (!action) return "idle";
-  return `${action.type} · ${action.status}`;
+  return `${action.type} - ${action.status}`;
 }
 
 function renderProductTitle(title) {
@@ -708,7 +708,7 @@ export default function PosApp() {
                     <div>
                       <p className="text-sm font-semibold uppercase text-white">{getReaderLabel(reader)}</p>
                       <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/45">
-                        {reader.device_type || "reader"} · {getReaderLocationLabel(reader)}
+                        {reader.device_type || "reader"} - {getReaderLocationLabel(reader)}
                       </p>
                     </div>
                     <div className="text-right">
@@ -716,7 +716,7 @@ export default function PosApp() {
                         {selectedReaderId === reader.id ? "Selected" : "Select"}
                       </p>
                       <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
-                        {reader.status || "unknown"} · {getActionSummary(reader.action)}
+                        {reader.status || "unknown"} - {getActionSummary(reader.action)}
                       </p>
                     </div>
                   </button>
@@ -941,7 +941,7 @@ export default function PosApp() {
                       </div>
                       {item.discountPercent > 0 ? (
                         <p className="mt-3 text-xs text-white/55">
-                          Subtotal {formatCurrency(item.subtotal)} · Discount {formatCurrency(item.discountAmount)}
+                          Subtotal {formatCurrency(item.subtotal)} - Discount {formatCurrency(item.discountAmount)}
                         </p>
                       ) : null}
                     </div>

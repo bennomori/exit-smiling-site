@@ -3,7 +3,8 @@ export async function getProducts() {
   const publishableKey = import.meta.env.VITE_MEDUSA_PUBLISHABLE_KEY;
 
   const params = new URLSearchParams({
-    fields: "*variants.calculated_price,+variants.prices,+metadata,+thumbnail,+images",
+    fields:
+      "*variants.calculated_price,+variants.prices,+variants.inventory_quantity,+variants.manage_inventory,+variants.allow_backorder,+variants.stocked_quantity,+variants.available_quantity,+metadata,+thumbnail,+images,+shipping_profile_id,+shipping_profile",
     country_code: "au",
   });
 

@@ -16,7 +16,10 @@ export default function CheckoutSuccess() {
                         Order Confirmed
                     </h1>
                     <p className="mt-4 text-white/70">
-                        Thanks for supporting Exit Smiling. Your payment was received and your order is being processed.
+                        Thanks for supporting Exit Smiling. Your payment was received and your order is being processed. All merch proceeds go towards our Japan Tour
+                    </p>
+                    <p className="mt-3 text-sm text-white/55">
+                        If you ordered a print-on-demand item you will receive your order after the custom print run. Thanks for your patience.
                     </p>
                     <a
                         href="/"

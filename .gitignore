@@ -9,3 +9,5 @@ dist
 .env.*
 **/.env
 **/.env.*
+cloudinary-export/files/
+temp_*.mp4
