@@ -192,6 +192,15 @@ function renderProductTitle(title) {
   return title;
 }
 
+const tapButtonClass =
+  "transition duration-150 active:scale-[0.97] active:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/70";
+
+const selectedPillClass =
+  "border-yellow-300 bg-yellow-300 text-black shadow-[0_0_0_1px_rgba(250,204,21,0.65),0_0_22px_rgba(250,204,21,0.28)]";
+
+const idlePillClass =
+  "border-white/12 bg-white/[0.04] text-white/70 hover:border-white/28 hover:text-white";
+
 export default function PosApp() {
   const [products, setProducts] = useState([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -215,6 +224,42 @@ export default function PosApp() {
   const [heroIndex, setHeroIndex] = useState(0);
   const [showChecklist, setShowChecklist] = useState(false);
   const [pressedPreview, setPressedPreview] = useState(null);
+
+  const playTapSound = () => {
+    if (typeof window === "undefined") return;
+
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    try {
+      const context = new AudioContextClass();
+      const oscillator = context.createOscillator();
+      const gainNode = context.createGain();
+
+      oscillator.type = "triangle";
+      oscillator.frequency.setValueAtTime(820, context.currentTime);
+      oscillator.frequency.exponentialRampToValueAtTime(560, context.currentTime + 0.045);
+
+      gainNode.gain.setValueAtTime(0.0001, context.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.045, context.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.0001, context.currentTime + 0.08);
+
+      oscillator.connect(gainNode);
+      gainNode.connect(context.destination);
+
+      oscillator.start(context.currentTime);
+      oscillator.stop(context.currentTime + 0.085);
+      oscillator.onended = () => {
+        context.close().catch(() => {});
+      };
+    } catch {
+    }
+  };
+
+  const withTapSound = (handler) => (...args) => {
+    playTapSound();
+    return handler(...args);
+  };
 
   useEffect(() => {
     async function loadCatalog() {
@@ -674,9 +719,9 @@ export default function PosApp() {
 
             <div className="mt-5 flex flex-wrap gap-3">
               <button
-                onClick={handlePrepareReader}
+                onClick={withTapSound(handlePrepareReader)}
                 disabled={loadingReaders}
-                className="rounded-full bg-yellow-300 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`rounded-full bg-yellow-300 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
               >
                 {loadingReaders
                   ? "Loading..."
@@ -685,9 +730,9 @@ export default function PosApp() {
                     : "Load live readers"}
               </button>
               <button
-                onClick={() => refreshReaders({ preferSimulated: simulateReader })}
+                onClick={withTapSound(() => refreshReaders({ preferSimulated: simulateReader }))}
                 disabled={loadingReaders}
-                className="rounded-full border border-white/15 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75 transition hover:border-white/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                className={`rounded-full border border-white/15 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75 hover:border-white/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 ${tapButtonClass}`}
               >
                 Refresh readers
               </button>
@@ -698,12 +743,12 @@ export default function PosApp() {
                 {readers.map((reader) => (
                   <button
                     key={reader.id}
-                    onClick={() => setSelectedReaderId(reader.id)}
+                    onClick={withTapSound(() => setSelectedReaderId(reader.id))}
                     className={`flex w-full items-center justify-between rounded-2xl border px-4 py-4 text-left transition ${
                       selectedReaderId === reader.id
-                        ? "border-yellow-300 bg-yellow-300/12"
+                        ? "border-yellow-300 bg-yellow-300/12 shadow-[0_0_0_1px_rgba(250,204,21,0.5),0_0_20px_rgba(250,204,21,0.18)]"
                         : "border-white/10 bg-black/35 hover:border-yellow-300/40 hover:bg-black/55"
-                    }`}
+                    } ${tapButtonClass}`}
                   >
                     <div>
                       <p className="text-sm font-semibold uppercase text-white">{getReaderLabel(reader)}</p>
@@ -790,7 +835,7 @@ export default function PosApp() {
                       <div className="flex gap-4">
                         <button
                           type="button"
-                          onClick={() =>
+                          onClick={withTapSound(() =>
                             setPressedPreview((current) =>
                               current?.src === (product.thumbnail || product.images?.[0]?.url || "")
                                 ? null
@@ -799,7 +844,7 @@ export default function PosApp() {
                                     title: product.title,
                                   }
                             )
-                          }
+                          )}
                           className="overflow-hidden rounded-2xl"
                         >
                           <img
@@ -841,21 +886,26 @@ export default function PosApp() {
                                   </p>
                                   <div className="flex flex-wrap gap-2">
                                     {values.map((value) => {
-                                      const selected =
+                        const selected =
                                         normalizeOptionValue(selectedOptions[optionName]) ===
                                         normalizeOptionValue(value);
 
                                       return (
                                         <button
                                           key={`${product.id}-${optionName}-${value}`}
-                                          onClick={() => handleOptionChange(product.id, optionName, value)}
+                                          onClick={withTapSound(() => handleOptionChange(product.id, optionName, value))}
                                           className={`rounded-full border px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] transition ${
                                             selected
-                                              ? "border-yellow-300 bg-yellow-300 text-black"
-                                              : "border-white/12 bg-white/[0.04] text-white/70 hover:border-white/28 hover:text-white"
-                                          }`}
+                                              ? selectedPillClass
+                                              : idlePillClass
+                                          } ${tapButtonClass}`}
                                         >
-                                          {value}
+                                          <span className="inline-flex items-center gap-2">
+                                            {selected ? (
+                                              <span className="inline-block h-2 w-2 rounded-full bg-black/80" />
+                                            ) : null}
+                                            {value}
+                                          </span>
                                         </button>
                                       );
                                     })}
@@ -867,8 +917,8 @@ export default function PosApp() {
                         </div>
                       </div>
                       <button
-                        onClick={() => handleAddProduct(product)}
-                        className="mt-4 w-full rounded-full bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black transition hover:opacity-90"
+                        onClick={withTapSound(() => handleAddProduct(product))}
+                        className={`mt-4 w-full rounded-full bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black hover:opacity-90 ${tapButtonClass}`}
                       >
                         Add to POS cart
                       </button>
@@ -912,12 +962,12 @@ export default function PosApp() {
                           return (
                             <button
                               key={`${item.key}-discount-${discountOption}`}
-                              onClick={() => updateCartDiscount(item.variantId, discountOption)}
+                              onClick={withTapSound(() => updateCartDiscount(item.variantId, discountOption))}
                               className={`rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition ${
                                 selected
-                                  ? "border-yellow-300 bg-yellow-300 text-black"
-                                  : "border-white/12 bg-white/[0.04] text-white/70 hover:border-white/28 hover:text-white"
-                              }`}
+                                  ? selectedPillClass
+                                  : idlePillClass
+                              } ${tapButtonClass}`}
                             >
                               {discountOption === 0 ? "No discount" : `${discountOption}% off`}
                             </button>
@@ -948,22 +998,22 @@ export default function PosApp() {
                     <div className="mt-4 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <button
-                          onClick={() => updateCartQuantity(item.variantId, item.quantity - 1)}
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 transition hover:border-white/30 hover:text-white"
+                          onClick={withTapSound(() => updateCartQuantity(item.variantId, item.quantity - 1))}
+                          className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 hover:border-white/30 hover:text-white ${tapButtonClass}`}
                         >
                           -
                         </button>
                         <span className="min-w-[2rem] text-center text-sm font-semibold text-white">{item.quantity}</span>
                         <button
-                          onClick={() => updateCartQuantity(item.variantId, item.quantity + 1)}
-                          className="flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 transition hover:border-white/30 hover:text-white"
+                          onClick={withTapSound(() => updateCartQuantity(item.variantId, item.quantity + 1))}
+                          className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 hover:border-white/30 hover:text-white ${tapButtonClass}`}
                         >
                           +
                         </button>
                       </div>
                       <button
-                        onClick={() => updateCartQuantity(item.variantId, 0)}
-                        className="text-xs uppercase tracking-[0.18em] text-red-300/90 transition hover:text-red-200"
+                        onClick={withTapSound(() => updateCartQuantity(item.variantId, 0))}
+                        className={`text-xs uppercase tracking-[0.18em] text-red-300/90 hover:text-red-200 ${tapButtonClass}`}
                       >
                         Remove
                       </button>
@@ -1006,9 +1056,9 @@ export default function PosApp() {
                 </div>
               </div>
               <button
-                onClick={handleTakePayment}
+                onClick={withTapSound(handleTakePayment)}
                 disabled={!cartLines.length || !selectedReaderId || paying}
-                className="mt-5 w-full rounded-full bg-yellow-300 px-5 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className={`mt-5 w-full rounded-full bg-yellow-300 px-5 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
               >
                 {paying ? "Waiting for reader..." : "Send payment to reader"}
               </button>
@@ -1019,7 +1069,7 @@ export default function PosApp() {
       {pressedPreview ? (
         <button
           type="button"
-          onClick={() => setPressedPreview(null)}
+          onClick={withTapSound(() => setPressedPreview(null))}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-6"
         >
           <div className="max-h-[88vh] max-w-[88vw] overflow-hidden rounded-[2rem] border border-white/10 bg-black shadow-[0_0_50px_rgba(0,0,0,0.55)]">
