@@ -4,8 +4,11 @@ import { getProducts } from "./getProducts";
 import {
   ensurePosLocation,
   ensureSimulatedReader,
+  finalizePosSale,
+  getPosSales,
   getTerminalSaleStatus,
   listTerminalReaders,
+  refundPosSale,
   startTerminalSale,
 } from "./posTerminal";
 
@@ -86,6 +89,108 @@ function getVariantPrice(variant) {
   return Number(amount);
 }
 
+function getVariantInventoryQuantity(variant) {
+  const value = [
+    variant?.inventory_quantity,
+    variant?.available_quantity,
+    variant?.stocked_quantity,
+  ].find((entry) => entry != null && !Number.isNaN(Number(entry)));
+
+  return value == null ? null : Number(value);
+}
+
+function getVariantStockMeta(variant) {
+  if (!variant) {
+    return {
+      label: "",
+      tone: "muted",
+      low: false,
+      out: false,
+      madeToOrder: false,
+    };
+  }
+
+  if (!variant.manage_inventory) {
+    return {
+      label: "Stock not tracked",
+      tone: "muted",
+      low: false,
+      out: false,
+      madeToOrder: false,
+    };
+  }
+
+  const quantity = getVariantInventoryQuantity(variant);
+
+  if (quantity == null) {
+    return variant.allow_backorder
+      ? {
+          label: "Made to order",
+          tone: "warning",
+          low: false,
+          out: false,
+          madeToOrder: true,
+        }
+      : {
+          label: "Stock unavailable",
+          tone: "danger",
+          low: false,
+          out: true,
+          madeToOrder: false,
+        };
+  }
+
+  if (quantity <= 0) {
+    return variant.allow_backorder
+      ? {
+          label: "Made to order",
+          tone: "warning",
+          low: false,
+          out: false,
+          madeToOrder: true,
+        }
+      : {
+          label: "Out of stock",
+          tone: "danger",
+          low: false,
+          out: true,
+          madeToOrder: false,
+        };
+  }
+
+  if (quantity === 1) {
+    return {
+      label: "Last one",
+      tone: "warning",
+      low: true,
+      out: false,
+      madeToOrder: false,
+    };
+  }
+
+  if (quantity <= 3) {
+    return {
+      label: `Low stock: ${quantity}`,
+      tone: "warning",
+      low: true,
+      out: false,
+      madeToOrder: false,
+    };
+  }
+
+  return {
+    label: `${quantity} in stock`,
+    tone: "ok",
+    low: false,
+    out: false,
+    madeToOrder: false,
+  };
+}
+
+function getVariantStockLabel(variant) {
+  return getVariantStockMeta(variant).label;
+}
+
 function buildDefaultOptions(product) {
   const defaults = {};
 
@@ -118,6 +223,8 @@ function deriveCartLines(posItems) {
       discountPercent,
       discountAmount,
       total: lineTotal,
+      stockLabel: getVariantStockLabel(entry.variant),
+      stockMeta: getVariantStockMeta(entry.variant),
     };
   });
 }
@@ -213,6 +320,8 @@ export default function PosApp() {
     "Prepare a reader, build the sale, then send the payment to the smart reader."
   );
   const [receiptEmail, setReceiptEmail] = useState("");
+  const [operatorName, setOperatorName] = useState("");
+  const [eventName, setEventName] = useState("");
   const [simulateReader, setSimulateReader] = useState(true);
   const [loadingReaders, setLoadingReaders] = useState(false);
   const [readers, setReaders] = useState([]);
@@ -221,6 +330,17 @@ export default function PosApp() {
   const [paying, setPaying] = useState(false);
   const [activeSale, setActiveSale] = useState(null);
   const [paymentResult, setPaymentResult] = useState(null);
+  const [refundOrderId, setRefundOrderId] = useState("");
+  const [refundPaymentIntentId, setRefundPaymentIntentId] = useState("");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundNote, setRefundNote] = useState("POS refund");
+  const [refundRestock, setRefundRestock] = useState(true);
+  const [refundLoading, setRefundLoading] = useState(false);
+  const [refundResult, setRefundResult] = useState(null);
+  const [salesHistory, setSalesHistory] = useState([]);
+  const [salesSummary, setSalesSummary] = useState(null);
+  const [salesLoading, setSalesLoading] = useState(false);
+  const [salesError, setSalesError] = useState("");
   const [heroIndex, setHeroIndex] = useState(0);
   const [showChecklist, setShowChecklist] = useState(false);
   const [pressedPreview, setPressedPreview] = useState(null);
@@ -261,16 +381,50 @@ export default function PosApp() {
     return handler(...args);
   };
 
+  const refreshCatalog = async () => {
+    try {
+      setCatalogError("");
+      const catalog = await getProducts();
+      setProducts(catalog);
+      setSelectedOptionsByProduct((prev) =>
+        Object.fromEntries(
+          catalog.map((product) => [
+            product.id,
+            {
+              ...buildDefaultOptions(product),
+              ...(prev[product.id] || {}),
+            },
+          ])
+        )
+      );
+      return catalog;
+    } catch (error) {
+      setCatalogError(error.message || "Failed to refresh POS catalog.");
+      return null;
+    }
+  };
+
+  const refreshSalesHistory = async () => {
+    try {
+      setSalesLoading(true);
+      setSalesError("");
+      const result = await getPosSales({ limit: 20 });
+      setSalesHistory(result.sales || []);
+      setSalesSummary(result.summary || null);
+      return result;
+    } catch (error) {
+      setSalesError(error.message || "Failed to load POS sales.");
+      return null;
+    } finally {
+      setSalesLoading(false);
+    }
+  };
+
   useEffect(() => {
     async function loadCatalog() {
       try {
         setLoadingProducts(true);
-        setCatalogError("");
-        const catalog = await getProducts();
-        setProducts(catalog);
-        setSelectedOptionsByProduct(
-          Object.fromEntries(catalog.map((product) => [product.id, buildDefaultOptions(product)]))
-        );
+        await Promise.all([refreshCatalog(), refreshSalesHistory()]);
       } catch (error) {
         setCatalogError(error.message || "Failed to load POS catalog.");
       } finally {
@@ -325,9 +479,41 @@ export default function PosApp() {
             id: status.payment_intent.id,
             status: paymentIntentStatus,
           });
-          setTerminalStatusMessage("Payment succeeded. Cart cleared for the next customer.");
-          setPosItems([]);
-          setReceiptEmail("");
+
+            try {
+              const finalizeResult = await finalizePosSale({
+                paymentIntentId: status.payment_intent.id,
+                items: activeSale?.items || [],
+              });
+              await refreshCatalog();
+              await refreshSalesHistory();
+              setRefundOrderId(finalizeResult?.order_id || "");
+              setRefundPaymentIntentId(status.payment_intent.id || "");
+              setRefundAmount("");
+              setRefundResult(null);
+              setTerminalStatusMessage(
+                finalizeResult?.order_id
+                  ? `Payment succeeded. Inventory synced and Medusa order ${finalizeResult.order_id} created.`
+                  : "Payment succeeded. Inventory synced for the next customer."
+              );
+              setPaymentResult({
+                amount: (status.payment_intent.amount || 0) / 100,
+                id: status.payment_intent.id,
+                status: paymentIntentStatus,
+                orderId: finalizeResult?.order_id || "",
+              });
+              setPosItems([]);
+              setReceiptEmail("");
+            } catch (error) {
+            setTerminalError(
+              error.message ||
+                "Payment succeeded, but the Medusa inventory sync did not complete."
+            );
+            setTerminalStatusMessage(
+              "Payment succeeded, but inventory sync needs attention before the next sale."
+            );
+          }
+
           return;
         }
 
@@ -495,9 +681,27 @@ export default function PosApp() {
       return;
     }
 
-    setTerminalError("");
+    const inventoryQuantity = getVariantInventoryQuantity(variant);
 
-    setPosItems((prev) => {
+    if (
+      variant.manage_inventory &&
+      !variant.allow_backorder &&
+      inventoryQuantity != null &&
+      inventoryQuantity <= 0
+    ) {
+      setTerminalError("That variant is out of stock on the Medusa backend.");
+      return;
+    }
+
+      setTerminalError("");
+      const stockMeta = getVariantStockMeta(variant);
+      if (stockMeta.madeToOrder) {
+        setTerminalStatusMessage("This variant is made to order. Let the customer know it will take longer to deliver.");
+      } else if (stockMeta.low) {
+        setTerminalStatusMessage(`Low stock warning: ${stockMeta.label}.`);
+      }
+
+      setPosItems((prev) => {
       const existing = prev.find((item) => item.variant.id === variant.id);
       if (existing) {
         return prev.map((item) =>
@@ -553,35 +757,40 @@ export default function PosApp() {
     setTerminalStatusMessage("Sending sale to smart reader...");
 
     try {
-      const result = await startTerminalSale({
-        reader_id: selectedReaderId,
-        amount: Math.round(cartTotal * 100),
-        currency: "aud",
-        description: `Exit Smiling merch stand sale (${cartCount} item${cartCount === 1 ? "" : "s"})`,
-        receipt_email: receiptEmail.trim().toLowerCase() || undefined,
-        metadata: {
-          source: "pos_ipad_server_driven",
-          cart_subtotal_display: formatCurrency(cartSubtotal),
-          cart_discount_display: formatCurrency(cartDiscountTotal),
-          cart_total_display: formatCurrency(cartTotal),
-        },
-        items: cartLines.map((item) => ({
-          product_id: item.productId,
-          variant_id: item.variantId,
-          title: item.title,
-          variant_title: item.variantTitle,
-          unit_price: item.price,
-          quantity: item.quantity,
-          discount_percent: item.discountPercent,
-          discount_amount: item.discountAmount,
-          line_total: item.total,
-        })),
+      const saleItems = cartLines.map((item) => ({
+        product_id: item.productId,
+        variant_id: item.variantId,
+        title: item.title,
+        variant_title: item.variantTitle,
+        unit_price: item.price,
+        quantity: item.quantity,
+        discount_percent: item.discountPercent,
+        discount_amount: item.discountAmount,
+        line_total: item.total,
+      }));
+
+        const result = await startTerminalSale({
+          reader_id: selectedReaderId,
+          amount: Math.round(cartTotal * 100),
+          currency: "aud",
+          description: `Exit Smiling merch stand sale (${cartCount} item${cartCount === 1 ? "" : "s"})`,
+          receipt_email: receiptEmail.trim().toLowerCase() || undefined,
+          metadata: {
+            source: "pos_ipad_server_driven",
+            operator_name: operatorName.trim(),
+            event_name: eventName.trim(),
+            cart_subtotal_display: formatCurrency(cartSubtotal),
+            cart_discount_display: formatCurrency(cartDiscountTotal),
+            cart_total_display: formatCurrency(cartTotal),
+          },
+          items: saleItems,
       });
 
       setActiveSale({
         paymentIntentId: result.payment_intent.id,
         readerId: result.reader.id,
         status: result,
+        items: saleItems,
       });
 
       setTerminalStatusMessage("Reader is waiting for card. Ask the customer to tap, insert, or swipe.");
@@ -589,6 +798,41 @@ export default function PosApp() {
       setPaying(false);
       setTerminalError(error.message || "Failed to start Terminal sale.");
       setTerminalStatusMessage("Sale did not start. Check the reader and try again.");
+    }
+  };
+
+  const handleRefundSale = async () => {
+    if (!refundOrderId.trim() && !refundPaymentIntentId.trim()) {
+      setTerminalError("Enter an order ID or payment intent ID before refunding.");
+      return;
+    }
+
+    setRefundLoading(true);
+    setTerminalError("");
+    setRefundResult(null);
+
+    try {
+      const result = await refundPosSale({
+        orderId: refundOrderId.trim(),
+        paymentIntentId: refundPaymentIntentId.trim(),
+        amount: refundAmount.trim() ? Number(refundAmount) : undefined,
+        note: refundNote.trim() || undefined,
+        restock: refundRestock,
+      });
+
+      await refreshCatalog();
+      await refreshSalesHistory();
+      setRefundResult(result);
+      setTerminalStatusMessage(
+        result?.restocked
+          ? `Refund succeeded and stock was restored for order ${result.order_id}.`
+          : `Refund succeeded for order ${result.order_id}.`
+      );
+    } catch (error) {
+      setTerminalError(error.message || "Refund failed.");
+      setTerminalStatusMessage("Refund did not complete. Review the sale IDs and try again.");
+    } finally {
+      setRefundLoading(false);
     }
   };
 
@@ -682,6 +926,50 @@ export default function PosApp() {
               </div>
             </div>
 
+            <div className="mt-5 grid gap-3 md:grid-cols-2">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Operator</label>
+                <input
+                  type="text"
+                  value={operatorName}
+                  onChange={(event) => setOperatorName(event.target.value)}
+                  placeholder="Staff name"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Venue / Event</label>
+                <input
+                  type="text"
+                  value={eventName}
+                  onChange={(event) => setEventName(event.target.value)}
+                  placeholder="Venue or show name"
+                  className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                />
+              </div>
+            </div>
+
+            {salesSummary ? (
+              <div className="mt-5 grid gap-3 md:grid-cols-4">
+                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Sales</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{salesSummary.today?.order_count || 0}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Gross</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{formatCurrency(salesSummary.today?.gross_total || 0)}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Refunded</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{formatCurrency(salesSummary.today?.refunded_total || 0)}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Units Today</p>
+                  <p className="mt-2 text-lg font-semibold text-white">{salesSummary.today?.units_sold || 0}</p>
+                </div>
+              </div>
+            ) : null}
+
             {showChecklist ? (
               <div className="mt-5 rounded-[1.5rem] border border-yellow-300/16 bg-yellow-300/[0.06] p-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
@@ -699,7 +987,7 @@ export default function PosApp() {
                 <ol className="mt-4 space-y-3 text-sm text-white/72">
                   <li>1. Register your WisePOS E or S700/S710 reader in Stripe and assign it to a Terminal location.</li>
                   <li>2. Use the iPad only as the POS screen; the backend now controls the reader.</li>
-                  <li>3. For testing, use `Prepare simulated reader` to create or reuse Stripe's simulated WisePOS E.</li>
+                  <li>3. Use `Prepare simulated reader` when working in simulator mode, or load your live readers when the hardware is available.</li>
                   <li>4. Once a reader is selected, add merch and send the sale to the reader.</li>
                 </ol>
                 <div className="mt-5 rounded-2xl border border-yellow-300/20 bg-black/25 p-4 text-sm text-yellow-100/80">
@@ -711,15 +999,164 @@ export default function PosApp() {
 
             <p className="mt-4 text-sm text-white/65">{terminalStatusMessage}</p>
             {terminalError ? <p className="mt-3 text-sm text-red-400">{terminalError}</p> : null}
-            {paymentResult ? (
-              <p className="mt-3 text-sm text-emerald-300">
-                Paid {formatCurrency(paymentResult.amount)} successfully. PaymentIntent {paymentResult.id}.
-              </p>
-            ) : null}
+              {paymentResult ? (
+                <p className="mt-3 text-sm text-emerald-300">
+                  Paid {formatCurrency(paymentResult.amount)} successfully. PaymentIntent {paymentResult.id}
+                  {paymentResult.orderId ? ` - Medusa order ${paymentResult.orderId}.` : "."}
+                </p>
+              ) : null}
 
-            <div className="mt-5 flex flex-wrap gap-3">
-              <button
-                onClick={withTapSound(handlePrepareReader)}
+              <div className="mt-5 rounded-[1.75rem] border border-white/10 bg-black/35 p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">Sale Refund</p>
+                    <p className="mt-2 text-sm text-white/65">
+                      Refund a completed POS sale and optionally restore inventory using the last sale IDs or manual input.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Medusa Order ID</label>
+                    <input
+                      type="text"
+                      value={refundOrderId}
+                      onChange={(event) => setRefundOrderId(event.target.value)}
+                      placeholder="order_..."
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">PaymentIntent ID</label>
+                    <input
+                      type="text"
+                      value={refundPaymentIntentId}
+                      onChange={(event) => setRefundPaymentIntentId(event.target.value)}
+                      placeholder="pi_..."
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Refund Amount (optional)</label>
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={refundAmount}
+                      onChange={(event) => setRefundAmount(event.target.value)}
+                      placeholder="Leave blank for full refund"
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Refund Note</label>
+                    <input
+                      type="text"
+                      value={refundNote}
+                      onChange={(event) => setRefundNote(event.target.value)}
+                      placeholder="POS refund"
+                      className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                    />
+                  </div>
+                </div>
+
+                <label className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-white/70">
+                  <input
+                    type="checkbox"
+                    checked={refundRestock}
+                    onChange={() => setRefundRestock((prev) => !prev)}
+                  />
+                  Restock inventory on full refund
+                </label>
+
+                {refundResult ? (
+                  <p className="mt-3 text-sm text-emerald-300">
+                    Refunded {formatCurrency(refundResult.refunded_amount)} for order {refundResult.order_id}.
+                    {refundResult.restocked ? " Inventory restored." : ""}
+                  </p>
+                ) : null}
+
+                <button
+                  type="button"
+                  onClick={withTapSound(handleRefundSale)}
+                  disabled={refundLoading}
+                  className={`mt-4 rounded-full border border-white/15 bg-white px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
+                >
+                  {refundLoading ? "Processing Refund..." : "Refund Selected Sale"}
+                </button>
+              </div>
+
+              <div className="mt-5 rounded-[1.75rem] border border-white/10 bg-black/35 p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="text-xs uppercase tracking-[0.24em] text-white/45">Recent Sales</p>
+                    <p className="mt-2 text-sm text-white/65">
+                      Load a recent POS order into the refund form or review gross and refund totals.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={withTapSound(refreshSalesHistory)}
+                    disabled={salesLoading}
+                    className={`rounded-full border border-white/15 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75 hover:border-white/35 hover:text-white disabled:opacity-40 ${tapButtonClass}`}
+                  >
+                    {salesLoading ? "Loading..." : "Refresh"}
+                  </button>
+                </div>
+
+                {salesError ? <p className="mt-3 text-sm text-red-400">{salesError}</p> : null}
+
+                <div className="mt-4 space-y-3">
+                  {salesHistory.length ? (
+                    salesHistory.slice(0, 8).map((sale) => (
+                      <button
+                        key={sale.id}
+                        type="button"
+                        onClick={withTapSound(() => {
+                          setRefundOrderId(sale.id || "");
+                          setRefundPaymentIntentId(sale.payment_intent_id || "");
+                          setRefundAmount("");
+                          setRefundResult(null);
+                        })}
+                        className={`w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-left transition hover:border-yellow-300/40 hover:bg-black/45 ${tapButtonClass}`}
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-semibold uppercase text-white">
+                              #{sale.display_id || sale.id?.slice(-6) || "sale"} {sale.label ? `- ${sale.label}` : ""}
+                            </p>
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                              {sale.operator_name || "No operator"} · {sale.event_name || "No venue"}
+                            </p>
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                              {sale.units_sold} units · {new Date(sale.created_at).toLocaleString("en-AU")}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-white">{formatCurrency(sale.total)}</p>
+                            {sale.refunded_amount > 0 ? (
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
+                                Refunded {formatCurrency(sale.refunded_amount)}
+                              </p>
+                            ) : (
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                {sale.payment_status || "paid"}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-sm text-white/55">No POS sales loaded yet.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <button
+                  onClick={withTapSound(handlePrepareReader)}
                 disabled={loadingReaders}
                 className={`rounded-full bg-yellow-300 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
               >
@@ -886,9 +1323,24 @@ export default function PosApp() {
                                   </p>
                                   <div className="flex flex-wrap gap-2">
                                     {values.map((value) => {
-                        const selected =
+                                      const selected =
                                         normalizeOptionValue(selectedOptions[optionName]) ===
                                         normalizeOptionValue(value);
+                                      const previewVariant =
+                                        optionName === "size"
+                                          ? findMatchingVariant(product, {
+                                              ...selectedOptions,
+                                              [optionName]: value,
+                                            })
+                                          : null;
+                                      const stockLabel =
+                                        optionName === "size"
+                                          ? getVariantStockLabel(previewVariant)
+                                          : "";
+                                      const stockMeta =
+                                        optionName === "size"
+                                          ? getVariantStockMeta(previewVariant)
+                                          : null;
 
                                       return (
                                         <button
@@ -898,13 +1350,36 @@ export default function PosApp() {
                                             selected
                                               ? selectedPillClass
                                               : idlePillClass
+                                          } ${
+                                            stockMeta?.out
+                                              ? "border-red-400/60"
+                                              : stockMeta?.low || stockMeta?.madeToOrder
+                                                ? "border-yellow-300/45"
+                                                : ""
                                           } ${tapButtonClass}`}
                                         >
-                                          <span className="inline-flex items-center gap-2">
-                                            {selected ? (
-                                              <span className="inline-block h-2 w-2 rounded-full bg-black/80" />
+                                          <span className="flex flex-col items-center gap-1">
+                                            <span className="inline-flex items-center gap-2">
+                                              {selected ? (
+                                                <span className="inline-block h-2 w-2 rounded-full bg-black/80" />
+                                              ) : null}
+                                              {value}
+                                            </span>
+                                            {stockLabel ? (
+                                              <span
+                                                className={`text-[9px] normal-case tracking-normal ${
+                                                  selected
+                                                    ? "text-black/70"
+                                                    : stockMeta?.out
+                                                      ? "text-red-300"
+                                                      : stockMeta?.low || stockMeta?.madeToOrder
+                                                        ? "text-yellow-300"
+                                                        : "text-white/45"
+                                                }`}
+                                              >
+                                                {stockLabel}
+                                              </span>
                                             ) : null}
-                                            {value}
                                           </span>
                                         </button>
                                       );
@@ -929,7 +1404,7 @@ export default function PosApp() {
             )}
           </section>
 
-          <aside className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5">
+          <aside className="rounded-[2rem] border border-white/10 bg-white/[0.03] p-5 lg:sticky lg:top-6 lg:self-start lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto">
             <p className="text-xs uppercase tracking-[0.28em] text-white/45">Current Sale</p>
             <h2 className="mt-2 text-2xl font-black uppercase">POS Cart</h2>
 
@@ -943,6 +1418,19 @@ export default function PosApp() {
                         <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/40">
                           {item.variantTitle || "Default variant"}
                         </p>
+                        {item.stockLabel ? (
+                          <p
+                            className={`mt-1 text-[10px] uppercase tracking-[0.16em] ${
+                              item.stockMeta?.out
+                                ? "text-red-300"
+                                : item.stockMeta?.low || item.stockMeta?.madeToOrder
+                                  ? "text-yellow-300"
+                                  : "text-white/40"
+                            }`}
+                          >
+                            {item.stockLabel}
+                          </p>
+                        ) : null}
                       </div>
                       <div className="text-right">
                         <p className="text-sm font-semibold text-white">{formatCurrency(item.total)}</p>

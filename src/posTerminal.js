@@ -86,3 +86,50 @@ export async function getTerminalSaleStatus({ paymentIntentId, readerId }) {
 
   return readJson(res, "Failed to fetch Terminal sale status.");
 }
+
+export async function finalizePosSale({ paymentIntentId, items }) {
+  const res = await fetch(`${baseUrl}/store/pos/finalize-sale`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      payment_intent_id: paymentIntentId,
+      items,
+    }),
+  })
+
+  return readJson(res, "Failed to finalize POS inventory sync.")
+}
+
+export async function refundPosSale({ orderId, paymentIntentId, amount, note, restock = true }) {
+  const res = await fetch(`${baseUrl}/store/pos/refund-sale`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      order_id: orderId || undefined,
+      payment_intent_id: paymentIntentId || undefined,
+      amount: amount ?? undefined,
+      note: note || undefined,
+      restock,
+    }),
+  })
+
+  return readJson(res, "Failed to refund POS sale.")
+}
+
+export async function getPosSales({ limit } = {}) {
+  const params = new URLSearchParams()
+
+  if (limit) {
+    params.set("limit", String(limit))
+  }
+
+  const res = await fetch(
+    `${baseUrl}/store/pos/sales${params.toString() ? `?${params.toString()}` : ""}`,
+    {
+      method: "GET",
+      headers: commonHeaders,
+    }
+  )
+
+  return readJson(res, "Failed to load POS sales.")
+}
