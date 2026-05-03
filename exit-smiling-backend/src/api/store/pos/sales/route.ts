@@ -160,6 +160,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         cash_received_amount: toNumber(order.metadata?.cash_received_amount),
         cash_change_given: toNumber(order.metadata?.cash_change_given),
         cash_note: order.metadata?.cash_note || "",
+        delivery_required: String(order.metadata?.delivery_required || "").trim() === "true",
+        delivery_address: order.metadata?.delivery_address || null,
         complimentary_sale_reference: order.metadata?.complimentary_sale_reference || "",
         complimentary_tags: Array.isArray(order.metadata?.complimentary_tags)
           ? order.metadata.complimentary_tags

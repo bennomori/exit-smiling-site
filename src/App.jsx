@@ -1,5 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { AddressElement, Elements } from "@stripe/react-stripe-js";
 import { getProducts } from "./getProducts";
 import { detectSizeGuideType, sizeGuides } from "./sizeGuides";
 import StripeCheckoutModal from "./StripeCheckoutModal";
@@ -36,6 +38,9 @@ const previewUsername = "ES";
 const previewPassword = "bakedbeans";
 const privateMemberDetailsEnabled =
   String(import.meta.env.VITE_ENABLE_PRIVATE_MEMBER_DETAILS || "").toLowerCase() === "true";
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 
 const defaultSlideDurationMs = 3000;
 const heroImages = [
@@ -2858,6 +2863,87 @@ function StudioModal({
   );
 }
 
+function splitFullName(name = "") {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length <= 1) {
+    return {
+      first_name: parts[0] || "",
+      last_name: "",
+    };
+  }
+
+  return {
+    first_name: parts.slice(0, -1).join(" "),
+    last_name: parts[parts.length - 1],
+  };
+}
+
+function StripeShippingAddressElement({ shippingForm, setShippingForm, setAddressComplete }) {
+  const addressOptions = useMemo(
+    () => ({
+      mode: "shipping",
+      allowedCountries: ["AU"],
+      blockPoBox: false,
+      ...(googleMapsApiKey
+        ? {
+            autocomplete: {
+              mode: "google_maps_api",
+              apiKey: googleMapsApiKey,
+            },
+          }
+        : {}),
+      fields: {
+        phone: "always",
+      },
+      validation: {
+        phone: {
+          required: "never",
+        },
+      },
+      defaultValues: {
+        name: [shippingForm.first_name, shippingForm.last_name].filter(Boolean).join(" "),
+        phone: shippingForm.phone || "",
+        address: {
+          line1: shippingForm.address_1 || "",
+          line2: shippingForm.address_2 || "",
+          city: shippingForm.city || "",
+          state: shippingForm.province || "",
+          postal_code: shippingForm.postal_code || "",
+          country: (shippingForm.country_code || "au").toUpperCase(),
+        },
+      },
+    }),
+    []
+  );
+
+  return (
+    <AddressElement
+      options={addressOptions}
+      onChange={(event) => {
+        setAddressComplete(Boolean(event.complete));
+
+        const value = event.value || {};
+        const address = value.address || {};
+        const nameParts = splitFullName(value.name);
+
+        setShippingForm((prev) => ({
+          ...prev,
+          first_name: nameParts.first_name || prev.first_name,
+          last_name: nameParts.last_name || prev.last_name,
+          address_1: address.line1 || "",
+          address_2: address.line2 || "",
+          city: address.city || "",
+          province: address.state || "",
+          postal_code: address.postal_code || "",
+          country_code: String(address.country || "AU").toLowerCase(),
+          phone: value.phone || prev.phone || "",
+        }));
+      }}
+    />
+  );
+}
+
 function MiniCart({
   open,
   cart,
@@ -2875,9 +2961,20 @@ function MiniCart({
   shippingLoading,
   shippingSaving,
   onSaveShippingDetails,
+  addressComplete,
+  setAddressComplete,
   onSelectShippingOption,
   checkoutError,
 }) {
+  const hasCompleteShippingForm =
+    Boolean(shippingForm.first_name?.trim()) &&
+    Boolean(shippingForm.last_name?.trim()) &&
+    Boolean(shippingForm.address_1?.trim()) &&
+    Boolean(shippingForm.city?.trim()) &&
+    Boolean(shippingForm.province?.trim()) &&
+    Boolean(shippingForm.postal_code?.trim()) &&
+    String(shippingForm.country_code || "").toLowerCase() === "au";
+
   return (
     <>
       <div
@@ -3037,82 +3134,38 @@ function MiniCart({
               className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
             />
 
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="text"
-                value={shippingForm.first_name}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, first_name: e.target.value }))
-                }
-                placeholder="First name"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-              <input
-                type="text"
-                value={shippingForm.last_name}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, last_name: e.target.value }))
-                }
-                placeholder="Last name"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-            </div>
-
-            <input
-              type="text"
-              value={shippingForm.address_1}
-              onChange={(e) =>
-                setShippingForm((prev) => ({ ...prev, address_1: e.target.value }))
-              }
-              placeholder="Street address"
-              className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="text"
-                value={shippingForm.city}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, city: e.target.value }))
-                }
-                placeholder="City"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-              <input
-                type="text"
-                value={shippingForm.province}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, province: e.target.value }))
-                }
-                placeholder="State"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <input
-                type="text"
-                value={shippingForm.postal_code}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, postal_code: e.target.value }))
-                }
-                placeholder="Postcode"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-              <input
-                type="text"
-                value={shippingForm.phone}
-                onChange={(e) =>
-                  setShippingForm((prev) => ({ ...prev, phone: e.target.value }))
-                }
-                placeholder="Phone"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
-              />
-            </div>
+            {addressStripePromise ? (
+              <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                <Elements
+                  stripe={addressStripePromise}
+                  options={{
+                    appearance: {
+                      theme: "night",
+                      variables: {
+                        colorBackground: "#111111",
+                        colorText: "#ffffff",
+                        colorDanger: "#f87171",
+                        borderRadius: "14px",
+                      },
+                    },
+                  }}
+                >
+                  <StripeShippingAddressElement
+                    shippingForm={shippingForm}
+                    setShippingForm={setShippingForm}
+                    setAddressComplete={setAddressComplete}
+                  />
+                </Elements>
+              </div>
+            ) : (
+              <p className="rounded-2xl border border-red-300/20 bg-red-300/10 p-3 text-sm text-red-200">
+                Stripe address entry is unavailable because the publishable key is missing.
+              </p>
+            )}
 
             <button
               onClick={onSaveShippingDetails}
-              disabled={shippingSaving}
+              disabled={shippingSaving || (!addressComplete && !hasCompleteShippingForm)}
               className="w-full rounded-full border border-white/20 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
             >
               {shippingSaving ? "Saving..." : "Confirm Shipping Details"}
@@ -3218,12 +3271,14 @@ export default function App() {
     first_name: "",
     last_name: "",
     address_1: "",
+    address_2: "",
     city: "",
     province: "",
     postal_code: "",
     country_code: "au",
     phone: "",
   });
+  const [shippingAddressComplete, setShippingAddressComplete] = useState(false);
   const [shippingOptions, setShippingOptions] = useState([]);
   const [shippingLoading, setShippingLoading] = useState(false);
   const [shippingSaving, setShippingSaving] = useState(false);
@@ -3942,13 +3997,32 @@ export default function App() {
       setShippingSaving(true);
       setCheckoutError("");
 
+      const hasCompleteShippingForm =
+        Boolean(checkoutEmail.trim()) &&
+        Boolean(shippingForm.first_name.trim()) &&
+        Boolean(shippingForm.last_name.trim()) &&
+        Boolean(shippingForm.address_1.trim()) &&
+        Boolean(shippingForm.city.trim()) &&
+        Boolean(shippingForm.province.trim()) &&
+        /^\d{4}$/.test(String(shippingForm.postal_code || "").trim()) &&
+        String(shippingForm.country_code || "").toLowerCase() === "au";
+
+      if (!hasCompleteShippingForm) {
+        setCheckoutError("Please complete the Stripe shipping address before confirming.");
+        return;
+      }
+
       await updateCartDetails(cartId, {
-        email: checkoutEmail,
+        email: checkoutEmail.trim().toLowerCase(),
         shipping_address: {
           ...shippingForm,
+          postal_code: String(shippingForm.postal_code || "").trim(),
+          country_code: "au",
         },
         billing_address: {
           ...shippingForm,
+          postal_code: String(shippingForm.postal_code || "").trim(),
+          country_code: "au",
         },
       });
 
@@ -4145,6 +4219,8 @@ export default function App() {
           shippingLoading={shippingLoading}
           shippingSaving={shippingSaving}
           onSaveShippingDetails={handleSaveShippingDetails}
+          addressComplete={shippingAddressComplete}
+          setAddressComplete={setShippingAddressComplete}
           onSelectShippingOption={handleSelectShippingOption}
           checkoutError={checkoutError}
         />

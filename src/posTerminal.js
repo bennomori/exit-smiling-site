@@ -107,6 +107,7 @@ export async function createCashPosSale({
   eventName,
   cashReceived,
   note,
+  delivery,
 }) {
   const res = await fetch(`${baseUrl}/store/pos/cash-sale`, {
     method: "POST",
@@ -118,6 +119,7 @@ export async function createCashPosSale({
       event_name: eventName || undefined,
       cash_received: cashReceived,
       note: note || undefined,
+      delivery,
     }),
   })
 
@@ -130,6 +132,7 @@ export async function createComplimentaryPosSale({
   operatorName,
   eventName,
   note,
+  delivery,
 }) {
   const res = await fetch(`${baseUrl}/store/pos/complimentary-sale`, {
     method: "POST",
@@ -140,6 +143,7 @@ export async function createComplimentaryPosSale({
       operator_name: operatorName || undefined,
       event_name: eventName || undefined,
       note: note || undefined,
+      delivery,
     }),
   })
 

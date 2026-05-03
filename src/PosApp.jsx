@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { loadStripe } from "@stripe/stripe-js";
+import { AddressElement, Elements } from "@stripe/react-stripe-js";
 import { getProducts } from "./getProducts";
 import {
   createComplimentaryPosSale,
@@ -16,6 +18,9 @@ import {
 import { detectSizeGuideType, sizeGuides } from "./sizeGuides";
 
 const posLocationId = String(import.meta.env.VITE_STRIPE_TERMINAL_LOCATION_ID || "").trim();
+const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
+const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 const brandLogo =
   "https://res.cloudinary.com/dkffwzpba/image/upload/v1776305886/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png";
 const heroImages = [
@@ -198,6 +203,87 @@ function getComplimentaryTagLabel(value) {
   return value === "event_organiser_freebie" ? "Event organiser freebie" : "Giveaway";
 }
 
+function splitFullName(name = "") {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+
+  if (parts.length <= 1) {
+    return {
+      first_name: parts[0] || "",
+      last_name: "",
+    };
+  }
+
+  return {
+    first_name: parts.slice(0, -1).join(" "),
+    last_name: parts[parts.length - 1],
+  };
+}
+
+function StripePosDeliveryAddressElement({ deliveryAddress, setDeliveryAddress, setDeliveryAddressComplete }) {
+  const addressOptions = useMemo(
+    () => ({
+      mode: "shipping",
+      allowedCountries: ["AU"],
+      blockPoBox: false,
+      ...(googleMapsApiKey
+        ? {
+            autocomplete: {
+              mode: "google_maps_api",
+              apiKey: googleMapsApiKey,
+            },
+          }
+        : {}),
+      fields: {
+        phone: "always",
+      },
+      validation: {
+        phone: {
+          required: "never",
+        },
+      },
+      defaultValues: {
+        name: [deliveryAddress.first_name, deliveryAddress.last_name].filter(Boolean).join(" "),
+        phone: deliveryAddress.phone || "",
+        address: {
+          line1: deliveryAddress.address_1 || "",
+          line2: deliveryAddress.address_2 || "",
+          city: deliveryAddress.city || "",
+          state: deliveryAddress.province || "",
+          postal_code: deliveryAddress.postal_code || "",
+          country: (deliveryAddress.country_code || "au").toUpperCase(),
+        },
+      },
+    }),
+    []
+  );
+
+  return (
+    <AddressElement
+      options={addressOptions}
+      onChange={(event) => {
+        setDeliveryAddressComplete(Boolean(event.complete));
+
+        const value = event.value || {};
+        const address = value.address || {};
+        const nameParts = splitFullName(value.name);
+
+        setDeliveryAddress((prev) => ({
+          ...prev,
+          first_name: nameParts.first_name || prev.first_name,
+          last_name: nameParts.last_name || prev.last_name,
+          address_1: address.line1 || "",
+          address_2: address.line2 || "",
+          city: address.city || "",
+          province: address.state || "",
+          postal_code: address.postal_code || "",
+          country_code: String(address.country || "AU").toLowerCase(),
+          phone: value.phone || prev.phone || "",
+        }));
+      }}
+    />
+  );
+}
+
 function buildDefaultOptions(product) {
   const defaults = {};
 
@@ -372,6 +458,19 @@ export default function PosApp() {
     "Prepare a reader, build the sale, then send the payment to the smart reader."
   );
   const [receiptEmail, setReceiptEmail] = useState("");
+  const [deliveryRequired, setDeliveryRequired] = useState(false);
+  const [deliveryAddressComplete, setDeliveryAddressComplete] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    first_name: "",
+    last_name: "",
+    address_1: "",
+    address_2: "",
+    city: "",
+    province: "",
+    postal_code: "",
+    country_code: "au",
+    phone: "",
+  });
   const [cashReceived, setCashReceived] = useState("");
   const [cashNote, setCashNote] = useState("Cash sale");
   const [complimentaryNote, setComplimentaryNote] = useState("Complimentary sale");
@@ -562,6 +661,7 @@ export default function PosApp() {
               });
               setPosItems([]);
               setReceiptEmail("");
+              clearDeliveryCapture();
             } catch (error) {
             setTerminalError(
               error.message ||
@@ -669,6 +769,56 @@ export default function PosApp() {
   const cashDelta = cashReceivedAmount - cartTotal;
   const cashChangeGiven = cashDelta > 0 ? cashDelta : 0;
   const cashStillOwed = cashDelta < 0 ? Math.abs(cashDelta) : 0;
+  const hasCompleteDeliveryAddress =
+    Boolean(deliveryAddress.first_name?.trim()) &&
+    Boolean(deliveryAddress.last_name?.trim()) &&
+    Boolean(deliveryAddress.address_1?.trim()) &&
+    Boolean(deliveryAddress.city?.trim()) &&
+    Boolean(deliveryAddress.province?.trim()) &&
+    /^\d{4}$/.test(String(deliveryAddress.postal_code || "").trim()) &&
+    String(deliveryAddress.country_code || "").toLowerCase() === "au";
+
+  const getDeliveryPayload = () =>
+    deliveryRequired
+      ? {
+          required: true,
+          address: {
+            ...deliveryAddress,
+            postal_code: String(deliveryAddress.postal_code || "").trim(),
+            country_code: "au",
+          },
+        }
+      : {
+          required: false,
+          address: null,
+        };
+
+  const assertDeliveryReady = () => {
+    if (!deliveryRequired) return true;
+
+    if (!hasCompleteDeliveryAddress) {
+      setTerminalError("Complete the delivery address before recording this POS sale.");
+      return false;
+    }
+
+    return true;
+  };
+
+  const clearDeliveryCapture = () => {
+    setDeliveryRequired(false);
+    setDeliveryAddressComplete(false);
+    setDeliveryAddress({
+      first_name: "",
+      last_name: "",
+      address_1: "",
+      address_2: "",
+      city: "",
+      province: "",
+      postal_code: "",
+      country_code: "au",
+      phone: "",
+    });
+  };
 
   const refreshReaders = async ({ preferSimulated = simulateReader } = {}) => {
     try {
@@ -853,6 +1003,8 @@ export default function PosApp() {
       return;
     }
 
+    if (!assertDeliveryReady()) return;
+
     setPaying(true);
     setTerminalError("");
     setPaymentResult(null);
@@ -871,6 +1023,7 @@ export default function PosApp() {
         line_total: item.total,
         complimentary_tag: item.complimentaryTag,
       }));
+      const deliveryPayload = getDeliveryPayload();
 
         const result = await startTerminalSale({
           reader_id: selectedReaderId,
@@ -885,6 +1038,17 @@ export default function PosApp() {
             cart_subtotal_display: formatCurrency(cartSubtotal),
             cart_discount_display: formatCurrency(cartDiscountTotal),
             cart_total_display: formatCurrency(cartTotal),
+            delivery_required: deliveryPayload.required ? "true" : "false",
+            delivery_name: deliveryPayload.required
+              ? `${deliveryPayload.address.first_name} ${deliveryPayload.address.last_name}`.trim()
+              : "",
+            delivery_address_1: deliveryPayload.address?.address_1 || "",
+            delivery_address_2: deliveryPayload.address?.address_2 || "",
+            delivery_city: deliveryPayload.address?.city || "",
+            delivery_province: deliveryPayload.address?.province || "",
+            delivery_postal_code: deliveryPayload.address?.postal_code || "",
+            delivery_country_code: deliveryPayload.address?.country_code || "",
+            delivery_phone: deliveryPayload.address?.phone || "",
           },
           items: saleItems,
       });
@@ -910,6 +1074,8 @@ export default function PosApp() {
       return;
     }
 
+    if (!assertDeliveryReady()) return;
+
     if (cashReceivedAmount < cartTotal) {
       setTerminalError(`Cash received is short by ${formatCurrency(cashStillOwed)}.`);
       return;
@@ -933,6 +1099,7 @@ export default function PosApp() {
         line_total: item.total,
         complimentary_tag: item.complimentaryTag,
       }));
+      const deliveryPayload = getDeliveryPayload();
 
       const result = await createCashPosSale({
         items: saleItems,
@@ -941,6 +1108,7 @@ export default function PosApp() {
         eventName: eventName.trim(),
         cashReceived: cashReceivedAmount,
         note: cashNote.trim() || undefined,
+        delivery: deliveryPayload,
       });
 
       await refreshCatalog();
@@ -963,6 +1131,7 @@ export default function PosApp() {
       setPosItems([]);
       setReceiptEmail("");
       setCashReceived("");
+      clearDeliveryCapture();
     } catch (error) {
       setTerminalError(error.message || "Failed to record cash sale.");
       setTerminalStatusMessage("Cash sale did not complete. Review the totals and try again.");
@@ -987,6 +1156,8 @@ export default function PosApp() {
       return;
     }
 
+    if (!assertDeliveryReady()) return;
+
     setComplimentarySaleLoading(true);
     setTerminalError("");
     setPaymentResult(null);
@@ -1005,6 +1176,7 @@ export default function PosApp() {
         line_total: item.total,
         complimentary_tag: item.complimentaryTag,
       }));
+      const deliveryPayload = getDeliveryPayload();
 
       const result = await createComplimentaryPosSale({
         items: saleItems,
@@ -1012,6 +1184,7 @@ export default function PosApp() {
         operatorName: operatorName.trim(),
         eventName: eventName.trim(),
         note: complimentaryNote.trim() || undefined,
+        delivery: deliveryPayload,
       });
 
       await refreshCatalog();
@@ -1033,6 +1206,7 @@ export default function PosApp() {
       });
       setPosItems([]);
       setReceiptEmail("");
+      clearDeliveryCapture();
     } catch (error) {
       setTerminalError(error.message || "Failed to record complimentary sale.");
       setTerminalStatusMessage("Complimentary sale did not complete. Review the flags and try again.");
@@ -1581,6 +1755,32 @@ export default function PosApp() {
                       </div>
                     ) : null}
 
+                    {selectedRefundSale.delivery_required ? (
+                      <div className="mt-4 rounded-2xl border border-sky-300/20 bg-sky-300/[0.05] p-4">
+                        <p className="text-[10px] uppercase tracking-[0.24em] text-sky-200">Delivery Required</p>
+                        <p className="mt-2 text-sm font-semibold text-white">
+                          {[
+                            selectedRefundSale.delivery_address?.first_name,
+                            selectedRefundSale.delivery_address?.last_name,
+                          ].filter(Boolean).join(" ") || "Customer"}
+                        </p>
+                        <p className="mt-1 text-sm text-white/70">
+                          {[
+                            selectedRefundSale.delivery_address?.address_1,
+                            selectedRefundSale.delivery_address?.address_2,
+                            selectedRefundSale.delivery_address?.city,
+                            selectedRefundSale.delivery_address?.province,
+                            selectedRefundSale.delivery_address?.postal_code,
+                          ].filter(Boolean).join(", ")}
+                        </p>
+                        {selectedRefundSale.delivery_address?.phone ? (
+                          <p className="mt-1 text-sm text-white/55">
+                            {selectedRefundSale.delivery_address.phone}
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+
                     <div className="mt-4">
                       <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Selected Sale Items</p>
                       <p className="mt-2 text-sm text-white/65">
@@ -1635,7 +1835,7 @@ export default function PosApp() {
                                   {item.variant_title || "Default variant"}
                                 </p>
                                 <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
-                                  Sold {item.quantity} â€¢ Refunded {refundedQuantity} â€¢ Remaining {refundableQuantity}
+                                  Sold {item.quantity} • Refunded {refundedQuantity} • Remaining {refundableQuantity}
                                 </p>
                                 {item.complimentary_tag ? (
                                   <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
@@ -1838,6 +2038,11 @@ export default function PosApp() {
                             <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
                               {sale.operator_name || "No operator"} | {sale.event_name || "No venue"}
                             </p>
+                            {sale.delivery_required ? (
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-sky-300">
+                                Delivery required
+                              </p>
+                            ) : null}
                             <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
                               {sale.units_sold} units | {new Date(sale.created_at).toLocaleString("en-AU")}
                             </p>
@@ -2284,6 +2489,73 @@ export default function PosApp() {
               />
             </div>
 
+            <div className="mt-5 rounded-2xl border border-white/10 bg-black/40 p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/35">Delivery</p>
+                  <p className="mt-2 text-sm text-white/65">
+                    Capture a shipping address for made-to-order or post-event delivery.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={withTapSound(() => {
+                    setDeliveryRequired((prev) => !prev);
+                    setTerminalError("");
+                  })}
+                  className={`rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                    deliveryRequired ? selectedPillClass : idlePillClass
+                  } ${tapButtonClass}`}
+                >
+                  {deliveryRequired ? "Delivery on" : "Delivery off"}
+                </button>
+              </div>
+
+              {deliveryRequired ? (
+                <div className="mt-4">
+                  {addressStripePromise ? (
+                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3">
+                      <Elements
+                        stripe={addressStripePromise}
+                        options={{
+                          appearance: {
+                            theme: "night",
+                            variables: {
+                              colorBackground: "#111111",
+                              colorText: "#ffffff",
+                              colorDanger: "#f87171",
+                              borderRadius: "14px",
+                            },
+                          },
+                        }}
+                      >
+                        <StripePosDeliveryAddressElement
+                          deliveryAddress={deliveryAddress}
+                          setDeliveryAddress={setDeliveryAddress}
+                          setDeliveryAddressComplete={setDeliveryAddressComplete}
+                        />
+                      </Elements>
+                    </div>
+                  ) : (
+                    <p className="rounded-2xl border border-red-300/20 bg-red-300/10 p-3 text-sm text-red-200">
+                      Stripe address entry is unavailable because the publishable key is missing.
+                    </p>
+                  )}
+                  <p
+                    className={`mt-3 text-[10px] uppercase tracking-[0.18em] ${
+                      deliveryAddressComplete || hasCompleteDeliveryAddress
+                        ? "text-emerald-300"
+                        : "text-yellow-300"
+                    }`}
+                  >
+                    {deliveryAddressComplete || hasCompleteDeliveryAddress
+                      ? "Delivery address ready"
+                      : "Complete address before sale"}
+                  </p>
+                </div>
+              ) : null}
+            </div>
+
             <div className="mt-5 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.05] p-4">
               <div className="flex items-center justify-between gap-3">
                 <div>
@@ -2436,3 +2708,4 @@ export default function PosApp() {
     </div>
   );
 }
+

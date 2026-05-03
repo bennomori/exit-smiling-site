@@ -18,9 +18,49 @@ type CashSaleItem = {
   complimentary_tag?: string
 }
 
+type PosDeliveryPayload = {
+  required?: boolean
+  address?: {
+    first_name?: string
+    last_name?: string
+    address_1?: string
+    address_2?: string
+    city?: string
+    province?: string
+    postal_code?: string
+    country_code?: string
+    phone?: string
+  } | null
+}
+
 function toPositiveInt(value: unknown) {
   const numeric = Number(value)
   return Number.isFinite(numeric) && numeric > 0 ? Math.floor(numeric) : 0
+}
+
+function normalizeDelivery(value: any): PosDeliveryPayload {
+  const required = Boolean(value?.required)
+
+  if (!required) {
+    return { required: false, address: null }
+  }
+
+  const address = value?.address || {}
+
+  return {
+    required: true,
+    address: {
+      first_name: String(address?.first_name || "").trim(),
+      last_name: String(address?.last_name || "").trim(),
+      address_1: String(address?.address_1 || "").trim(),
+      address_2: String(address?.address_2 || "").trim(),
+      city: String(address?.city || "").trim(),
+      province: String(address?.province || "").trim(),
+      postal_code: String(address?.postal_code || "").trim(),
+      country_code: String(address?.country_code || "au").trim().toLowerCase(),
+      phone: String(address?.phone || "").trim(),
+    },
+  }
 }
 
 function toPositiveNumber(value: unknown) {
@@ -37,6 +77,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       event_name?: string
       cash_received?: number
       note?: string
+      delivery?: PosDeliveryPayload
     }
 
     const rawItems = Array.isArray(body.items) ? body.items : []
@@ -45,6 +86,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const eventName = String(body.event_name || "").trim()
     const note = String(body.note || "").trim()
     const cashReceived = toPositiveNumber(body.cash_received)
+    const delivery = normalizeDelivery(body.delivery)
 
     const items = rawItems
       .map((item) => ({
@@ -287,6 +329,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         email: receiptEmail || undefined,
         status: "pending",
         items: orderItems,
+        shipping_address: delivery.required && delivery.address ? delivery.address : undefined,
+        billing_address: delivery.required && delivery.address ? delivery.address : undefined,
         metadata: {
           pos_mode: "ipad_terminal",
           pos_payment_method: "cash",
@@ -296,6 +340,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           cash_note: note,
           operator_name: operatorName,
           event_name: eventName,
+          delivery_required: delivery.required ? "true" : "false",
+          delivery_address: delivery.address || null,
           cart_subtotal_display: `$${saleSubtotal.toFixed(2)}`,
           cart_discount_display: `$${saleDiscountTotal.toFixed(2)}`,
           cart_total_display: `$${saleTotal.toFixed(2)}`,

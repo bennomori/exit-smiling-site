@@ -19,9 +19,51 @@ type FinalizeSaleItem = {
   complimentary_tag?: string
 }
 
+type PosDeliveryPayload = {
+  required?: boolean
+  address?: {
+    first_name?: string
+    last_name?: string
+    address_1?: string
+    address_2?: string
+    city?: string
+    province?: string
+    postal_code?: string
+    country_code?: string
+    phone?: string
+  } | null
+}
+
 function toPositiveInt(value: unknown) {
   const numeric = Number(value)
   return Number.isFinite(numeric) && numeric > 0 ? Math.floor(numeric) : 0
+}
+
+function getDeliveryFromPaymentIntentMetadata(metadata: any): PosDeliveryPayload {
+  const required = String(metadata?.delivery_required || "").trim() === "true"
+
+  if (!required) {
+    return { required: false, address: null }
+  }
+
+  const nameParts = String(metadata?.delivery_name || "").trim().split(/\s+/).filter(Boolean)
+  const firstName = nameParts.length > 1 ? nameParts.slice(0, -1).join(" ") : nameParts[0] || ""
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : ""
+
+  return {
+    required: true,
+    address: {
+      first_name: firstName,
+      last_name: lastName,
+      address_1: String(metadata?.delivery_address_1 || "").trim(),
+      address_2: String(metadata?.delivery_address_2 || "").trim(),
+      city: String(metadata?.delivery_city || "").trim(),
+      province: String(metadata?.delivery_province || "").trim(),
+      postal_code: String(metadata?.delivery_postal_code || "").trim(),
+      country_code: String(metadata?.delivery_country_code || "au").trim().toLowerCase(),
+      phone: String(metadata?.delivery_phone || "").trim(),
+    },
+  }
 }
 
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
@@ -51,6 +93,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     const stripe = getStripeClient()
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    const delivery = getDeliveryFromPaymentIntentMetadata(paymentIntent.metadata || {})
 
     if (
       paymentIntent.status !== "succeeded" &&
@@ -285,6 +328,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           email: paymentIntent.receipt_email || undefined,
           status: "pending",
           items: orderItems,
+          shipping_address: delivery.required && delivery.address ? delivery.address : undefined,
+          billing_address: delivery.required && delivery.address ? delivery.address : undefined,
           metadata: {
             pos_mode: "ipad_terminal",
             stripe_payment_intent_id: paymentIntentId,
@@ -292,6 +337,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             pos_reader_id: paymentIntent.metadata?.reader_id || "",
             operator_name: paymentIntent.metadata?.operator_name || "",
             event_name: paymentIntent.metadata?.event_name || "",
+            delivery_required: delivery.required ? "true" : "false",
+            delivery_address: delivery.address || null,
             cart_subtotal_display: paymentIntent.metadata?.cart_subtotal_display || "",
             cart_discount_display: paymentIntent.metadata?.cart_discount_display || "",
             cart_total_display: paymentIntent.metadata?.cart_total_display || "",
