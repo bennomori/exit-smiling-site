@@ -6,6 +6,7 @@ import {
   markPaymentCollectionAsPaid,
 } from "@medusajs/core-flows"
 import { getStripeClient } from "../../../../lib/stripe"
+import { sendOrderAlert } from "../../../../lib/order-alerts"
 
 type FinalizeSaleItem = {
   variant_id?: string
@@ -384,6 +385,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         medusa_order_paid_synced: paymentCollectionId ? "true" : paymentIntent.metadata?.medusa_order_paid_synced || "",
       },
     })
+
+    if (createdOrderId) {
+      try {
+        await sendOrderAlert(req.scope, createdOrderId, { source: "POS card" })
+      } catch (alertError) {
+        console.error("Failed to send POS card order alert", alertError)
+      }
+    }
 
     return res.status(200).json({
       ok: true,

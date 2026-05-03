@@ -5,6 +5,7 @@ import {
   createOrderWorkflow,
   markPaymentCollectionAsPaid,
 } from "@medusajs/core-flows"
+import { sendOrderAlert } from "../../../../lib/order-alerts"
 
 type ComplimentarySaleItem = {
   variant_id?: string
@@ -355,6 +356,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             payment_collection_id: paymentCollectionId,
           },
         })
+      }
+    }
+
+    if (createdOrderId) {
+      try {
+        await sendOrderAlert(req.scope, createdOrderId, { source: "POS complimentary" })
+      } catch (alertError) {
+        console.error("Failed to send POS complimentary order alert", alertError)
       }
     }
 
