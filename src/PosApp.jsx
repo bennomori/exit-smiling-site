@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { getProducts } from "./getProducts";
 import {
+  createComplimentaryPosSale,
+  createCashPosSale,
   ensurePosLocation,
   ensureSimulatedReader,
   finalizePosSale,
@@ -11,6 +13,7 @@ import {
   refundPosSale,
   startTerminalSale,
 } from "./posTerminal";
+import { detectSizeGuideType, sizeGuides } from "./sizeGuides";
 
 const posLocationId = String(import.meta.env.VITE_STRIPE_TERMINAL_LOCATION_ID || "").trim();
 const brandLogo =
@@ -191,6 +194,10 @@ function getVariantStockLabel(variant) {
   return getVariantStockMeta(variant).label;
 }
 
+function getComplimentaryTagLabel(value) {
+  return value === "event_organiser_freebie" ? "Event organiser freebie" : "Giveaway";
+}
+
 function buildDefaultOptions(product) {
   const defaults = {};
 
@@ -223,6 +230,7 @@ function deriveCartLines(posItems) {
       discountPercent,
       discountAmount,
       total: lineTotal,
+      complimentaryTag: entry.complimentaryTag || "",
       stockLabel: getVariantStockLabel(entry.variant),
       stockMeta: getVariantStockMeta(entry.variant),
     };
@@ -299,6 +307,50 @@ function renderProductTitle(title) {
   return title;
 }
 
+function renderGuideTable(guide) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+      <p className="text-sm font-semibold uppercase text-white">{guide.title}</p>
+      <p className="mt-2 text-xs text-white/55">{guide.description}</p>
+      <div className="mt-3 overflow-x-auto">
+        <table className="w-full border-collapse text-left text-xs text-white/75">
+          <thead>
+            <tr className="border-b border-white/10">
+              {guide.columns.map((column) => (
+                <th key={column} className="px-2 py-2 font-semibold uppercase tracking-[0.14em] text-white/55">
+                  {column}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {guide.rows.map((row, rowIndex) => (
+              <tr key={`${guide.title}-${rowIndex}`} className="border-b border-white/5 last:border-b-0">
+                {row.map((cell, cellIndex) => (
+                  <td key={`${guide.title}-${rowIndex}-${cellIndex}`} className="px-2 py-2">
+                    {cell || "-"}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <p className="mt-3 text-[11px] text-white/55">
+        <span className="font-semibold text-white/75">How to measure:</span> {guide.howToMeasure}
+      </p>
+    </div>
+  );
+}
+
+function createRequestKey() {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+
+  return `refund-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 const tapButtonClass =
   "transition duration-150 active:scale-[0.97] active:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-yellow-300/70";
 
@@ -320,6 +372,9 @@ export default function PosApp() {
     "Prepare a reader, build the sale, then send the payment to the smart reader."
   );
   const [receiptEmail, setReceiptEmail] = useState("");
+  const [cashReceived, setCashReceived] = useState("");
+  const [cashNote, setCashNote] = useState("Cash sale");
+  const [complimentaryNote, setComplimentaryNote] = useState("Complimentary sale");
   const [operatorName, setOperatorName] = useState("");
   const [eventName, setEventName] = useState("");
   const [simulateReader, setSimulateReader] = useState(true);
@@ -328,6 +383,8 @@ export default function PosApp() {
   const [selectedReaderId, setSelectedReaderId] = useState("");
   const [posLocation, setPosLocation] = useState(null);
   const [paying, setPaying] = useState(false);
+  const [cashSaleLoading, setCashSaleLoading] = useState(false);
+  const [complimentarySaleLoading, setComplimentarySaleLoading] = useState(false);
   const [activeSale, setActiveSale] = useState(null);
   const [paymentResult, setPaymentResult] = useState(null);
   const [refundOrderId, setRefundOrderId] = useState("");
@@ -337,6 +394,7 @@ export default function PosApp() {
   const [refundRestock, setRefundRestock] = useState(true);
   const [refundLoading, setRefundLoading] = useState(false);
   const [refundResult, setRefundResult] = useState(null);
+  const [refundItemQuantities, setRefundItemQuantities] = useState({});
   const [salesHistory, setSalesHistory] = useState([]);
   const [salesSummary, setSalesSummary] = useState(null);
   const [salesLoading, setSalesLoading] = useState(false);
@@ -580,8 +638,37 @@ export default function PosApp() {
     () => cartLines.reduce((sum, item) => sum + item.quantity, 0),
     [cartLines]
   );
+  const complimentaryLineCount = useMemo(
+    () => cartLines.filter((item) => item.complimentaryTag).length,
+    [cartLines]
+  );
 
   const selectedReader = readers.find((reader) => reader.id === selectedReaderId) || null;
+  const selectedRefundSale =
+    salesHistory.find((sale) => sale.id === refundOrderId.trim()) || null;
+  const selectedRefundItems = selectedRefundSale
+    ? (selectedRefundSale.items || [])
+        .map((item) => ({
+          order_item_id: item.id,
+          quantity: Number(refundItemQuantities[item.id] || 0),
+        }))
+        .filter((item) => item.quantity > 0)
+    : [];
+  const selectedRefundPreviewAmount = selectedRefundSale
+    ? selectedRefundItems.reduce((sum, selectedItem) => {
+        const saleItem = (selectedRefundSale.items || []).find((item) => item.id === selectedItem.order_item_id);
+        if (!saleItem) return sum;
+        const quantity = Number(saleItem.quantity || 0);
+        const lineTotal = Number(saleItem.total || 0);
+        const unitAmount = quantity > 0 ? lineTotal / quantity : 0;
+        return sum + unitAmount * selectedItem.quantity;
+      }, 0)
+    : 0;
+  const selectedRefundHistory = selectedRefundSale?.refund_history || [];
+  const cashReceivedAmount = Number(cashReceived || 0);
+  const cashDelta = cashReceivedAmount - cartTotal;
+  const cashChangeGiven = cashDelta > 0 ? cashDelta : 0;
+  const cashStillOwed = cashDelta < 0 ? Math.abs(cashDelta) : 0;
 
   const refreshReaders = async ({ preferSimulated = simulateReader } = {}) => {
     try {
@@ -734,6 +821,21 @@ export default function PosApp() {
           ? {
               ...item,
               discountPercent: Math.min(100, Math.max(0, Number(nextDiscountPercent) || 0)),
+              complimentaryTag: Number(nextDiscountPercent) >= 100 ? item.complimentaryTag || "" : "",
+            }
+          : item
+      )
+    );
+  };
+
+  const updateComplimentaryTag = (variantId, complimentaryTag) => {
+    setPosItems((prev) =>
+      prev.map((item) =>
+        item.variant.id === variantId
+          ? {
+              ...item,
+              discountPercent: complimentaryTag ? 100 : item.discountPercent,
+              complimentaryTag,
             }
           : item
       )
@@ -767,6 +869,7 @@ export default function PosApp() {
         discount_percent: item.discountPercent,
         discount_amount: item.discountAmount,
         line_total: item.total,
+        complimentary_tag: item.complimentaryTag,
       }));
 
         const result = await startTerminalSale({
@@ -801,6 +904,143 @@ export default function PosApp() {
     }
   };
 
+  const handleCashSale = async () => {
+    if (!cartLines.length) {
+      setTerminalError("Add at least one item to the POS cart before recording a cash sale.");
+      return;
+    }
+
+    if (cashReceivedAmount < cartTotal) {
+      setTerminalError(`Cash received is short by ${formatCurrency(cashStillOwed)}.`);
+      return;
+    }
+
+    setCashSaleLoading(true);
+    setTerminalError("");
+    setPaymentResult(null);
+    setTerminalStatusMessage("Recording cash sale and syncing inventory...");
+
+    try {
+      const saleItems = cartLines.map((item) => ({
+        product_id: item.productId,
+        variant_id: item.variantId,
+        title: item.title,
+        variant_title: item.variantTitle,
+        unit_price: item.price,
+        quantity: item.quantity,
+        discount_percent: item.discountPercent,
+        discount_amount: item.discountAmount,
+        line_total: item.total,
+        complimentary_tag: item.complimentaryTag,
+      }));
+
+      const result = await createCashPosSale({
+        items: saleItems,
+        receiptEmail: receiptEmail.trim().toLowerCase() || undefined,
+        operatorName: operatorName.trim(),
+        eventName: eventName.trim(),
+        cashReceived: cashReceivedAmount,
+        note: cashNote.trim() || undefined,
+      });
+
+      await refreshCatalog();
+      await refreshSalesHistory();
+      setRefundOrderId(result?.order_id || "");
+      setRefundPaymentIntentId("");
+      setRefundAmount("");
+      setRefundResult(null);
+      setTerminalStatusMessage(
+        result?.order_id
+          ? `Cash sale recorded. Medusa order ${result.order_id} created and inventory synced.`
+          : "Cash sale recorded and inventory synced."
+      );
+      setPaymentResult({
+        amount: Number(result?.sale_total || cartTotal),
+        id: result?.cash_sale_reference || "cash",
+        status: "cash",
+        orderId: result?.order_id || "",
+      });
+      setPosItems([]);
+      setReceiptEmail("");
+      setCashReceived("");
+    } catch (error) {
+      setTerminalError(error.message || "Failed to record cash sale.");
+      setTerminalStatusMessage("Cash sale did not complete. Review the totals and try again.");
+    } finally {
+      setCashSaleLoading(false);
+    }
+  };
+
+  const handleComplimentarySale = async () => {
+    if (!cartLines.length) {
+      setTerminalError("Add at least one item before recording a complimentary sale.");
+      return;
+    }
+
+    if (cartTotal > 0) {
+      setTerminalError("Complimentary sales require the cart total to be zero.");
+      return;
+    }
+
+    if (!complimentaryLineCount) {
+      setTerminalError("Mark at least one item as Giveaway or Event organiser freebie first.");
+      return;
+    }
+
+    setComplimentarySaleLoading(true);
+    setTerminalError("");
+    setPaymentResult(null);
+    setTerminalStatusMessage("Recording complimentary sale and syncing inventory...");
+
+    try {
+      const saleItems = cartLines.map((item) => ({
+        product_id: item.productId,
+        variant_id: item.variantId,
+        title: item.title,
+        variant_title: item.variantTitle,
+        unit_price: item.price,
+        quantity: item.quantity,
+        discount_percent: item.discountPercent,
+        discount_amount: item.discountAmount,
+        line_total: item.total,
+        complimentary_tag: item.complimentaryTag,
+      }));
+
+      const result = await createComplimentaryPosSale({
+        items: saleItems,
+        receiptEmail: receiptEmail.trim().toLowerCase() || undefined,
+        operatorName: operatorName.trim(),
+        eventName: eventName.trim(),
+        note: complimentaryNote.trim() || undefined,
+      });
+
+      await refreshCatalog();
+      await refreshSalesHistory();
+      setRefundOrderId(result?.order_id || "");
+      setRefundPaymentIntentId("");
+      setRefundAmount("");
+      setRefundResult(null);
+      setTerminalStatusMessage(
+        result?.order_id
+          ? `Complimentary sale recorded. Medusa order ${result.order_id} created and inventory synced.`
+          : "Complimentary sale recorded and inventory synced."
+      );
+      setPaymentResult({
+        amount: 0,
+        id: result?.complimentary_sale_reference || "complimentary",
+        status: "complimentary",
+        orderId: result?.order_id || "",
+      });
+      setPosItems([]);
+      setReceiptEmail("");
+    } catch (error) {
+      setTerminalError(error.message || "Failed to record complimentary sale.");
+      setTerminalStatusMessage("Complimentary sale did not complete. Review the flags and try again.");
+    } finally {
+      setComplimentarySaleLoading(false);
+    }
+  };
+
   const handleRefundSale = async () => {
     if (!refundOrderId.trim() && !refundPaymentIntentId.trim()) {
       setTerminalError("Enter an order ID or payment intent ID before refunding.");
@@ -812,17 +1052,24 @@ export default function PosApp() {
     setRefundResult(null);
 
     try {
+      const requestKey = createRequestKey();
       const result = await refundPosSale({
         orderId: refundOrderId.trim(),
         paymentIntentId: refundPaymentIntentId.trim(),
-        amount: refundAmount.trim() ? Number(refundAmount) : undefined,
+        amount:
+          selectedRefundItems.length === 0 && refundAmount.trim()
+            ? Number(refundAmount)
+            : undefined,
         note: refundNote.trim() || undefined,
         restock: refundRestock,
+        items: selectedRefundItems,
+        requestKey,
       });
 
       await refreshCatalog();
       await refreshSalesHistory();
       setRefundResult(result);
+      setRefundItemQuantities({});
       setTerminalStatusMessage(
         result?.restocked
           ? `Refund succeeded and stock was restored for order ${result.order_id}.`
@@ -950,24 +1197,162 @@ export default function PosApp() {
             </div>
 
             {salesSummary ? (
-              <div className="mt-5 grid gap-3 md:grid-cols-4">
-                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Sales</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{salesSummary.today?.order_count || 0}</p>
+              <>
+                <div className="mt-5 grid gap-3 md:grid-cols-4">
+                  <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Total</p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {formatCurrency(salesSummary.today?.gross_total || 0)}
+                    </p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                      {salesSummary.today?.order_count || 0} orders
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Card Sales</p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {formatCurrency(salesSummary.today_reconciliation?.by_payment_method?.card?.gross_total || 0)}
+                    </p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                      {salesSummary.today_reconciliation?.by_payment_method?.card?.order_count || 0} orders
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Cash Sales</p>
+                    <p className="mt-2 text-lg font-semibold text-white">
+                      {formatCurrency(salesSummary.today_reconciliation?.by_payment_method?.cash?.gross_total || 0)}
+                    </p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                      {salesSummary.today_reconciliation?.by_payment_method?.cash?.order_count || 0} orders
+                    </p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Refunded</p>
+                    <p className="mt-2 text-lg font-semibold text-white">{formatCurrency(salesSummary.today?.refunded_total || 0)}</p>
+                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                      {salesSummary.today?.units_sold || 0} units
+                    </p>
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Gross</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{formatCurrency(salesSummary.today?.gross_total || 0)}</p>
+
+                <div className="mt-5 rounded-[1.75rem] border border-white/10 bg-black/35 p-5">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.24em] text-white/45">End of Day</p>
+                      <p className="mt-2 text-sm text-white/65">
+                        Reconciliation snapshot for today&apos;s venue sales.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 md:grid-cols-4">
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Net Sales</p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {formatCurrency(salesSummary.today?.net_total || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Discounts</p>
+                      <p className="mt-2 text-lg font-semibold text-yellow-300">
+                        {formatCurrency(salesSummary.today_reconciliation?.discount_total || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Avg Sale</p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {formatCurrency(salesSummary.today_reconciliation?.average_order_value || 0)}
+                      </p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-black/30 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Refund Events</p>
+                      <p className="mt-2 text-lg font-semibold text-white">
+                        {salesSummary.today_reconciliation?.refund_event_count || 0}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 xl:grid-cols-3">
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Top Products</p>
+                      <div className="mt-3 space-y-3">
+                        {(salesSummary.today_reconciliation?.top_products || []).length ? (
+                          salesSummary.today_reconciliation.top_products.map((item) => (
+                            <div key={item.title} className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold uppercase text-white">{item.title}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  {item.units_sold} sold | {item.refunded_units} refunded
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold text-white">{formatCurrency(item.gross_total || 0)}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
+                                  Discount {formatCurrency(item.discount_total || 0)}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-white/55">No product sales today.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Top Sizes / Variants</p>
+                      <div className="mt-3 space-y-3">
+                        {(salesSummary.today_reconciliation?.top_variants || []).length ? (
+                          salesSummary.today_reconciliation.top_variants.map((item) => (
+                            <div key={item.label} className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold uppercase text-white">{item.label}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  {item.units_sold} sold | {item.refunded_units} refunded
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold text-white">{formatCurrency(item.gross_total || 0)}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
+                                  Discount {formatCurrency(item.discount_total || 0)}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-white/55">No variant sales today.</p>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/25 p-4">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Operator Breakdown</p>
+                      <div className="mt-3 space-y-3">
+                        {(salesSummary.today_reconciliation?.operator_breakdown || []).length ? (
+                          salesSummary.today_reconciliation.operator_breakdown.map((item) => (
+                            <div key={item.operator_name} className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold uppercase text-white">{item.operator_name}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  {item.order_count} sales
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold text-white">{formatCurrency(item.gross_total || 0)}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  Net {formatCurrency(item.net_total || 0)}
+                                </p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-sm text-white/55">No operator activity today.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Today Refunded</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{formatCurrency(salesSummary.today?.refunded_total || 0)}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-black/35 p-4">
-                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Units Today</p>
-                  <p className="mt-2 text-lg font-semibold text-white">{salesSummary.today?.units_sold || 0}</p>
-                </div>
-              </div>
+              </>
             ) : null}
 
             {showChecklist ? (
@@ -1001,7 +1386,15 @@ export default function PosApp() {
             {terminalError ? <p className="mt-3 text-sm text-red-400">{terminalError}</p> : null}
               {paymentResult ? (
                 <p className="mt-3 text-sm text-emerald-300">
-                  Paid {formatCurrency(paymentResult.amount)} successfully. PaymentIntent {paymentResult.id}
+                  {paymentResult.status === "complimentary"
+                    ? "Complimentary sale recorded."
+                    : `Paid ${formatCurrency(paymentResult.amount)} successfully.`}{" "}
+                  {paymentResult.status === "cash"
+                    ? "Cash reference"
+                    : paymentResult.status === "complimentary"
+                      ? "Complimentary reference"
+                      : "PaymentIntent"}{" "}
+                  {paymentResult.id}
                   {paymentResult.orderId ? ` - Medusa order ${paymentResult.orderId}.` : "."}
                 </p>
               ) : null}
@@ -1011,7 +1404,7 @@ export default function PosApp() {
                   <div>
                     <p className="text-xs uppercase tracking-[0.24em] text-white/45">Sale Refund</p>
                     <p className="mt-2 text-sm text-white/65">
-                      Refund a completed POS sale and optionally restore inventory using the last sale IDs or manual input.
+                      Refund a completed POS sale, by whole order or selected line items, and optionally restore inventory.
                     </p>
                   </div>
                 </div>
@@ -1045,7 +1438,12 @@ export default function PosApp() {
                       step="0.01"
                       value={refundAmount}
                       onChange={(event) => setRefundAmount(event.target.value)}
-                      placeholder="Leave blank for full refund"
+                      placeholder={
+                        selectedRefundItems.length
+                          ? "Ignored while line items are selected"
+                          : "Leave blank for full refund"
+                      }
+                      disabled={selectedRefundItems.length > 0}
                       className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
                     />
                   </div>
@@ -1061,13 +1459,323 @@ export default function PosApp() {
                   </div>
                 </div>
 
+                {selectedRefundSale ? (
+                  <div className="mt-4 rounded-2xl border border-white/10 bg-black/25 p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Selected Sale Detail</p>
+                        <p className="mt-2 text-sm font-semibold uppercase text-white">
+                          #{selectedRefundSale.display_id || selectedRefundSale.id?.slice(-6) || "sale"} {selectedRefundSale.label ? `- ${selectedRefundSale.label}` : ""}
+                        </p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                          {selectedRefundSale.operator_name || "No operator"} | {selectedRefundSale.event_name || "No venue"}
+                        </p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                          {selectedRefundSale.units_sold} units | {new Date(selectedRefundSale.created_at).toLocaleString("en-AU")}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-semibold text-white">{formatCurrency(selectedRefundSale.total)}</p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                          Refunded {formatCurrency(selectedRefundSale.refunded_amount || 0)}
+                        </p>
+                        <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                          Net {formatCurrency(selectedRefundSale.net_total || 0)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Payment Ref</p>
+                        <p className="mt-2 break-all text-xs text-white">
+                          {selectedRefundSale.payment_method === "cash"
+                            ? selectedRefundSale.cash_sale_reference || "Cash sale"
+                            : selectedRefundSale.payment_method === "complimentary"
+                              ? selectedRefundSale.complimentary_sale_reference || "Complimentary sale"
+                              : selectedRefundSale.payment_intent_id || "n/a"}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Order ID</p>
+                        <p className="mt-2 break-all text-xs text-white">{selectedRefundSale.id}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Email</p>
+                        <p className="mt-2 break-all text-xs text-white">{selectedRefundSale.email || "No receipt email"}</p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Reader</p>
+                        <p className="mt-2 break-all text-xs text-white">
+                          {selectedRefundSale.payment_method === "cash"
+                            ? "Cash drawer / hand cash"
+                            : selectedRefundSale.payment_method === "complimentary"
+                              ? "Complimentary / no payment"
+                              : selectedRefundSale.reader_id || "n/a"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 grid gap-3 md:grid-cols-3">
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Subtotal</p>
+                        <p className="mt-2 text-sm font-semibold text-white">
+                          {selectedRefundSale.cart_subtotal_display || formatCurrency(selectedRefundSale.total || 0)}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Discounts</p>
+                        <p className="mt-2 text-sm font-semibold text-yellow-300">
+                          {selectedRefundSale.cart_discount_display || formatCurrency(0)}
+                        </p>
+                      </div>
+                      <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Total</p>
+                        <p className="mt-2 text-sm font-semibold text-white">
+                          {selectedRefundSale.cart_total_display || formatCurrency(selectedRefundSale.total || 0)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {selectedRefundSale.payment_method === "cash" ? (
+                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Payment Method</p>
+                          <p className="mt-2 text-sm font-semibold text-white">Cash</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Cash Received</p>
+                          <p className="mt-2 text-sm font-semibold text-white">
+                            {formatCurrency(selectedRefundSale.cash_received_amount || 0)}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Change Given</p>
+                          <p className="mt-2 text-sm font-semibold text-white">
+                            {formatCurrency(selectedRefundSale.cash_change_given || 0)}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {selectedRefundSale.payment_method === "complimentary" ? (
+                      <div className="mt-4 grid gap-3 md:grid-cols-3">
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Payment Method</p>
+                          <p className="mt-2 text-sm font-semibold text-white">Complimentary</p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Reason Tags</p>
+                          <p className="mt-2 text-sm font-semibold text-white">
+                            {(selectedRefundSale.complimentary_tags || []).length
+                              ? selectedRefundSale.complimentary_tags.join(" | ")
+                              : "n/a"}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Note</p>
+                          <p className="mt-2 text-sm font-semibold text-white">
+                            {selectedRefundSale.complimentary_note || "No note"}
+                          </p>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    <div className="mt-4">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Selected Sale Items</p>
+                      <p className="mt-2 text-sm text-white/65">
+                        Choose quantities to refund and restock for this sale.
+                      </p>
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Refund Quantity Picker</p>
+                        <p className="mt-2 text-sm text-white/65">
+                          Pick the specific units to refund from this completed sale.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={withTapSound(() => {
+                          const next = {};
+                          for (const item of selectedRefundSale.items || []) {
+                            const refundableQuantity = Number(item.refundable_quantity ?? item.quantity ?? 0);
+                            if (refundableQuantity > 0) {
+                              next[item.id] = refundableQuantity;
+                            }
+                          }
+                          setRefundItemQuantities(next);
+                        })}
+                        className={`rounded-full border border-white/15 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/75 hover:border-white/35 hover:text-white ${tapButtonClass}`}
+                      >
+                        Select all refundable
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-3">
+                      {(selectedRefundSale.items || []).map((item) => {
+                        const refundableQuantity = Number(item.refundable_quantity ?? item.quantity ?? 0);
+                        const refundedQuantity = Number(item.refunded_quantity || 0);
+                        const selectedQuantity = Number(refundItemQuantities[item.id] || 0);
+                        const lineUnitAmount =
+                          Number(item.quantity || 0) > 0
+                            ? Number(item.total || 0) / Number(item.quantity || 0)
+                            : 0;
+
+                        return (
+                          <div
+                            key={item.id}
+                            className="rounded-2xl border border-white/10 bg-black/30 p-4"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-semibold uppercase text-white">{item.title}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  {item.variant_title || "Default variant"}
+                                </p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  Sold {item.quantity} • Refunded {refundedQuantity} • Remaining {refundableQuantity}
+                                </p>
+                                {item.complimentary_tag ? (
+                                  <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                                    {getComplimentaryTagLabel(item.complimentary_tag)}
+                                  </p>
+                                ) : null}
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm font-semibold text-white">{formatCurrency(item.total)}</p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                  {formatCurrency(lineUnitAmount)} each
+                                </p>
+                                <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-yellow-300">
+                                  Discount {formatCurrency(item.discount_total || 0)}
+                                  {Number(item.discount_percent || 0) > 0 ? ` | ${Number(item.discount_percent || 0)}%` : ""}
+                                </p>
+                              </div>
+                            </div>
+
+                            <div className="mt-4 flex items-center justify-between gap-3">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={withTapSound(() =>
+                                    setRefundItemQuantities((prev) => ({
+                                      ...prev,
+                                      [item.id]: Math.max(0, selectedQuantity - 1),
+                                    }))
+                                  )}
+                                  disabled={selectedQuantity <= 0}
+                                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 hover:border-white/30 hover:text-white disabled:opacity-30 ${tapButtonClass}`}
+                                >
+                                  -
+                                </button>
+                                <span className="min-w-[2.5rem] text-center text-sm font-semibold text-white">
+                                  {selectedQuantity}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={withTapSound(() =>
+                                    setRefundItemQuantities((prev) => ({
+                                      ...prev,
+                                      [item.id]: Math.min(refundableQuantity, selectedQuantity + 1),
+                                    }))
+                                  )}
+                                  disabled={selectedQuantity >= refundableQuantity}
+                                  className={`flex h-10 w-10 items-center justify-center rounded-full border border-white/12 text-lg text-white/80 hover:border-white/30 hover:text-white disabled:opacity-30 ${tapButtonClass}`}
+                                >
+                                  +
+                                </button>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={withTapSound(() =>
+                                  setRefundItemQuantities((prev) => ({
+                                    ...prev,
+                                    [item.id]: refundableQuantity,
+                                  }))
+                                )}
+                                disabled={refundableQuantity <= 0}
+                                className={`rounded-full border border-white/12 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-white/75 hover:border-white/35 hover:text-white disabled:opacity-30 ${tapButtonClass}`}
+                              >
+                                Max
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-white/10 pt-4">
+                      <p className="text-xs uppercase tracking-[0.2em] text-white/50">
+                        Selected line-item refund
+                      </p>
+                      <p className="text-lg font-semibold text-white">
+                        {formatCurrency(selectedRefundPreviewAmount)}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 border-t border-white/10 pt-4">
+                      <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">Refund History</p>
+                      <div className="mt-3 space-y-3">
+                        {selectedRefundHistory.length ? (
+                          selectedRefundHistory
+                            .slice()
+                            .sort((a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime())
+                            .map((entry) => (
+                              <div
+                                key={entry.request_key || entry.created_at}
+                                className="rounded-2xl border border-white/10 bg-black/30 p-4"
+                              >
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <p className="text-sm font-semibold uppercase text-white">
+                                      {entry.note || "Refund"}
+                                    </p>
+                                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                      {entry.created_at ? new Date(entry.created_at).toLocaleString("en-AU") : "No timestamp"}
+                                    </p>
+                                    {entry.items?.length ? (
+                                      <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                        {entry.items
+                                          .map((refundItem) => {
+                                            const saleItem = (selectedRefundSale.items || []).find(
+                                              (item) => item.id === refundItem.order_item_id
+                                            );
+                                            return `${refundItem.quantity} x ${saleItem?.title || refundItem.order_item_id}`;
+                                          })
+                                          .join(" | ")}
+                                      </p>
+                                    ) : null}
+                                  </div>
+                                  <div className="text-right">
+                                    <p className="text-sm font-semibold text-white">
+                                      {formatCurrency(entry.refunded_amount || 0)}
+                                    </p>
+                                    <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                                      {entry.restocked ? "Restocked" : "No restock"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                        ) : (
+                          <p className="text-sm text-white/55">No previous refunds on this sale.</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
+
                 <label className="mt-4 flex items-center gap-2 text-xs uppercase tracking-[0.18em] text-white/70">
                   <input
                     type="checkbox"
                     checked={refundRestock}
                     onChange={() => setRefundRestock((prev) => !prev)}
                   />
-                  Restock inventory on full refund
+                  {selectedRefundItems.length
+                    ? "Restock inventory for selected refunded items"
+                    : "Restock inventory on full refund"}
                 </label>
 
                 {refundResult ? (
@@ -1117,6 +1825,7 @@ export default function PosApp() {
                           setRefundOrderId(sale.id || "");
                           setRefundPaymentIntentId(sale.payment_intent_id || "");
                           setRefundAmount("");
+                          setRefundItemQuantities({});
                           setRefundResult(null);
                         })}
                         className={`w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-left transition hover:border-yellow-300/40 hover:bg-black/45 ${tapButtonClass}`}
@@ -1127,10 +1836,17 @@ export default function PosApp() {
                               #{sale.display_id || sale.id?.slice(-6) || "sale"} {sale.label ? `- ${sale.label}` : ""}
                             </p>
                             <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
-                              {sale.operator_name || "No operator"} · {sale.event_name || "No venue"}
+                              {sale.operator_name || "No operator"} | {sale.event_name || "No venue"}
                             </p>
                             <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
-                              {sale.units_sold} units · {new Date(sale.created_at).toLocaleString("en-AU")}
+                              {sale.units_sold} units | {new Date(sale.created_at).toLocaleString("en-AU")}
+                            </p>
+                            <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-white/45">
+                              {sale.payment_method === "cash"
+                                ? "Cash sale"
+                                : sale.payment_method === "complimentary"
+                                  ? "Complimentary sale"
+                                  : "Card / reader sale"}
                             </p>
                           </div>
                           <div className="text-right">
@@ -1236,6 +1952,7 @@ export default function PosApp() {
                   const selectedOptions = selectedOptionsByProduct[product.id] || {};
                   const matchedVariant = findMatchingVariant(product, selectedOptions);
                   const displayPrice = matchedVariant ? getVariantPrice(matchedVariant) : null;
+                  const sizeGuideType = detectSizeGuideType(product, selectedOptions);
                   const options = product.options || [];
                   const typeOption = options.find(
                     (option) => normalizeOptionKey(option.title || option.name) === "type"
@@ -1391,6 +2108,24 @@ export default function PosApp() {
                           </div>
                         </div>
                       </div>
+
+                      {sizeGuideType ? (
+                        <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+                          <summary className="cursor-pointer list-none text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+                            Size Guide +
+                          </summary>
+                          <div className="mt-3 text-left">
+                            <p className="text-xs text-white/55">
+                              Check size before ordering. This guide is based on body measurements for this product type.
+                            </p>
+                            <div className="mt-3">{renderGuideTable(sizeGuides[sizeGuideType])}</div>
+                            <p className="mt-3 text-[10px] text-white/35">
+                              Sizing is based on body measurements, not garment measurements. Measurements are approximate and may vary slightly between garment styles.
+                            </p>
+                          </div>
+                        </details>
+                      ) : null}
+
                       <button
                         onClick={withTapSound(() => handleAddProduct(product))}
                         className={`mt-4 w-full rounded-full bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black hover:opacity-90 ${tapButtonClass}`}
@@ -1418,6 +2153,11 @@ export default function PosApp() {
                         <p className="mt-1 text-xs uppercase tracking-[0.16em] text-white/40">
                           {item.variantTitle || "Default variant"}
                         </p>
+                        {item.complimentaryTag ? (
+                          <p className="mt-1 text-[10px] uppercase tracking-[0.16em] text-emerald-300">
+                            {getComplimentaryTagLabel(item.complimentaryTag)}
+                          </p>
+                        ) : null}
                         {item.stockLabel ? (
                           <p
                             className={`mt-1 text-[10px] uppercase tracking-[0.16em] ${
@@ -1460,6 +2200,24 @@ export default function PosApp() {
                               {discountOption === 0 ? "No discount" : `${discountOption}% off`}
                             </button>
                           );
+                        })}
+                        {[
+                          { label: "Freebie", value: "giveaway" },
+                          { label: "Event organiser", value: "event_organiser_freebie" },
+                        ].map((option) => {
+                          const selected = item.complimentaryTag === option.value;
+
+                          return (
+                            <button
+                              key={`${item.key}-comp-${option.value}`}
+                              onClick={withTapSound(() => updateComplimentaryTag(item.variantId, selected ? "" : option.value))}
+                              className={`rounded-full border px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] transition ${
+                                selected ? selectedPillClass : idlePillClass
+                              } ${tapButtonClass}`}
+                            >
+                              {option.label}
+                            </button>
+                          )
                         })}
                       </div>
                       <div className="mt-3 flex items-center gap-3">
@@ -1526,6 +2284,98 @@ export default function PosApp() {
               />
             </div>
 
+            <div className="mt-5 rounded-2xl border border-emerald-300/15 bg-emerald-300/[0.05] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/35">Cash Sale</p>
+                  <p className="mt-2 text-sm text-white/65">
+                    Enter funds received to record a cash-only sale without Stripe.
+                  </p>
+                </div>
+                <div className="rounded-full border border-emerald-300/25 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                  No Stripe
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Funds Received</label>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={cashReceived}
+                    onChange={(event) => setCashReceived(event.target.value)}
+                    placeholder="0.00"
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Cash Note</label>
+                  <input
+                    type="text"
+                    value={cashNote}
+                    onChange={(event) => setCashNote(event.target.value)}
+                    placeholder="Cash sale"
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                  />
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Cash Received</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{formatCurrency(cashReceivedAmount)}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">
+                    {cashStillOwed > 0 ? "Still Owed" : "Change Given"}
+                  </p>
+                  <p className={`mt-2 text-sm font-semibold ${cashStillOwed > 0 ? "text-red-300" : "text-emerald-300"}`}>
+                    {formatCurrency(cashStillOwed > 0 ? cashStillOwed : cashChangeGiven)}
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Sale Total</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{formatCurrency(cartTotal)}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 rounded-2xl border border-sky-300/15 bg-sky-300/[0.05] p-4">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.24em] text-white/35">Complimentary Sale</p>
+                  <p className="mt-2 text-sm text-white/65">
+                    Use for giveaways or event organiser freebies. Mark the relevant item lines above first.
+                  </p>
+                </div>
+                <div className="rounded-full border border-sky-300/25 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-sky-200">
+                  Zero total
+                </div>
+              </div>
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Flagged Lines</p>
+                  <p className="mt-2 text-sm font-semibold text-white">{complimentaryLineCount}</p>
+                </div>
+                <div className="rounded-2xl border border-white/10 bg-black/30 p-3">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-white/40">Cart Total</p>
+                  <p className={`mt-2 text-sm font-semibold ${cartTotal === 0 ? "text-emerald-300" : "text-red-300"}`}>
+                    {formatCurrency(cartTotal)}
+                  </p>
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.24em] text-white/35">Complimentary Note</label>
+                  <input
+                    type="text"
+                    value={complimentaryNote}
+                    onChange={(event) => setComplimentaryNote(event.target.value)}
+                    placeholder="Complimentary sale"
+                    className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-white placeholder:text-white/30"
+                  />
+                </div>
+              </div>
+            </div>
+
             <div className="mt-5 rounded-[1.75rem] border border-yellow-300/15 bg-yellow-300/[0.05] p-5">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -1549,6 +2399,20 @@ export default function PosApp() {
                 className={`mt-5 w-full rounded-full bg-yellow-300 px-5 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
               >
                 {paying ? "Waiting for reader..." : "Send payment to reader"}
+              </button>
+              <button
+                onClick={withTapSound(handleCashSale)}
+                disabled={!cartLines.length || cashSaleLoading || cashStillOwed > 0}
+                className={`mt-3 w-full rounded-full bg-emerald-300 px-5 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
+              >
+                {cashSaleLoading ? "Recording cash sale..." : "Record cash sale"}
+              </button>
+              <button
+                onClick={withTapSound(handleComplimentarySale)}
+                disabled={!cartLines.length || complimentarySaleLoading || cartTotal > 0 || complimentaryLineCount === 0}
+                className={`mt-3 w-full rounded-full bg-sky-300 px-5 py-4 text-sm font-semibold uppercase tracking-[0.22em] text-black hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${tapButtonClass}`}
+              >
+                {complimentarySaleLoading ? "Recording complimentary sale..." : "Record complimentary sale"}
               </button>
             </div>
           </aside>

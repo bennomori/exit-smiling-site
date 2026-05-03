@@ -5,9 +5,8 @@ import {
   createOrderWorkflow,
   markPaymentCollectionAsPaid,
 } from "@medusajs/core-flows"
-import { getStripeClient } from "../../../../lib/stripe"
 
-type FinalizeSaleItem = {
+type CashSaleItem = {
   variant_id?: string
   quantity?: number
   title?: string
@@ -24,19 +23,28 @@ function toPositiveInt(value: unknown) {
   return Number.isFinite(numeric) && numeric > 0 ? Math.floor(numeric) : 0
 }
 
+function toPositiveNumber(value: unknown) {
+  const numeric = Number(value)
+  return Number.isFinite(numeric) && numeric > 0 ? numeric : 0
+}
+
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const body = (req.body || {}) as {
-      payment_intent_id?: string
-      items?: FinalizeSaleItem[]
+      items?: CashSaleItem[]
+      receipt_email?: string
+      operator_name?: string
+      event_name?: string
+      cash_received?: number
+      note?: string
     }
 
-    const paymentIntentId = String(body.payment_intent_id || "").trim()
     const rawItems = Array.isArray(body.items) ? body.items : []
-
-    if (!paymentIntentId) {
-      return res.status(400).json({ message: "A payment_intent_id is required." })
-    }
+    const receiptEmail = String(body.receipt_email || "").trim().toLowerCase()
+    const operatorName = String(body.operator_name || "").trim()
+    const eventName = String(body.event_name || "").trim()
+    const note = String(body.note || "").trim()
+    const cashReceived = toPositiveNumber(body.cash_received)
 
     const items = rawItems
       .map((item) => ({
@@ -49,28 +57,23 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(400).json({ message: "At least one sale item is required." })
     }
 
-    const stripe = getStripeClient()
-    const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+    const saleSubtotal = rawItems.reduce(
+      (sum, item) => sum + Number(item?.unit_price || 0) * toPositiveInt(item?.quantity),
+      0
+    )
+    const saleDiscountTotal = rawItems.reduce(
+      (sum, item) => sum + Number(item?.discount_amount || 0),
+      0
+    )
+    const saleTotal = rawItems.reduce((sum, item) => sum + Number(item?.line_total || 0), 0)
 
-    if (
-      paymentIntent.status !== "succeeded" &&
-      paymentIntent.status !== "requires_capture"
-    ) {
-      return res.status(400).json({
-        message: `PaymentIntent ${paymentIntentId} is not finalized for inventory sync.`,
-      })
+    if (saleTotal <= 0) {
+      return res.status(400).json({ message: "The cash sale total must be greater than zero." })
     }
 
-    const existingOrderId = String(paymentIntent.metadata?.medusa_order_id || "").trim()
-    const inventoryAlreadySynced = paymentIntent.metadata?.medusa_inventory_synced === "true"
-    const paidAlreadySynced = paymentIntent.metadata?.medusa_order_paid_synced === "true"
-
-    if (existingOrderId && inventoryAlreadySynced && paidAlreadySynced) {
-      return res.status(200).json({
-        ok: true,
-        already_synced: true,
-        payment_intent_id: paymentIntentId,
-        order_id: existingOrderId,
+    if (cashReceived < saleTotal) {
+      return res.status(400).json({
+        message: `Cash received is short by ${(saleTotal - cashReceived).toFixed(2)}.`,
       })
     }
 
@@ -87,6 +90,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const inventoryService = req.scope.resolve(Modules.INVENTORY)
     const locking = req.scope.resolve(Modules.LOCKING)
     const variantIds = Array.from(variantQuantityMap.keys())
+
     const { data: variants } = await query.graph({
       entity: "product_variant",
       fields: [
@@ -116,7 +120,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
       if (!variant) {
         return res.status(404).json({
-          message: `Variant ${variantId} was not found for POS finalization.`,
+          message: `Variant ${variantId} was not found for cash sale finalization.`,
         })
       }
 
@@ -152,7 +156,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
         if (!variant.allow_backorder && totalAvailable < requiredTotal) {
           return res.status(409).json({
-            message: `Insufficient inventory to finalize POS sale for variant ${variant.title || variantId}.`,
+            message: `Insufficient inventory to finalize cash sale for variant ${variant.title || variantId}.`,
           })
         }
 
@@ -195,10 +199,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
-    if (adjustments.length && !inventoryAlreadySynced) {
-      const lockingKeys = Array.from(
-        new Set(adjustments.map((entry) => entry.inventory_item_id))
-      )
+    if (adjustments.length) {
+      const lockingKeys = Array.from(new Set(adjustments.map((entry) => entry.inventory_item_id)))
 
       await locking.execute(lockingKeys, async () => {
         await inventoryService.adjustInventory(
@@ -215,7 +217,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       entity: "region",
       fields: ["id", "currency_code"],
       filters: {
-        currency_code: String(paymentIntent.currency || "aud").toLowerCase(),
+        currency_code: "aud",
       },
       pagination: {
         take: 1,
@@ -226,7 +228,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     if (!region?.id) {
       return res.status(500).json({
-        message: `No region was found for currency ${paymentIntent.currency}.`,
+        message: "No region was found for AUD cash sale creation.",
       })
     }
 
@@ -242,7 +244,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     if (!salesChannel?.id) {
       return res.status(500).json({
-        message: "No sales channel was found for POS order creation.",
+        message: "No sales channel was found for cash sale order creation.",
       })
     }
 
@@ -274,48 +276,46 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       })
       .filter((item) => item.variant_id && item.quantity > 0)
 
-    let createdOrderId = existingOrderId || ""
+    const cashSaleReference = `cash-${Date.now()}`
+    const cashChangeGiven = Math.max(0, Number((cashReceived - saleTotal).toFixed(2)))
 
-    if (!createdOrderId) {
-      const { result: createdOrder } = await createOrderWorkflow(req.scope).run({
+    const { result: createdOrder } = await createOrderWorkflow(req.scope).run({
+      input: {
+        region_id: region.id,
+        sales_channel_id: salesChannel.id,
+        currency_code: "aud",
+        email: receiptEmail || undefined,
+        status: "pending",
+        items: orderItems,
+        metadata: {
+          pos_mode: "ipad_terminal",
+          pos_payment_method: "cash",
+          cash_sale_reference: cashSaleReference,
+          cash_received_amount: cashReceived,
+          cash_change_given: cashChangeGiven,
+          cash_note: note,
+          operator_name: operatorName,
+          event_name: eventName,
+          cart_subtotal_display: `$${saleSubtotal.toFixed(2)}`,
+          cart_discount_display: `$${saleDiscountTotal.toFixed(2)}`,
+          cart_total_display: `$${saleTotal.toFixed(2)}`,
+        },
+      },
+    })
+
+    const createdOrderId = String(createdOrder?.id || "").trim()
+
+    let paymentCollectionId = ""
+
+    if (createdOrderId) {
+      const { result: paymentCollections } = await createOrderPaymentCollectionWorkflow(req.scope).run({
         input: {
-          region_id: region.id,
-          sales_channel_id: salesChannel.id,
-          currency_code: String(paymentIntent.currency || "aud").toLowerCase(),
-          email: paymentIntent.receipt_email || undefined,
-          status: "pending",
-          items: orderItems,
-          metadata: {
-            pos_mode: "ipad_terminal",
-            stripe_payment_intent_id: paymentIntentId,
-            stripe_payment_status: paymentIntent.status,
-            pos_reader_id: paymentIntent.metadata?.reader_id || "",
-            operator_name: paymentIntent.metadata?.operator_name || "",
-            event_name: paymentIntent.metadata?.event_name || "",
-            cart_subtotal_display: paymentIntent.metadata?.cart_subtotal_display || "",
-            cart_discount_display: paymentIntent.metadata?.cart_discount_display || "",
-            cart_total_display: paymentIntent.metadata?.cart_total_display || "",
-          },
+          order_id: createdOrderId,
+          amount: saleTotal,
         },
       })
 
-      createdOrderId = String(createdOrder?.id || "").trim()
-    }
-
-    let paymentCollectionId = String(paymentIntent.metadata?.medusa_payment_collection_id || "").trim()
-    const collectedAmount = Number((paymentIntent.amount_received ?? paymentIntent.amount ?? 0) / 100)
-
-    if (createdOrderId && !paidAlreadySynced) {
-      if (!paymentCollectionId) {
-        const { result: paymentCollections } = await createOrderPaymentCollectionWorkflow(req.scope).run({
-          input: {
-            order_id: createdOrderId,
-            amount: collectedAmount,
-          },
-        })
-
-        paymentCollectionId = String(paymentCollections?.[0]?.id || "").trim()
-      }
+      paymentCollectionId = String(paymentCollections?.[0]?.id || "").trim()
 
       if (paymentCollectionId) {
         await markPaymentCollectionAsPaid(req.scope).run({
@@ -327,27 +327,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
     }
 
-    await stripe.paymentIntents.update(paymentIntentId, {
-      metadata: {
-        ...paymentIntent.metadata,
-        medusa_inventory_synced: "true",
-        medusa_inventory_synced_at: new Date().toISOString(),
-        medusa_order_id: createdOrderId,
-        medusa_payment_collection_id: paymentCollectionId,
-        medusa_order_paid_synced: paymentCollectionId ? "true" : paymentIntent.metadata?.medusa_order_paid_synced || "",
-      },
-    })
-
     return res.status(200).json({
       ok: true,
-      already_synced: inventoryAlreadySynced && paidAlreadySynced,
-      payment_intent_id: paymentIntentId,
       order_id: createdOrderId || null,
+      payment_collection_id: paymentCollectionId || null,
       adjusted_levels: adjustments.length,
+      sale_total: saleTotal,
+      cash_received: cashReceived,
+      cash_change_given: cashChangeGiven,
+      cash_sale_reference: cashSaleReference,
     })
   } catch (error: any) {
     return res.status(500).json({
-      message: error?.message || "Failed to finalize POS inventory sync.",
+      message: error?.message || "Failed to record cash sale.",
     })
   }
 }
