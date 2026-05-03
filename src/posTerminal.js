@@ -100,7 +100,61 @@ export async function finalizePosSale({ paymentIntentId, items }) {
   return readJson(res, "Failed to finalize POS inventory sync.")
 }
 
-export async function refundPosSale({ orderId, paymentIntentId, amount, note, restock = true }) {
+export async function createCashPosSale({
+  items,
+  receiptEmail,
+  operatorName,
+  eventName,
+  cashReceived,
+  note,
+}) {
+  const res = await fetch(`${baseUrl}/store/pos/cash-sale`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      items,
+      receipt_email: receiptEmail || undefined,
+      operator_name: operatorName || undefined,
+      event_name: eventName || undefined,
+      cash_received: cashReceived,
+      note: note || undefined,
+    }),
+  })
+
+  return readJson(res, "Failed to record cash POS sale.")
+}
+
+export async function createComplimentaryPosSale({
+  items,
+  receiptEmail,
+  operatorName,
+  eventName,
+  note,
+}) {
+  const res = await fetch(`${baseUrl}/store/pos/complimentary-sale`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      items,
+      receipt_email: receiptEmail || undefined,
+      operator_name: operatorName || undefined,
+      event_name: eventName || undefined,
+      note: note || undefined,
+    }),
+  })
+
+  return readJson(res, "Failed to record complimentary POS sale.")
+}
+
+export async function refundPosSale({
+  orderId,
+  paymentIntentId,
+  amount,
+  note,
+  restock = true,
+  items,
+  requestKey,
+}) {
   const res = await fetch(`${baseUrl}/store/pos/refund-sale`, {
     method: "POST",
     headers: commonHeaders,
@@ -110,6 +164,8 @@ export async function refundPosSale({ orderId, paymentIntentId, amount, note, re
       amount: amount ?? undefined,
       note: note || undefined,
       restock,
+      items: Array.isArray(items) && items.length ? items : undefined,
+      request_key: requestKey || undefined,
     }),
   })
 

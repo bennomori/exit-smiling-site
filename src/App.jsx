@@ -1,6 +1,7 @@
 import { useMemo, useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getProducts } from "./getProducts";
+import { detectSizeGuideType, sizeGuides } from "./sizeGuides";
 import StripeCheckoutModal from "./StripeCheckoutModal";
 import { SiSpotify, SiApplemusic } from "react-icons/si";
 import {
@@ -1024,6 +1025,51 @@ function Store({
     };
   };
 
+  const renderSizeGuide = (guideType) => {
+    const guide = sizeGuides[guideType];
+
+    if (!guide) return null;
+
+    return (
+      <div className="mt-3 rounded-2xl border border-white/10 bg-black/30 p-4">
+        <p className="text-[10px] uppercase tracking-[0.24em] text-white/40">
+          {guide.title}
+        </p>
+        <p className="mt-2 text-xs text-white/55">{guide.description}</p>
+        <div className="mt-3 overflow-x-auto">
+          <table className="w-full border-collapse text-left text-xs text-white/75">
+            <thead>
+              <tr className="border-b border-white/10">
+                {guide.columns.map((column) => (
+                  <th key={column} className="px-2 py-2 font-semibold uppercase tracking-[0.14em] text-white/55">
+                    {column}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {guide.rows.map((row, rowIndex) => (
+                <tr key={`${guideType}-${rowIndex}`} className="border-b border-white/5 last:border-b-0">
+                  {row.map((cell, cellIndex) => (
+                    <td key={`${guideType}-${rowIndex}-${cellIndex}`} className="px-2 py-2">
+                      {cell || "-"}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-3 text-[11px] text-white/55">
+          <span className="font-semibold text-white/75">How to measure:</span> {guide.howToMeasure}
+        </p>
+        <p className="mt-2 text-[10px] text-white/35">
+          Sizing is based on body measurements, not garment measurements. All measurements are approximate and may vary slightly between garment styles.
+        </p>
+      </div>
+    );
+  };
+
   return (
     <section id="store" className="scroll-mt-32 border-t border-white/10">
       <div className="mx-auto max-w-7xl px-6 py-20">
@@ -1114,6 +1160,7 @@ function Store({
               hasSelectedTypeAndSize && selectedVariant
                 ? getVariantStockInfo(selectedVariant)
                 : null;
+            const sizeGuideType = detectSizeGuideType(product, selectedOptions);
             const isMadeToOrder =
               Boolean(selectedVariant?.allow_backorder) &&
               stockInfo?.message?.toLowerCase().includes("custom made");
@@ -1315,6 +1362,20 @@ function Store({
                     </>
                   );
                 })()}
+
+                {sizeGuideType ? (
+                  <details className="mt-4 rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3">
+                    <summary className="cursor-pointer list-none text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white/70">
+                      Size Guide +
+                    </summary>
+                    <div className="mt-3 text-left">
+                      <p className="text-xs text-white/55">
+                        Check your size before ordering. These guides apply to our T-shirts and hoodies.
+                      </p>
+                      {renderSizeGuide(sizeGuideType)}
+                    </div>
+                  </details>
+                ) : null}
 
                 {price ? (
                   <p className="mt-3 text-center text-sm text-white/60">{price}</p>
