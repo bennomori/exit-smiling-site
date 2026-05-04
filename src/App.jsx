@@ -106,7 +106,7 @@ const tourDates = [
 ];
 
 const videos = [
-  { title: 'Latest Single', label: 'Official Video' },
+  { title: 'Music Video Coming Soon', label: 'Latest Single' },
   { title: 'Live Session', label: 'Behind the Scenes' },
   { title: 'ABC RADIO LIVE SHOW', label: 'LIVE IN ABC STUDIOS APRIL 29 2026' },
 ];
@@ -275,7 +275,7 @@ function Header({ cart, onToggleMiniCart }) {
               <FacebookIcon className="h-4 w-4" />
             </a>
 
-            <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+            <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
               <YoutubeIcon className="h-4 w-4" />
             </a>
 
@@ -2551,7 +2551,7 @@ function Footer() {
             <FacebookIcon className="h-4 w-4" />
           </a>
 
-          <a href="https://www.youtube.com/@exitsmiling-v8q/videos" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+          <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
             <YoutubeIcon className="h-4 w-4" />
           </a>
 
@@ -2599,7 +2599,7 @@ function MobileSocialBar() {
         </a>
 
         <a
-          href="https://www.youtube.com/@exitsmiling-v8q/videos"
+          href="https://www.youtube.com/@ExitSmiling-u8i"
           target="_blank"
           rel="noreferrer"
           aria-label="YouTube"

@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-stripe-js";
+import {
+    Elements,
+    ExpressCheckoutElement,
+    PaymentElement,
+    useElements,
+    useStripe,
+} from "@stripe/react-stripe-js";
 import { completeCart } from "./cart";
 
 const pendingOrderStorageKey = "exit_smiling_pending_order";
@@ -91,6 +97,7 @@ function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
     const [statusMessage, setStatusMessage] = useState("");
+    const [expressReady, setExpressReady] = useState(false);
     const [pendingFinalization, setPendingFinalization] = useState(() => readPendingOrder(cartId));
 
     useEffect(() => {
@@ -169,8 +176,68 @@ function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
         await finalizeOrder(paymentIntent.id);
     };
 
+    const handleExpressConfirm = async () => {
+        if (!stripe || !elements || submitting) return;
+
+        setSubmitting(true);
+        setError("");
+        setStatusMessage("Confirming wallet payment...");
+
+        const { error: stripeError, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            redirect: "if_required",
+        });
+
+        if (stripeError) {
+            setError(stripeError.message || "Wallet payment failed.");
+            setStatusMessage("");
+            setSubmitting(false);
+            return;
+        }
+
+        if (paymentIntent && paymentIntent.status !== "succeeded") {
+            setError(`Payment status: ${paymentIntent.status}`);
+            setStatusMessage("");
+            setSubmitting(false);
+            return;
+        }
+
+        if (!paymentIntent?.id) {
+            setError("Payment was confirmed, but a payment reference was not returned.");
+            setStatusMessage("");
+            setSubmitting(false);
+            return;
+        }
+
+        setPendingFinalization({ cartId, paymentIntentId: paymentIntent.id });
+        await finalizeOrder(paymentIntent.id);
+    };
+
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
+            <div className={expressReady ? "space-y-3" : "hidden"}>
+                <ExpressCheckoutElement
+                    onReady={({ availablePaymentMethods }) => {
+                        setExpressReady(Boolean(availablePaymentMethods));
+                    }}
+                    onConfirm={handleExpressConfirm}
+                    options={{
+                        buttonTheme: {
+                            applePay: "white",
+                            googlePay: "white",
+                        },
+                        buttonType: {
+                            applePay: "buy",
+                            googlePay: "buy",
+                        },
+                    }}
+                />
+                <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/35">
+                    <span className="h-px flex-1 bg-white/10" />
+                    <span>or pay by card</span>
+                    <span className="h-px flex-1 bg-white/10" />
+                </div>
+            </div>
             <PaymentElement />
             {statusMessage ? <p className="text-sm text-white/70">{statusMessage}</p> : null}
             {error ? <p className="text-sm text-red-400">{error}</p> : null}
