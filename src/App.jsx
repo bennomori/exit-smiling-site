@@ -239,58 +239,85 @@ const studioSessions = [
 ];
 
 function Header({ cart, onToggleMiniCart }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const socialButtonClass = 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-500 hover:border-white/35 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]';
   const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
+  const navItems = [
+    { href: '#music', label: 'Music' },
+    { href: '#tour', label: 'Gigs' },
+    { href: '#videos', label: 'Videos' },
+    { href: '#about', label: 'The Band' },
+    { href: '#store', label: 'Merch' },
+    { href: '#press-kit', label: 'EPK' },
+  ];
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [mobileMenuOpen]);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-8">
-          <a href="#top" className="flex items-center">
-            <img src={brand.markLogo} alt={brand.logoAlt} className="h-16 w-16 object-contain md:h-20 md:w-20" />
-            <span className="sr-only">{brand.name}</span>
-          </a>
-          <nav className="hidden gap-12 text-sm uppercase tracking-[0.2em] md:flex">
-            {[
-              { href: '#music', label: 'Music' },
-              { href: '#tour', label: 'Gigs' },
-              { href: '#videos', label: 'Videos' },
-              { href: '#about', label: 'The Band' },
-              { href: '#store', label: 'Merch' },
-            ].map((item) => (
-              <a key={item.href} href={item.href} className="relative text-white/80 transition hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full">
-                {item.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-
-        <div className="flex items-center gap-10">
-          <div className="hidden items-center gap-3 md:flex">
-            <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
-              <InstagramIcon className="h-4 w-4" />
+    <>
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-8">
+            <a href="#top" className="flex items-center">
+              <img src={brand.markLogo} alt={brand.logoAlt} className="h-16 w-16 object-contain md:h-20 md:w-20" />
+              <span className="sr-only">{brand.name}</span>
             </a>
-
-            <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
-              <FacebookIcon className="h-4 w-4" />
-            </a>
-
-            <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
-              <YoutubeIcon className="h-4 w-4" />
-            </a>
-
-            <a href="#" aria-label="Spotify" className={socialButtonClass}>
-              <SiSpotify className="h-4 w-4" />
-            </a>
-
-            <a href="#" aria-label="Apple Music" className={socialButtonClass}>
-              <SiApplemusic className="h-4 w-4" />
-            </a>
-
-            <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
-              <TikTokIcon className="h-4 w-4" />
-            </a>
+            <nav className="hidden gap-12 text-sm uppercase tracking-[0.2em] md:flex">
+              {navItems.map((item) => (
+                <a key={item.href} href={item.href} className="relative text-white/80 transition hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full">
+                  {item.label}
+                </a>
+              ))}
+            </nav>
           </div>
+
+          <div className="flex items-center gap-4 md:gap-10">
+            <div className="hidden items-center gap-3 md:flex">
+              <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
+                <InstagramIcon className="h-4 w-4" />
+              </a>
+
+              <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
+                <FacebookIcon className="h-4 w-4" />
+              </a>
+
+              <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+                <YoutubeIcon className="h-4 w-4" />
+              </a>
+
+              <a href="#" aria-label="Spotify" className={socialButtonClass}>
+                <SiSpotify className="h-4 w-4" />
+              </a>
+
+              <a href="#" aria-label="Apple Music" className={socialButtonClass}>
+                <SiApplemusic className="h-4 w-4" />
+              </a>
+
+              <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
+                <TikTokIcon className="h-4 w-4" />
+              </a>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(true)}
+              className="rounded-full border border-white/20 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white transition hover:bg-white/10 md:hidden"
+              aria-label="Open mobile menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              Menu
+            </button>
             <button
               onClick={onToggleMiniCart}
               className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition hover:bg-white/10"
@@ -303,12 +330,93 @@ function Header({ cart, onToggleMiniCart }) {
                 </span>
               )}
             </button>
-          <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black">
-            Get Tickets
-          </a>
+            <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="hidden rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black sm:inline-flex">
+              Get Tickets
+            </a>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+      {mobileMenuOpen ? (
+        <div className="fixed left-0 top-0 z-[999] h-dvh w-screen bg-black/90 px-4 py-5 text-white md:hidden">
+          <button
+            type="button"
+            aria-label="Close mobile menu backdrop"
+            onClick={closeMobileMenu}
+            className="absolute inset-0 h-full w-full bg-black/90"
+          />
+          <div className="relative z-10 mx-auto flex h-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/12 bg-[#070707] p-5 shadow-[0_0_60px_rgba(0,0,0,0.72)]">
+            <div className="flex items-center justify-between">
+              <a href="#top" onClick={closeMobileMenu} className="flex items-center gap-3">
+                <img src={brand.markLogo} alt={brand.logoAlt} className="h-14 w-14 object-contain" />
+                <span className="text-sm font-black uppercase tracking-[0.24em] text-white">Exit Smiling</span>
+              </a>
+              <button
+                type="button"
+                onClick={closeMobileMenu}
+                className="rounded-full border border-white/18 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/75 transition hover:bg-white/10 hover:text-white"
+              >
+                Close
+              </button>
+            </div>
+
+            <nav className="mt-10 grid gap-3">
+              {navItems.map((item, index) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobileMenu}
+                  className="group rounded-3xl border border-white/10 bg-white/[0.03] px-5 py-4 transition hover:border-yellow-200/35 hover:bg-yellow-200/10"
+                >
+                  <span className="text-[10px] uppercase tracking-[0.32em] text-white/35">
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                  <span className="mt-1 block text-2xl font-black uppercase text-white transition group-hover:text-yellow-50">
+                    {item.label}
+                  </span>
+                </a>
+              ))}
+            </nav>
+
+            <div className="mt-6 grid gap-3">
+              <a
+                href="https://events.humanitix.com/exit-smiling/tickets"
+                target="_blank"
+                rel="noreferrer"
+                onClick={closeMobileMenu}
+                className="rounded-full bg-white px-5 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
+              >
+                Get Tickets
+              </a>
+              <a
+                href="/epk"
+                onClick={closeMobileMenu}
+                className="rounded-full border border-white/18 px-5 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-white/10"
+              >
+                Standalone EPK
+              </a>
+            </div>
+
+            <div className="mt-auto border-t border-white/10 pt-5">
+              <p className="mb-3 text-[10px] uppercase tracking-[0.28em] text-white/35">Follow</p>
+              <div className="flex flex-wrap gap-3">
+                <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
+                  <InstagramIcon className="h-4 w-4" />
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
+                  <FacebookIcon className="h-4 w-4" />
+                </a>
+                <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+                  <YoutubeIcon className="h-4 w-4" />
+                </a>
+                <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
+                  <TikTokIcon className="h-4 w-4" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }
 
@@ -330,6 +438,34 @@ function SectionTitle({ children, className = "" }) {
       <h2 className="relative text-4xl font-black uppercase tracking-[0.02em] text-white drop-shadow-[0_0_14px_rgba(255,214,10,0.22)] animate-[sectionTitlePop_4.5s_ease-in-out_infinite] md:text-6xl">
         {children}
       </h2>
+    </div>
+  );
+}
+
+function HeroQuickActions() {
+  const actions = [
+    { href: "#music", label: "Listen", note: "Single teasers" },
+    { href: "#videos", label: "Watch", note: "Live sessions" },
+    { href: "#store", label: "Buy Merch", note: "Ships from Australia" },
+    { href: "#fan-list", label: "Join List", note: "Gigs and release drops" },
+  ];
+
+  return (
+    <div className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      {actions.map((action) => (
+        <a
+          key={action.href}
+          href={action.href}
+          className="group rounded-2xl border border-white/10 bg-black/42 px-4 py-3 backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:border-yellow-200/45 hover:bg-yellow-200/10 hover:shadow-[0_0_24px_rgba(250,204,21,0.14)]"
+        >
+          <span className="block text-xs font-black uppercase tracking-[0.22em] text-white">
+            {action.label}
+          </span>
+          <span className="mt-1 block text-xs text-white/52 transition group-hover:text-white/72">
+            {action.note}
+          </span>
+        </a>
+      ))}
     </div>
   );
 }
@@ -427,6 +563,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
             <a href="https://www.starfishwaterfront.com/stafishsessions" target="_blank" rel="noreferrer" className="rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black transition hover:scale-[1.02]">Launch Event</a>
             <a href="https://humanitix.com/au/search/au--batemans-bay--2536/starfish%20sessions?dates=all" target="_blank" rel="noreferrer" className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:border-white">Tickets</a>
           </div>
+          <HeroQuickActions />
         </div>
         <div className="grid gap-4 self-end">
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
@@ -784,7 +921,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
             ) : i === 1 ? (
               <div className="relative cursor-pointer overflow-hidden" onClick={onOpenVideo}>
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776074427/Screenshot_2026-04-13_195808_ewpool.png')" }} />
+                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: "url('https://img.youtube.com/vi/nlqhNT8FOuk/maxresdefault.jpg')" }} />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition duration-300 group-hover:bg-black/15">
                   <div className="absolute bottom-4 left-4 text-left">
                     <p className="text-xs uppercase tracking-[0.3em] text-white/70 transition duration-300 group-hover:text-white/85">Live</p>
@@ -802,7 +939,8 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                   onOpenAudioImage({
                     image: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777543242/abc_radio_studio_kvt1cg.jpg",
                     title: "ABC Radio Live Show",
-                    audio: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777547088/abc_radio_interview_f772rc.mp4",
+                    youtubeId: "FhFmBOPrCkw",
+                    youtubeTitle: "ABC Radio Live Show with Alice Ansara",
                   })
                 }
               >
@@ -1084,6 +1222,18 @@ function Store({
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
               All our band merch is currently lovingly hand screenprinted by the band to save waste, and all proceeds go toward our Japan Tour. We print in small on-demand batches and occasional one-offs. We print once weekly, so if your choice is not currently in inventory we will let you know the approximate print time.
             </p>
+            <div className="mt-5 grid gap-3 text-xs text-white/64 sm:grid-cols-3">
+              {[
+                ["Secure checkout", "Card, Apple Pay, and Google Pay via Stripe."],
+                ["Ships from Australia", "Standard and Express options at checkout."],
+                ["Print-on-demand", "Out-of-stock items add about 7 days before shipping."],
+              ].map(([title, copy]) => (
+                <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.025] p-4">
+                  <p className="font-black uppercase tracking-[0.18em] text-white/82">{title}</p>
+                  <p className="mt-2 leading-5">{copy}</p>
+                </div>
+              ))}
+            </div>
             <div
               className="group/merchvideo relative mt-5 inline-block"
               onMouseEnter={handleMerchPreviewEnter}
@@ -1513,6 +1663,7 @@ function MemberCard({ member }) {
             {
               src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/lando_crowd_zf6g0w.jpg',
               className: '',
+              credit: 'Photo: Cohen Maberly',
             },
           ]
       : member.name === 'Cadence'
@@ -1524,6 +1675,7 @@ function MemberCard({ member }) {
             {
               src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/cadence_crowd_sh5bik.jpg',
               className: '',
+              credit: 'Photo: Cohen Maberly',
             },
           ]
       : member.name === 'Julian'
@@ -1732,6 +1884,9 @@ function MemberCard({ member }) {
     setIsHoveringBioImage(false);
     setActiveHoverImageIndex(0);
   };
+  const activeHoverImageCredit =
+    isHoveringBioImage ? visibleLighterSideImages[activeHoverImageIndex]?.credit : null;
+  const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
 
   useEffect(() => {
     if (!isHoveringBioImage || visibleLighterSideImages.length <= 1) {
@@ -1895,6 +2050,11 @@ function MemberCard({ member }) {
             ))}
             <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/52 via-black/8 to-black/18 opacity-0 transition duration-300 group-hover:opacity-100" />
             <div className="pointer-events-none absolute inset-0 z-10 opacity-0 transition duration-300 group-hover:opacity-100 bg-[radial-gradient(circle_at_50%_32%,rgba(255,255,255,0.14),transparent_58%)]" />
+            {activeHoverImageCredit ? (
+              <div className="pointer-events-none absolute right-4 top-4 z-30 rounded-full border border-white/18 bg-black/62 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/72 shadow-[0_0_16px_rgba(0,0,0,0.24)] backdrop-blur-sm">
+                {activeHoverImageCredit}
+              </div>
+            ) : null}
           </>
         ) : null}
       </div>
@@ -2225,6 +2385,11 @@ function MemberCard({ member }) {
                     className={`absolute inset-0 h-full w-full object-contain transition duration-700 ease-out ${index === activeHoverGalleryIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]'} ${image.className}`}
                   />
                 ))}
+                {activeHoverGalleryCredit ? (
+                  <div className="pointer-events-none absolute bottom-4 right-4 z-20 rounded-full border border-white/18 bg-black/62 px-3 py-1 text-[9px] font-semibold uppercase tracking-[0.18em] text-white/72 shadow-[0_0_16px_rgba(0,0,0,0.24)] backdrop-blur-sm">
+                    {activeHoverGalleryCredit}
+                  </div>
+                ) : null}
                 <div className="aspect-[4/5] w-full" />
                 <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/20 to-transparent px-5 pb-5 pt-12">
                   <p className="text-[10px] uppercase tracking-[0.28em] text-white/55">Off Stage</p>
@@ -2473,6 +2638,685 @@ function Band() {
   );
 }
 
+function PressImageLibraryModal({ open, onClose, assets }) {
+  const [selectedIds, setSelectedIds] = useState([]);
+  const selectedAssets = assets.filter((asset) => selectedIds.includes(asset.id));
+  const previewAsset = selectedAssets[0] || assets[0];
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onClose]);
+
+  useEffect(() => {
+    if (!open) {
+      setSelectedIds([]);
+    }
+  }, [open]);
+
+  if (!open) return null;
+
+  const toggleSelected = (assetId) => {
+    setSelectedIds((current) =>
+      current.includes(assetId)
+        ? current.filter((id) => id !== assetId)
+        : [...current, assetId]
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-[145] overflow-y-auto bg-black/92 p-4 backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl py-8">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.34em] text-yellow-100/70">Press Image Library</p>
+            <h2 className="mt-2 text-3xl font-black uppercase text-white md:text-5xl">Select / Download</h2>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href="/press-kit/exit-smiling-press-kit.zip"
+              download="exit-smiling-press-kit.zip"
+              className="rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
+            >
+              Download Press Kit ZIP
+            </a>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-full border border-white/20 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:bg-white/10"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[0.92fr_1.08fr]">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-3">
+            <img
+              src={previewAsset.href}
+              alt={previewAsset.alt}
+              className="max-h-[72vh] w-full rounded-2xl object-contain bg-black"
+            />
+            <div className="p-4">
+              <p className="text-xs uppercase tracking-[0.28em] text-yellow-100/65">{previewAsset.category}</p>
+              <h3 className="mt-2 text-2xl font-black uppercase text-white">{previewAsset.title}</h3>
+              <p className="mt-2 text-sm text-white/55">{previewAsset.usage}</p>
+            </div>
+          </div>
+
+          <div className="grid max-h-[82vh] gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
+            {assets.map((asset) => {
+              const isSelected = selectedIds.includes(asset.id);
+
+              return (
+                <article
+                  key={asset.id}
+                  className={`rounded-3xl border p-3 transition ${
+                    isSelected
+                      ? "border-yellow-200/55 bg-yellow-200/10"
+                      : "border-white/10 bg-white/[0.025] hover:border-white/25 hover:bg-white/[0.055]"
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={() => toggleSelected(asset.id)}
+                    className="group relative block w-full overflow-hidden rounded-2xl bg-black text-left"
+                  >
+                    <img
+                      src={asset.href}
+                      alt={asset.alt}
+                      className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.04] group-hover:brightness-110"
+                    />
+                    <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/65 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white backdrop-blur">
+                      {isSelected ? "Selected" : "Select"}
+                    </div>
+                  </button>
+                  <p className="mt-3 text-[10px] uppercase tracking-[0.28em] text-white/42">{asset.category}</p>
+                  <h3 className="mt-1 text-sm font-black uppercase text-white">{asset.title}</h3>
+                  <div className="mt-3 flex gap-2">
+                    <a
+                      href={asset.href}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="rounded-full border border-white/12 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+                    >
+                      Preview
+                    </a>
+                    <a
+                      href={asset.href}
+                      download={asset.fileName}
+                      className="rounded-full border border-white/12 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+                    >
+                      Download
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LogoAssetGrid({ logos }) {
+  const downloadAllLogos = () => {
+    logos.forEach((logo, index) => {
+      window.setTimeout(() => {
+        const link = document.createElement("a");
+        link.href = logo.href;
+        link.download = logo.fileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }, index * 120);
+    });
+  };
+
+  return (
+    <div className="mt-6 rounded-3xl border border-white/10 bg-black/30 p-4">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-xs uppercase tracking-[0.28em] text-yellow-100/65">Transparent Logo Assets</p>
+          <h3 className="mt-2 text-xl font-black uppercase text-white">White / Black / Yellow</h3>
+        </div>
+        <button
+          type="button"
+          onClick={downloadAllLogos}
+          className="rounded-full border border-white/18 px-4 py-2 text-center text-[10px] font-black uppercase tracking-[0.18em] text-white transition hover:bg-white hover:text-black"
+        >
+          Download All Logos
+        </button>
+      </div>
+
+      <div className="mt-4 grid gap-3 sm:grid-cols-3">
+        {logos.map((logo) => (
+          <article
+            key={logo.id}
+            className="group/logo rounded-2xl border border-white/10 bg-white/[0.025] p-3 transition duration-300 hover:z-10 hover:-translate-y-1 hover:border-yellow-200/40 hover:bg-yellow-200/8 hover:shadow-[0_0_34px_rgba(250,204,21,0.14)]"
+          >
+            <div className={`flex aspect-square items-center justify-center overflow-hidden rounded-xl border border-white/8 p-4 transition duration-300 group-hover/logo:scale-[1.08] ${logo.previewClassName}`}>
+              <img
+                src={logo.href}
+                alt={logo.alt}
+                className="max-h-full max-w-full object-contain transition duration-300 group-hover/logo:scale-[1.18]"
+              />
+            </div>
+            <p className="mt-3 text-center text-xs font-black uppercase tracking-[0.18em] text-white">{logo.title}</p>
+            <p className="mt-1 text-center text-[10px] text-white/45">Transparent PNG</p>
+            <a
+              href={logo.href}
+              download={logo.fileName}
+              className="mt-3 block rounded-full border border-white/12 px-3 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.16em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+            >
+              Download
+            </a>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function PressKit({ standalone = false }) {
+  const [imageLibraryOpen, setImageLibraryOpen] = useState(false);
+  const logoAssets = [
+    {
+      id: "logo-white",
+      title: "White Logo",
+      href: "/press-kit/images/exit-smiling-logo-white.png",
+      fileName: "exit-smiling-logo-white-transparent.png",
+      alt: "Exit Smiling white transparent logo",
+      previewClassName: "bg-zinc-950",
+    },
+    {
+      id: "logo-black",
+      title: "Black Logo",
+      href: "/press-kit/images/exit-smiling-logo-black.png",
+      fileName: "exit-smiling-logo-black-transparent.png",
+      alt: "Exit Smiling black transparent logo",
+      previewClassName: "bg-white",
+    },
+    {
+      id: "logo-yellow",
+      title: "Yellow Logo",
+      href: "/press-kit/images/exit-smiling-logo-yellow.png",
+      fileName: "exit-smiling-logo-yellow-transparent.png",
+      alt: "Exit Smiling yellow transparent logo",
+      previewClassName: "bg-zinc-950",
+    },
+  ];
+  const pressImages = [
+    {
+      id: "press-01",
+      title: "Press Photo 01",
+      category: "Press photo",
+      usage: "Primary press-set image for media, posters, and venue listings.",
+      href: "/press-kit/images/press/exit-smiling-press-01.jpg",
+      fileName: "exit-smiling-press-01.jpg",
+      alt: "Exit Smiling press photo 01",
+    },
+    {
+      id: "press-01b",
+      title: "Press Photo 01B",
+      category: "Press photo",
+      usage: "Alternate crop from the official press photo set.",
+      href: "/press-kit/images/press/exit-smiling-press-01b.jpg",
+      fileName: "exit-smiling-press-01b.jpg",
+      alt: "Exit Smiling press photo 01B",
+    },
+    {
+      id: "press-02",
+      title: "Press Photo 02",
+      category: "Press photo",
+      usage: "Official press-set image for features, listings, and social tiles.",
+      href: "/press-kit/images/press/exit-smiling-press-02.jpg",
+      fileName: "exit-smiling-press-02.jpg",
+      alt: "Exit Smiling press photo 02",
+    },
+    {
+      id: "press-03",
+      title: "Press Photo 03",
+      category: "Press photo",
+      usage: "Official press-set image for features, listings, and social tiles.",
+      href: "/press-kit/images/press/exit-smiling-press-03.jpg",
+      fileName: "exit-smiling-press-03.jpg",
+      alt: "Exit Smiling press photo 03",
+    },
+    {
+      id: "press-03b",
+      title: "Press Photo 03B",
+      category: "Press photo",
+      usage: "Alternate crop from the official press photo set.",
+      href: "/press-kit/images/press/exit-smiling-press-03b.jpg",
+      fileName: "exit-smiling-press-03b.jpg",
+      alt: "Exit Smiling press photo 03B",
+    },
+    {
+      id: "press-04",
+      title: "Press Photo 04",
+      category: "Press photo",
+      usage: "Official press-set image for features, listings, and social tiles.",
+      href: "/press-kit/images/press/exit-smiling-press-04.jpg",
+      fileName: "exit-smiling-press-04.jpg",
+      alt: "Exit Smiling press photo 04",
+    },
+    {
+      id: "press-04b",
+      title: "Press Photo 04B",
+      category: "Press photo",
+      usage: "Alternate crop from the official press photo set.",
+      href: "/press-kit/images/press/exit-smiling-press-04b.jpg",
+      fileName: "exit-smiling-press-04b.jpg",
+      alt: "Exit Smiling press photo 04B",
+    },
+    {
+      id: "press-05",
+      title: "Press Photo 05",
+      category: "Press photo",
+      usage: "Official press-set image for features, listings, and social tiles.",
+      href: "/press-kit/images/press/exit-smiling-press-05.jpg",
+      fileName: "exit-smiling-press-05.jpg",
+      alt: "Exit Smiling press photo 05",
+    },
+    {
+      id: "press-05b",
+      title: "Press Photo 05B",
+      category: "Press photo",
+      usage: "Alternate crop from the official press photo set.",
+      href: "/press-kit/images/press/exit-smiling-press-05b.jpg",
+      fileName: "exit-smiling-press-05b.jpg",
+      alt: "Exit Smiling press photo 05B",
+    },
+    {
+      id: "band-press-photo",
+      title: "Band Press Photo",
+      category: "Press photo",
+      usage: "Primary image for press, posters, venue listings, and articles.",
+      href: "/press-kit/images/exit-smiling-band-press-photo.jpg",
+      fileName: "exit-smiling-band-press-photo.jpg",
+      alt: "Exit Smiling band press photo",
+    },
+    {
+      id: "smoke-band",
+      title: "Smoke Band Image",
+      category: "Atmospheric band photo",
+      usage: "Use for feature banners, social announcements, and hero graphics.",
+      href: "/press-kit/images/exit-smiling-smoke-band.jpg",
+      fileName: "exit-smiling-smoke-band.jpg",
+      alt: "Exit Smiling band in smoke lighting",
+    },
+    {
+      id: "live-01",
+      title: "Live Band Photo",
+      category: "Live image",
+      usage: "Use for gig previews, venue posts, and live-show promotion.",
+      href: "/press-kit/images/exit-smiling-live-01.jpg",
+      fileName: "exit-smiling-live-01.jpg",
+      alt: "Exit Smiling live performance photo",
+    },
+    {
+      id: "live-photo-01",
+      title: "Live Stage Photo",
+      category: "Live image",
+      usage: "Use for stage, festival, and event listings.",
+      href: "/press-kit/images/live/exit-smiling-live-photo-01.jpg",
+      fileName: "exit-smiling-live-photo-01.jpg",
+      alt: "Exit Smiling live stage photo",
+    },
+    {
+      id: "live-photo-02",
+      title: "Live Photo 02",
+      category: "Live image",
+      usage: "Use for gig previews, venue posts, and live-show promotion.",
+      href: "/press-kit/images/live/exit-smiling-live-photo-02.jpg",
+      fileName: "exit-smiling-live-photo-02.jpg",
+      alt: "Exit Smiling live photo 02",
+    },
+    {
+      id: "live-photo-03",
+      title: "Live Photo 03",
+      category: "Live image",
+      usage: "Use for gig previews, venue posts, and live-show promotion.",
+      href: "/press-kit/images/live/exit-smiling-live-photo-03.jpg",
+      fileName: "exit-smiling-live-photo-03.jpg",
+      alt: "Exit Smiling live photo 03",
+    },
+    {
+      id: "live-photo-04",
+      title: "Live Photo 04",
+      category: "Live image",
+      usage: "Use for gig previews, venue posts, and live-show promotion.",
+      href: "/press-kit/images/live/exit-smiling-live-photo-04.jpg",
+      fileName: "exit-smiling-live-photo-04.jpg",
+      alt: "Exit Smiling live photo 04",
+    },
+    {
+      id: "abc-radio",
+      title: "ABC Radio Studio",
+      category: "Media appearance",
+      usage: "Use when referencing ABC Radio or interview coverage.",
+      href: "/press-kit/images/exit-smiling-abc-radio-studio.jpg",
+      fileName: "exit-smiling-abc-radio-studio.jpg",
+      alt: "Exit Smiling in ABC Radio studio",
+    },
+    {
+      id: "single-cover",
+      title: "Debut Single Cover",
+      category: "Release artwork",
+      usage: "Use for debut single, release, and music-preview coverage.",
+      href: "/press-kit/images/exit-smiling-single-cover.png",
+      fileName: "exit-smiling-single-cover.png",
+      alt: "Exit Smiling debut single cover",
+    },
+    {
+      id: "logo-white",
+      title: "White Logo",
+      category: "Logo asset",
+      usage: "Transparent PNG logo asset. Use on dark backgrounds.",
+      href: "/press-kit/images/exit-smiling-logo-white.png",
+      fileName: "exit-smiling-logo-white-transparent.png",
+      alt: "Exit Smiling white logo",
+    },
+    {
+      id: "logo-black",
+      title: "Black Logo",
+      category: "Logo asset",
+      usage: "Transparent PNG logo asset. Use on light backgrounds.",
+      href: "/press-kit/images/exit-smiling-logo-black.png",
+      fileName: "exit-smiling-logo-black-transparent.png",
+      alt: "Exit Smiling black logo",
+    },
+    {
+      id: "logo-yellow",
+      title: "Yellow Logo",
+      category: "Logo asset",
+      usage: "Transparent PNG logo asset. Use when a high-impact brand mark is needed.",
+      href: "/press-kit/images/exit-smiling-logo-yellow.png",
+      fileName: "exit-smiling-logo-yellow-transparent.png",
+      alt: "Exit Smiling yellow logo",
+    },
+  ];
+  const pressPhotoUrl = pressImages[0].href;
+  const pressLinks = [
+    { href: "https://www.instagram.com/exitsmiling33/", label: "Instagram" },
+    { href: "https://www.facebook.com/profile.php?id=61584318366927", label: "Facebook" },
+    { href: "https://www.youtube.com/@ExitSmiling-u8i", label: "YouTube" },
+    { href: "https://www.tiktok.com/@exit_smiling", label: "TikTok" },
+  ];
+  const highlights = [
+    "Debut single launch: Starfish Sessions, Batemans Bay - June 12, 2026.",
+    "Original music played on ABC Radio, including live studio interview content.",
+    "Winners of school Battle of the Bands and Eurobodalla Battle of the Bands.",
+    "Live appearances at Smokey Dans, Starfish Deli Live, Nelligen Hotel, Narooma Oyster Festival, and more.",
+    "Shared bills or stages with Flavuh, Archie, Merci, Mercy, Thunderfox, Spindrift Saga, and other South Coast artists.",
+  ];
+  const videos = [
+    {
+      title: "Bombtrack (RATM Cover)",
+      subtitle: "Live performance video",
+      youtubeId: "nlqhNT8FOuk",
+    },
+    {
+      title: "ABC Radio Live Show",
+      subtitle: "Live with Alice Ansara",
+      youtubeId: "FhFmBOPrCkw",
+    },
+  ];
+
+  return (
+    <section
+      id="press-kit"
+      className={`${standalone ? "min-h-screen" : "scroll-mt-32 border-y border-white/10"} bg-[linear-gradient(135deg,rgba(255,255,255,0.055),rgba(255,255,255,0.012)),radial-gradient(circle_at_80%_15%,rgba(250,204,21,0.13),transparent_34%)]`}
+    >
+      <div className="mx-auto max-w-7xl px-6 py-20">
+        {standalone ? (
+          <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
+            <a href="/" className="inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/[0.035] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-white/35 hover:bg-white/10">
+              <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 object-contain" />
+              Exit Smiling
+            </a>
+            <div className="flex flex-wrap gap-2">
+              <a href="/" className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white">
+                Main Site
+              </a>
+              <a href="/#store" className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white">
+                Merch
+              </a>
+            </div>
+          </div>
+        ) : null}
+        <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-start">
+          <div>
+            <p className="text-xs uppercase tracking-[0.35em] text-yellow-100/70">Electronic Press Kit</p>
+            <h2 className="mt-3 text-4xl font-black uppercase leading-none text-white md:text-6xl">
+              Press / Media Kit
+            </h2>
+            <p className="mt-5 max-w-2xl text-sm leading-7 text-white/68 md:text-base">
+              Exit Smiling are a South Coast NSW teenage band building a fast-moving live reputation around original songs, high-energy covers, and a genuine community following. Their site, live show, merch stand, and media presence are being built around the same independent DIY energy as the band.
+            </p>
+            <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58 md:text-base">
+              For booking, press, festival, radio, school, and venue enquiries, use the contacts below or link directly to the official social channels.
+            </p>
+
+            <div className="mt-6 grid gap-3 sm:grid-cols-2">
+              <a
+                href="/press-kit/exit-smiling-press-kit.zip"
+                download="exit-smiling-press-kit.zip"
+                className="rounded-2xl border border-white bg-white px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
+              >
+                Download Press Kit ZIP
+              </a>
+              <button
+                type="button"
+                onClick={() => setImageLibraryOpen(true)}
+                className="rounded-2xl border border-yellow-200/25 bg-yellow-200/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-yellow-50 transition hover:border-yellow-100/55 hover:bg-yellow-200/18"
+              >
+                Open Image Library
+              </button>
+              <a
+                href={pressPhotoUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="rounded-2xl border border-white/12 bg-white/[0.035] px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-white/35 hover:bg-white/10"
+              >
+                Open Press Photo
+              </a>
+            </div>
+            <LogoAssetGrid logos={logoAssets} />
+          </div>
+
+          <div className="overflow-hidden rounded-3xl border border-white/10 bg-black/45 p-3 shadow-[0_0_34px_rgba(255,255,255,0.08)]">
+            <img
+              src={pressPhotoUrl}
+              alt="Exit Smiling press photo"
+              className="aspect-[4/3] w-full rounded-2xl object-cover object-center"
+            />
+          </div>
+        </div>
+
+        <div className="mt-10 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-5">
+            <h3 className="text-xl font-black uppercase tracking-[0.08em] text-white">Fast Facts</h3>
+            <div className="mt-5 grid gap-3 text-sm text-white/68">
+              <p><span className="font-semibold text-white">Location:</span> South Coast NSW, Australia</p>
+              <p><span className="font-semibold text-white">Style:</span> Young alternative rock band, original songs, live covers, high-energy local shows</p>
+              <p><span className="font-semibold text-white">Current focus:</span> Debut single launch, live shows, studio sessions, and official merch</p>
+              <p><span className="font-semibold text-white">Booking:</span> <a href="mailto:megan@goodvibesentertainment.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">megan@goodvibesentertainment.com.au</a></p>
+              <p><span className="font-semibold text-white">Band contact:</span> <a href="mailto:paul@pauldolphindesigns.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">paul@pauldolphindesigns.com.au</a></p>
+            </div>
+
+            <div className="mt-6 flex flex-wrap gap-2">
+              {pressLinks.map((link) => (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-white/[0.025] p-5">
+            <h3 className="text-xl font-black uppercase tracking-[0.08em] text-white">Notable Highlights</h3>
+            <div className="mt-5 space-y-3">
+              {highlights.map((highlight) => (
+                <div key={highlight} className="flex gap-3 rounded-2xl border border-white/8 bg-black/24 p-3 text-sm leading-6 text-white/68">
+                  <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-yellow-200" />
+                  <p>{highlight}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 grid gap-6 md:grid-cols-2">
+          {videos.map((video) => (
+            <article key={video.youtubeId} className="overflow-hidden rounded-3xl border border-white/10 bg-black/45">
+              <div className="aspect-video w-full bg-black">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0`}
+                  title={video.title}
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  loading="lazy"
+                  className="h-full w-full border-0"
+                />
+              </div>
+              <div className="p-5">
+                <p className="text-xs uppercase tracking-[0.28em] text-yellow-100/62">{video.subtitle}</p>
+                <h3 className="mt-2 text-xl font-black uppercase text-white">{video.title}</h3>
+              </div>
+            </article>
+          ))}
+        </div>
+        <PressImageLibraryModal
+          open={imageLibraryOpen}
+          onClose={() => setImageLibraryOpen(false)}
+          assets={pressImages}
+        />
+      </div>
+    </section>
+  );
+}
+
+function FanListSignup() {
+  const [email, setEmail] = useState("");
+  const [consentChecked, setConsentChecked] = useState(false);
+  const [status, setStatus] = useState({ tone: "idle", message: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!normalizedEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      setStatus({ tone: "error", message: "Enter a valid email address." });
+      return;
+    }
+
+    if (!consentChecked) {
+      setStatus({ tone: "error", message: "Please confirm you are happy to receive Exit Smiling updates." });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus({ tone: "idle", message: "" });
+
+    try {
+      await registerFanUpdatesAccess({
+        email: normalizedEmail,
+        consentChecked: true,
+        source: "website_fan_list",
+      });
+
+      setEmail("");
+      setConsentChecked(false);
+      setStatus({
+        tone: "success",
+        message: "You're on the list. We'll only send release, gig, and merch updates.",
+      });
+    } catch (err) {
+      setStatus({
+        tone: "error",
+        message: err.message || "Could not join the list right now. Please try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <section id="fan-list" className="scroll-mt-32 border-y border-white/10 bg-[radial-gradient(circle_at_15%_20%,rgba(250,204,21,0.16),transparent_32%),linear-gradient(135deg,rgba(255,255,255,0.06),rgba(255,255,255,0.015))]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-6 py-14 md:grid-cols-[0.9fr_1.1fr] md:items-center">
+        <div>
+          <p className="text-xs uppercase tracking-[0.32em] text-yellow-100/72">Fan list</p>
+          <h2 className="mt-3 text-3xl font-black uppercase leading-tight text-white md:text-5xl">
+            Release drops, gig alerts, merch restocks.
+          </h2>
+          <p className="mt-4 max-w-xl text-sm leading-7 text-white/64 md:text-base">
+            Join the Exit Smiling list for occasional updates when new music, live shows, limited merch, or print runs go live.
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="rounded-3xl border border-white/10 bg-black/55 p-5 shadow-[0_0_34px_rgba(0,0,0,0.2)] backdrop-blur">
+          <div className="grid gap-3 sm:grid-cols-[1fr_auto]">
+            <input
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="Email address"
+              autoComplete="email"
+              className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/32 outline-none transition focus:border-yellow-200/50 focus:bg-white/[0.07]"
+            />
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="rounded-full bg-white px-6 py-3 text-sm font-black uppercase tracking-[0.16em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {isSubmitting ? "Joining..." : "Join"}
+            </button>
+          </div>
+
+          <label className="mt-4 flex items-start gap-3 text-xs leading-5 text-white/56">
+            <input
+              type="checkbox"
+              checked={consentChecked}
+              onChange={(event) => setConsentChecked(event.target.checked)}
+              className="mt-1 h-4 w-4 accent-yellow-200"
+            />
+            <span>I consent to receive occasional Exit Smiling updates by email. No spam.</span>
+          </label>
+
+          {status.message ? (
+            <p className={`mt-4 rounded-2xl border px-4 py-3 text-sm ${
+              status.tone === "success"
+                ? "border-emerald-300/25 bg-emerald-300/10 text-emerald-100"
+                : "border-red-300/25 bg-red-300/10 text-red-100"
+            }`}>
+              {status.message}
+            </p>
+          ) : null}
+        </form>
+      </div>
+    </section>
+  );
+}
+
 function StudioSessions({ onOpenStudio }) {
   return (
     <section className="mx-auto max-w-7xl px-6 pb-20">
@@ -2639,12 +3483,40 @@ function MobileSocialBar() {
 }
 
 function VideoModal({ open, onClose }) {
+  useEffect(() => {
+    if (!open) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [open, onClose]);
+
   if (!open) return null;
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
       <div className="relative w-full max-w-7xl px-4 md:px-8">
+        <a
+          href="https://www.youtube.com/watch?v=nlqhNT8FOuk"
+          target="_blank"
+          rel="noreferrer"
+          onClick={onClose}
+          className="absolute -top-10 left-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70"
+        >
+          Watch on YouTube
+        </a>
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
-        <video src="https://res.cloudinary.com/dkffwzpba/video/upload/v1776069327/bombtrack_4_xfxuvd.mp4" controls autoPlay className="w-full rounded-2xl max-h-[85vh] bg-black" />
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/nlqhNT8FOuk?autoplay=1&rel=0"
+          title="Bombtrack RATM Cover by Exit Smiling"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="aspect-video w-full rounded-2xl bg-black"
+        />
       </div>
     </div>
   );
@@ -2665,6 +3537,19 @@ function PosterModal({ open, onClose }) {
 }
 
 function FeaturedAudioImageModal({ item, onClose }) {
+  useEffect(() => {
+    if (!item?.youtubeId) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "hidden") {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [item?.youtubeId, onClose]);
+
   if (!item?.image) return null;
   return (
     <div className="fixed inset-0 z-[102] flex items-center justify-center bg-black/92 p-4" onClick={onClose}>
@@ -2677,7 +3562,19 @@ function FeaturedAudioImageModal({ item, onClose }) {
             className="max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
           />
         </div>
-        {item.audio ? <audio src={item.audio} autoPlay controls className="mt-4 w-full" /> : null}
+        {item.youtubeId ? (
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-black">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${item.youtubeId}?autoplay=1&rel=0`}
+              title={item.youtubeTitle || item.title || "Featured audio"}
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              className="aspect-video w-full bg-black"
+            />
+          </div>
+        ) : item.audio ? (
+          <audio src={item.audio} autoPlay controls className="mt-4 w-full" />
+        ) : null}
       </div>
     </div>
   );
@@ -3212,6 +4109,12 @@ function MiniCart({
         </div>
 
         <div className="mt-4 border-t border-white/10 pt-4">
+          <div className="mb-4 rounded-2xl border border-yellow-200/15 bg-yellow-200/8 p-3 text-[11px] leading-5 text-yellow-50/78">
+            <p className="font-black uppercase tracking-[0.2em] text-yellow-50">Checkout notes</p>
+            <p className="mt-2">
+              Secure Stripe checkout. Apple Pay and Google Pay appear when supported by your device/browser. Print-on-demand items take about 7 extra days before shipping.
+            </p>
+          </div>
           <div className="mb-4 flex items-center justify-between text-sm">
             <span className="text-white/60">Subtotal</span>
             <span className="font-semibold text-white">
@@ -4165,6 +5068,7 @@ export default function App() {
       />
       <StudioSessions onOpenStudio={handleStudioAccess} />
       <Band />
+      <FanListSignup />
       <Store
         products={products}
         onAddToCart={handleAddToCart}
@@ -4176,6 +5080,7 @@ export default function App() {
         selectedOptionsByProduct={selectedOptionsByProduct}
         setSelectedOptionsByProduct={setSelectedOptionsByProduct}
       />
+      <PressKit />
       
       <Footer />
       <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
