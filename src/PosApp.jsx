@@ -2371,7 +2371,11 @@ export default function PosApp() {
                   <input
                     type="checkbox"
                     checked={simulateReader}
-                    onChange={(event) => setSimulateReader(event.target.checked)}
+                    onChange={(event) => {
+                      setSimulateReader(event.target.checked);
+                      setSelectedReaderId("");
+                      setReaders([]);
+                    }}
                     className="h-4 w-4 accent-yellow-300"
                   />
                   Simulated Reader
@@ -3128,11 +3132,22 @@ export default function PosApp() {
                     : "Load live readers"}
               </button>
               <button
+                onClick={withTapSound(() => {
+                  setSimulateReader(false);
+                  setSelectedReaderId("");
+                  refreshReaders({ preferSimulated: false });
+                })}
+                disabled={loadingReaders}
+                className={`rounded-full border border-yellow-300/35 bg-yellow-300/10 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-yellow-100 hover:border-yellow-300/70 hover:bg-yellow-300/20 disabled:cursor-not-allowed disabled:opacity-40 ${tapButtonClass}`}
+              >
+                Load live readers
+              </button>
+              <button
                 onClick={withTapSound(() => refreshReaders({ preferSimulated: simulateReader }))}
                 disabled={loadingReaders}
                 className={`rounded-full border border-white/15 px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white/75 hover:border-white/35 hover:text-white disabled:cursor-not-allowed disabled:opacity-40 ${tapButtonClass}`}
               >
-                Refresh readers
+                Refresh current mode
               </button>
             </div>
 
@@ -3249,6 +3264,8 @@ export default function PosApp() {
     </div>
   );
 }
+
+
 
 
 
