@@ -60,6 +60,20 @@ export async function ensureSimulatedReader({ locationId, label } = {}) {
   return readJson(res, "Failed to prepare simulated reader.");
 }
 
+export async function registerTerminalReader({ registrationCode, locationId, label } = {}) {
+  const res = await fetch(`${baseUrl}/store/pos/terminal/register-reader`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      registration_code: registrationCode,
+      location_id: locationId,
+      label,
+    }),
+  });
+
+  return readJson(res, "Failed to register Terminal reader.");
+}
+
 export async function startTerminalSale(payload) {
   const res = await fetch(`${baseUrl}/store/pos/terminal/sales`, {
     method: "POST",
@@ -103,6 +117,7 @@ export async function finalizePosSale({ paymentIntentId, items }) {
 export async function createCashPosSale({
   items,
   receiptEmail,
+  customerMobile,
   operatorName,
   eventName,
   cashReceived,
@@ -115,6 +130,7 @@ export async function createCashPosSale({
     body: JSON.stringify({
       items,
       receipt_email: receiptEmail || undefined,
+      customer_mobile: customerMobile || undefined,
       operator_name: operatorName || undefined,
       event_name: eventName || undefined,
       cash_received: cashReceived,
@@ -129,6 +145,7 @@ export async function createCashPosSale({
 export async function createComplimentaryPosSale({
   items,
   receiptEmail,
+  customerMobile,
   operatorName,
   eventName,
   note,
@@ -140,6 +157,7 @@ export async function createComplimentaryPosSale({
     body: JSON.stringify({
       items,
       receipt_email: receiptEmail || undefined,
+      customer_mobile: customerMobile || undefined,
       operator_name: operatorName || undefined,
       event_name: eventName || undefined,
       note: note || undefined,

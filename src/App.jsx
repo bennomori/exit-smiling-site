@@ -175,6 +175,15 @@ const merch = [
   "Signed Tee's",
 ];
 
+const fallbackMerchImage =
+  "https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png";
+
+const mostPopularProductImageOverrides = {
+  // Add custom promo images by Medusa product title, handle, or id.
+  // Example:
+  // "light grey hoodie black logo": "https://res.cloudinary.com/.../custom-hero.jpg",
+};
+
 const members = [
   { name: 'Cadence', role: 'Vocals' },
   { name: 'Lando', role: 'Vocals / Rhythm Guitar' },
@@ -283,8 +292,8 @@ function Header({ cart, onToggleMiniCart }) {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-10">
-            <div className="hidden items-center gap-3 md:flex">
+          <div className="flex items-center gap-4 md:gap-4 lg:gap-5">
+            <div className="hidden items-center gap-2 md:flex">
               <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
                 <InstagramIcon className="h-4 w-4" />
               </a>
@@ -472,6 +481,15 @@ function HeroQuickActions() {
 
 function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
   const currentHeroMedia = heroImages[currentImage];
+  const [showHeroManifestoTile, setShowHeroManifestoTile] = useState(false);
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setShowHeroManifestoTile((prev) => !prev);
+    }, showHeroManifestoTile ? 18500 : 10500);
+
+    return () => window.clearInterval(interval);
+  }, [showHeroManifestoTile]);
 
   return (
     <section className="relative overflow-hidden border-b border-white/10">
@@ -484,6 +502,18 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
           26%, 74% {
             opacity: 0;
             transform: rotate(-24deg) scale(0.9);
+          }
+        }
+        @keyframes heroCatch22ImagePulse {
+          0%, 12%, 88%, 100% {
+            opacity: 0;
+            transform: rotate(-14deg) scale(0.86);
+            filter: grayscale(100%) contrast(1.2) brightness(0.88);
+          }
+          24%, 72% {
+            opacity: 0.48;
+            transform: rotate(-14deg) scale(1.04);
+            filter: grayscale(100%) contrast(1.38) brightness(1.15) drop-shadow(0 0 18px rgba(255,255,255,0.22));
           }
         }
       `}</style>
@@ -567,42 +597,42 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
         </div>
         <div className="grid gap-4 self-end">
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.3em] text-white/50">Featured release</p>
-            <button
-              type="button"
-              onClick={() =>
-                onOpenReleasePreview({
-                  src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
-                  disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
-                })
-              }
-              className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left"
-            >
-              <div
-                className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
-                style={{
-                  backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')",
-                  backgroundSize: 'cover',
-                  backgroundPosition: 'center 70%',
-                }}
-              />
-              <div className="absolute inset-0 bg-black/20 transition duration-500 group-hover:opacity-0" />
-              <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
-                <div
-                  className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
-                  style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
-                >
-                  <p className="max-w-[11rem] text-center text-sm font-black uppercase leading-tight tracking-[0.12em] text-white md:max-w-[13rem] md:text-lg">
-                    PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+            <p className="text-xs uppercase tracking-[0.3em] text-white/50">
+              {showHeroManifestoTile ? "Name origin" : "Featured release"}
+            </p>
+            {showHeroManifestoTile ? (
+              <div className="relative mt-4 flex aspect-square w-full flex-col justify-between overflow-hidden rounded-2xl border border-yellow-100/18 bg-[#11100b] p-5 shadow-[inset_0_0_40px_rgba(250,204,21,0.05)] animate-[fadeIn_0.55s_ease_forwards]">
+                <div className="pointer-events-none absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_15%_10%,rgba(250,204,21,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%),repeating-linear-gradient(0deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_18px)]" />
+                <img
+                  src="https://res.cloudinary.com/dkffwzpba/image/upload/v1778026869/Screenshot_2026-05-06_102033_kcetie.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-[-12%] top-[10%] w-[78%] max-w-[24rem] mix-blend-screen"
+                  style={{
+                    animation: 'heroCatch22ImagePulse 8.4s ease-in-out infinite',
+                  }}
+                />
+                <div className="relative">
+                  <p className="text-[10px] font-black uppercase tracking-[0.34em] text-yellow-100/70">
+                    Why Exit Smiling?
+                  </p>
+                  <h2 className="mt-3 max-w-[12rem] -rotate-2 text-4xl font-black uppercase leading-[0.9] text-white drop-shadow-[0_0_18px_rgba(250,204,21,0.12)] md:text-5xl">
+                    No forced smiles.
+                  </h2>
+                </div>
+                <div className="relative space-y-3 text-sm leading-6 text-white/74">
+                  <p>
+                    The name Exit Smiling is inspired by the paradox at the heart of Catch-22: trapped by rules that contradict themselves, where even escape depends on playing along.
+                  </p>
+                  <p className="font-black uppercase tracking-[0.12em] text-yellow-50">
+                    Smile. Agree. Move on.
+                  </p>
+                  <p>
+                    That might work for systems but It does not work for us. No filters or fake exits. Just noise that tells the truth.
                   </p>
                 </div>
               </div>
-            </button>
-            <div className="mt-4 flex items-center justify-between gap-4">
-              <div>
-                <h2 className="text-2xl font-bold uppercase">Debut Single</h2>
-                <p className="text-sm text-white/60">Releases live on Friday June 12, 2026</p>
-              </div>
+            ) : (
               <button
                 type="button"
                 onClick={() =>
@@ -611,10 +641,60 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
                     disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
                   })
                 }
-                className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+                className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left animate-[fadeIn_0.55s_ease_forwards]"
               >
-                Click for a teaser
+                <div
+                  className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
+                  style={{
+                    backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')",
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center 70%',
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/20 transition duration-500 group-hover:opacity-0" />
+                <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
+                  <div
+                    className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
+                    style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
+                  >
+                    <p className="max-w-[11rem] text-center text-sm font-black uppercase leading-tight tracking-[0.12em] text-white md:max-w-[13rem] md:text-lg">
+                      PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+                    </p>
+                  </div>
+                </div>
               </button>
+            )}
+            <div className="mt-4 flex items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold uppercase">
+                  {showHeroManifestoTile ? "Band Manifesto" : "Debut Single"}
+                </h2>
+                <p className="text-sm text-white/60">
+                  {showHeroManifestoTile ? "The name behind the noise" : "Releases live on Friday June 12, 2026"}
+                </p>
+              </div>
+              {showHeroManifestoTile ? (
+                <button
+                  type="button"
+                  onClick={() => setShowHeroManifestoTile(false)}
+                  className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+                >
+                  View single
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() =>
+                    onOpenReleasePreview({
+                      src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                      disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+                    })
+                  }
+                  className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+                >
+                  Click for a teaser
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -992,6 +1072,18 @@ function Store({
   const normalizeOptionValue = (value) =>
     String(value || "").trim().toLowerCase();
 
+  const topProduct = products?.[0] || null;
+  const topProductImageOverride =
+    topProduct &&
+    (mostPopularProductImageOverrides[String(topProduct.id || "").trim().toLowerCase()] ||
+      mostPopularProductImageOverrides[String(topProduct.handle || "").trim().toLowerCase()] ||
+      mostPopularProductImageOverrides[String(topProduct.title || "").trim().toLowerCase()]);
+  const topProductImage =
+    topProductImageOverride ||
+    topProduct?.thumbnail ||
+    topProduct?.images?.[0]?.url ||
+    fallbackMerchImage;
+
   const handleMerchPreviewEnter = async () => {
     const video = merchPreviewVideoRef.current;
     if (!video) return;
@@ -1264,27 +1356,36 @@ function Store({
           <div className="relative hidden self-start md:block">
             <div className="pointer-events-none absolute inset-0 rounded-[1.7rem] bg-[radial-gradient(circle_at_50%_20%,rgba(255,255,255,0.08),transparent_62%)]" />
             <div className="relative overflow-hidden rounded-[1.7rem] border border-white/8 bg-black/30 p-2 shadow-[0_0_34px_rgba(255,255,255,0.08)]">
-              <div className="overflow-hidden rounded-[1.2rem]">
-              <video
-                src="https://res.cloudinary.com/dkffwzpba/video/upload/v1777258191/merch_rotation_woman_brpnmy.mp4"
-                autoPlay
-                muted
-                loop
-                playsInline
-                preload="auto"
-                onLoadedMetadata={(event) => {
-                  event.currentTarget.currentTime = 0.75;
-                  event.currentTarget.playbackRate = 0.625;
-                }}
-                className="block h-[280px] w-[160px] object-cover object-center [filter:contrast(1.08)_brightness(1.02)]"
-                style={{ mixBlendMode: "screen" }}
-              />
-              </div>
-              <div className="pointer-events-none absolute inset-x-4 bottom-5 z-20">
-                <div className="rounded-full border border-yellow-300/30 bg-black/55 px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.2)] backdrop-blur-sm animate-[liveHeadlinePulse_5.2s_ease-in-out_infinite]">
-                  Most Popular
+              <button
+                type="button"
+                onClick={() => topProduct && onOpenMerchImage?.(topProductImage, topProduct.title)}
+                className="group/popular relative block overflow-hidden rounded-[1.2rem] text-left"
+                disabled={!topProduct}
+              >
+                <img
+                  src={topProductImage}
+                  alt={topProduct ? `${topProduct.title} - most popular merch` : "Most popular merch"}
+                  className="block h-[280px] w-[160px] object-cover object-center transition duration-500 ease-out [filter:contrast(1.08)_brightness(1.02)] group-hover/popular:scale-[1.06] group-hover/popular:brightness-110"
+                />
+                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
+                <div className="pointer-events-none absolute inset-x-3 bottom-4 z-20">
+                  <div className="rounded-full border border-yellow-300/30 bg-black/55 px-4 py-2 text-center text-[10px] font-semibold uppercase tracking-[0.28em] text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.2)] backdrop-blur-sm animate-[liveHeadlinePulse_5.2s_ease-in-out_infinite]">
+                    Most Popular
+                  </div>
+                  {topProduct ? (
+                    <div className="mt-3 rounded-2xl border border-white/12 bg-black/60 px-3 py-2 text-center backdrop-blur-sm">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/90">
+                        {topProduct.title}
+                      </p>
+                      {Number(topProduct.units_sold || 0) > 0 ? (
+                        <p className="mt-1 text-[9px] uppercase tracking-[0.16em] text-white/50">
+                          {topProduct.units_sold} sold to date
+                        </p>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
-              </div>
+              </button>
             </div>
           </div>
         </div>
@@ -1323,7 +1424,7 @@ function Store({
             const image =
               product.thumbnail ||
               product.images?.[0]?.url ||
-              "https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png";
+              fallbackMerchImage;
 
             return (
               <article
@@ -3248,7 +3349,7 @@ function FanListSignup() {
       setConsentChecked(false);
       setStatus({
         tone: "success",
-        message: "You're on the list. We'll only send release, gig, and merch updates.",
+        message: "You're on the list. We'll only send occasional release, gig, and merch updates.",
       });
     } catch (err) {
       setStatus({
@@ -3354,9 +3455,17 @@ function Footer() {
   return (
     <footer className="border-t border-white/10 px-6 py-10 text-sm text-white/50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
-        <div className="flex items-center gap-3">
-          <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
-          <span>(c) 2026 {brand.name}</span>
+        <div>
+          <div className="flex items-center gap-3">
+            <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
+            <span>(c) 2026 {brand.name}</span>
+          </div>
+          <a
+            href="/epk"
+            className="mt-4 inline-flex rounded-full border border-white/15 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+          >
+            Press Kit
+          </a>
         </div>
 
         <div className="text-white/70">
@@ -3417,11 +3526,11 @@ function Footer() {
 }
 
 function MobileSocialBar() {
-  const socialButtonClass = 'flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-300 hover:border-white/35 hover:bg-white/10 hover:text-white';
+  const socialButtonClass = 'flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white/75 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur transition duration-300 hover:border-white/35 hover:bg-white/10 hover:text-white';
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-black/90 px-4 py-3 backdrop-blur md:hidden">
-      <div className="mx-auto flex max-w-md items-center justify-center gap-4">
+    <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2 md:hidden">
+      <div className="flex flex-col items-center justify-center gap-2 rounded-full border border-white/10 bg-black/55 p-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur">
         <a
           href="https://www.instagram.com/exitsmiling33/"
           target="_blank"
@@ -5081,6 +5190,7 @@ export default function App() {
         setSelectedOptionsByProduct={setSelectedOptionsByProduct}
       />
       <PressKit />
+      <MobileSocialBar />
       
       <Footer />
       <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />

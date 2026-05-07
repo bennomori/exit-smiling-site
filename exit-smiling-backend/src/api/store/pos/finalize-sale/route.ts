@@ -336,6 +336,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
             stripe_payment_intent_id: paymentIntentId,
             stripe_payment_status: paymentIntent.status,
             pos_reader_id: paymentIntent.metadata?.reader_id || "",
+            customer_mobile: paymentIntent.metadata?.customer_mobile || "",
             operator_name: paymentIntent.metadata?.operator_name || "",
             event_name: paymentIntent.metadata?.event_name || "",
             delivery_required: delivery.required ? "true" : "false",

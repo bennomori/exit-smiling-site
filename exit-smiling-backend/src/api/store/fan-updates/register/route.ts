@@ -1,6 +1,7 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { FAN_SUBSCRIBERS_MODULE } from "../../../../modules/fan-subscribers"
 import { issueFanUpdatesToken } from "../../../../lib/fan-updates-token"
+import { syncSubscriberToMailerLite } from "../../../../lib/mailerlite"
 
 const CONSENT_TEXT_VERSION = "fan-updates-v1"
 
@@ -39,6 +40,10 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
   )
 
   const now = new Date()
+  const mailerLiteResult = await syncSubscriberToMailerLite({
+    email,
+    source,
+  })
 
   const subscriber =
     existingSubscribers[0]
@@ -75,5 +80,6 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     email,
     token: token.token,
     expires_at: token.expires_at,
+    mailerlite: mailerLiteResult,
   })
 }

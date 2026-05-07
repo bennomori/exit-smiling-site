@@ -155,6 +155,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse) {
         operator_name: order.metadata?.operator_name || "",
         event_name: order.metadata?.event_name || "",
         payment_intent_id: order.metadata?.stripe_payment_intent_id || "",
+        customer_mobile: order.metadata?.customer_mobile || "",
         reader_id: order.metadata?.pos_reader_id || "",
         cash_sale_reference: order.metadata?.cash_sale_reference || "",
         cash_received_amount: toNumber(order.metadata?.cash_received_amount),

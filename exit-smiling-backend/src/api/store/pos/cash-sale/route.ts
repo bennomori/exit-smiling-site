@@ -74,6 +74,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const body = (req.body || {}) as {
       items?: CashSaleItem[]
       receipt_email?: string
+      customer_mobile?: string
       operator_name?: string
       event_name?: string
       cash_received?: number
@@ -83,6 +84,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     const rawItems = Array.isArray(body.items) ? body.items : []
     const receiptEmail = String(body.receipt_email || "").trim().toLowerCase()
+    const customerMobile = String(body.customer_mobile || "").trim()
     const operatorName = String(body.operator_name || "").trim()
     const eventName = String(body.event_name || "").trim()
     const note = String(body.note || "").trim()
@@ -339,6 +341,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           cash_received_amount: cashReceived,
           cash_change_given: cashChangeGiven,
           cash_note: note,
+          customer_mobile: customerMobile,
           operator_name: operatorName,
           event_name: eventName,
           delivery_required: delivery.required ? "true" : "false",

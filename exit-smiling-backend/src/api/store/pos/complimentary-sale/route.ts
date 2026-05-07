@@ -69,6 +69,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     const body = (req.body || {}) as {
       items?: ComplimentarySaleItem[]
       receipt_email?: string
+      customer_mobile?: string
       operator_name?: string
       event_name?: string
       note?: string
@@ -77,6 +78,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     const rawItems = Array.isArray(body.items) ? body.items : []
     const receiptEmail = String(body.receipt_email || "").trim().toLowerCase()
+    const customerMobile = String(body.customer_mobile || "").trim()
     const operatorName = String(body.operator_name || "").trim()
     const eventName = String(body.event_name || "").trim()
     const note = String(body.note || "").trim()
@@ -325,6 +327,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
           complimentary_sale_reference: complimentarySaleReference,
           complimentary_tags: complimentaryTagSummary,
           complimentary_note: note,
+          customer_mobile: customerMobile,
           operator_name: operatorName,
           event_name: eventName,
           delivery_required: delivery.required ? "true" : "false",
