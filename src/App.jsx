@@ -118,13 +118,18 @@ const pastGigPosterImages = [
   "https://res.cloudinary.com/dkffwzpba/image/upload/v1777321764/halloween_v6s0bg.jpg",
 ];
 
+const exitSmilingDebutSingleCover =
+  "https://res.cloudinary.com/dkffwzpba/image/upload/v1778121889/exitsmiling_single_wrinkledpaper_bcudfh.png";
+const exitSmilingDebutSingleCoverLarge =
+  "https://res.cloudinary.com/dkffwzpba/image/upload/v1778122135/ES_wrinkledlogo_quality_pjmbkr.png";
+
 const releases = [
   {
     title: 'Debut Single - Exit Smiling',
     meta: 'Single - Releases Friday June 12, 2026',
     href: 'https://events.humanitix.com/exit-smiling/tickets',
     blurb: 'Launching live at Starfish Sessions in Batemans Bay.',
-    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png',
+    image: exitSmilingDebutSingleCover,
     imageAlt: 'Exit Smiling Debut Single',
     previewVideo: {
       src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4',
@@ -479,14 +484,14 @@ function HeroQuickActions() {
   );
 }
 
-function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
+function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpenHeroSingleImage }) {
   const currentHeroMedia = heroImages[currentImage];
   const [showHeroManifestoTile, setShowHeroManifestoTile] = useState(false);
 
   useEffect(() => {
     const interval = window.setInterval(() => {
       setShowHeroManifestoTile((prev) => !prev);
-    }, showHeroManifestoTile ? 18500 : 10500);
+    }, showHeroManifestoTile ? 26640 : 10500);
 
     return () => window.clearInterval(interval);
   }, [showHeroManifestoTile]);
@@ -595,13 +600,18 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
           </div>
           <HeroQuickActions />
         </div>
-        <div className="grid gap-4 self-end">
+        <div className="relative grid gap-4 self-end">
+          {showHeroManifestoTile ? (
+            <div className="pointer-events-none absolute inset-x-6 bottom-[calc(100%+0.65rem)] z-20">
+              <BandHeadingFigures />
+            </div>
+          ) : null}
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-              {showHeroManifestoTile ? "Name origin" : "Featured release"}
+              {showHeroManifestoTile ? "Why Exit Smiling?" : "Featured release"}
             </p>
             {showHeroManifestoTile ? (
-              <div className="relative mt-4 flex aspect-square w-full flex-col justify-between overflow-hidden rounded-2xl border border-yellow-100/18 bg-[#11100b] p-5 shadow-[inset_0_0_40px_rgba(250,204,21,0.05)] animate-[fadeIn_0.55s_ease_forwards]">
+              <div className="relative mt-4 flex aspect-square w-full flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-yellow-100/18 bg-[#11100b] p-5 shadow-[inset_0_0_40px_rgba(250,204,21,0.05)] animate-[fadeIn_0.55s_ease_forwards]">
                 <div className="pointer-events-none absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_15%_10%,rgba(250,204,21,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%),repeating-linear-gradient(0deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_18px)]" />
                 <img
                   src="https://res.cloudinary.com/dkffwzpba/image/upload/v1778026869/Screenshot_2026-05-06_102033_kcetie.png"
@@ -614,39 +624,34 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
                 />
                 <div className="relative">
                   <p className="text-[10px] font-black uppercase tracking-[0.34em] text-yellow-100/70">
-                    Why Exit Smiling?
+                    Deeper than just a smile
                   </p>
-                  <h2 className="mt-3 max-w-[12rem] -rotate-2 text-4xl font-black uppercase leading-[0.9] text-white drop-shadow-[0_0_18px_rgba(250,204,21,0.12)] md:text-5xl">
+                  <h2 className="mt-2 max-w-[13rem] -rotate-2 text-3xl font-black uppercase leading-[0.92] text-white drop-shadow-[0_0_18px_rgba(250,204,21,0.12)] md:text-4xl">
                     No forced smiles.
                   </h2>
                 </div>
-                <div className="relative space-y-3 text-sm leading-6 text-white/74">
+                <div className="relative space-y-2.5 text-[13px] leading-5 text-white/74 md:text-sm md:leading-[1.45rem]">
                   <p>
-                    The name Exit Smiling is inspired by the paradox at the heart of Catch-22: trapped by rules that contradict themselves, where even escape depends on playing along.
+                    Max&apos;s avid reading inspired the name Exit Smiling. He uncovered the paradox at the heart of Catch-22: trapped by rules that contradict themselves where even our escape depends on playing along with the system. Perhaps you can relate?
                   </p>
                   <p className="font-black uppercase tracking-[0.12em] text-yellow-50">
                     Smile. Agree. Move on.
                   </p>
                   <p>
-                    That might work for systems but It does not work for us. No filters or fake exits. Just noise that tells the truth.
+                    While that might work for our world systems, it won&apos;t work for us. As a band, we have no filters, no fake exits. Just our creativity and noise telling the truth.
                   </p>
                 </div>
               </div>
             ) : (
               <button
                 type="button"
-                onClick={() =>
-                  onOpenReleasePreview({
-                    src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
-                    disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
-                  })
-                }
+                onClick={() => onOpenHeroSingleImage?.()}
                 className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left animate-[fadeIn_0.55s_ease_forwards]"
               >
                 <div
                   className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
                   style={{
-                    backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')",
+                    backgroundImage: `url(${exitSmilingDebutSingleCover})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center 70%',
                   }}
@@ -692,7 +697,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview }) {
                   }
                   className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
                 >
-                  Click for a teaser
+                  Listen
                 </button>
               )}
             </div>
@@ -718,9 +723,11 @@ function Releases({ onOpenReleasePreview }) {
           }
         }
       `}</style>
-      <div className="mb-10 flex items-end justify-between gap-4">
-        <SectionTitle>Latest releases</SectionTitle>
-        <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">View all</a>
+      <div className="mb-10">
+        <div className="flex items-end justify-between gap-4">
+          <SectionTitle>Latest releases</SectionTitle>
+          <a href="#" className="text-sm uppercase tracking-[0.2em] text-white/70 hover:text-white">View all</a>
+        </div>
       </div>
       <div className="grid gap-5 md:grid-cols-3">
         {releases.map((item) => {
@@ -989,7 +996,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 }
               >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1776054716/exit_smiling_cover_rounded_yktcc1.png')" }} />
+                <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url(${exitSmilingDebutSingleCover})` }} />
                 <div className="pointer-events-none absolute inset-[-18%] z-20 flex items-center justify-center">
                   <div className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-2.5 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm">
                     <p className="max-w-[10rem] text-center text-xs font-black uppercase leading-tight tracking-[0.12em] text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.6)] md:max-w-[12rem] md:text-base">
@@ -2645,6 +2652,97 @@ function BandLivePreview() {
   );
 }
 
+function BandHeadingFigures() {
+  const bandHeadingFigures = [
+    {
+      name: "Max",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198389/max_white_m6hkiy.png",
+    },
+    {
+      name: "Lando",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/lando_white_vo0dok.png",
+    },
+    {
+      name: "Cadence",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198433/cadence_white_br6gks.png",
+    },
+    {
+      name: "Joey",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/joey_white_oudg6s.png",
+    },
+    {
+      name: "Julian",
+      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/julian_white_wf68ww.png",
+    },
+  ];
+  const [figureState, setFigureState] = useState({
+    activeIndex: 0,
+    previousIndex: null,
+    activeColorIndex: 0,
+    previousColorIndex: 0,
+  });
+  const figureColorFilters = [
+    "brightness(0) saturate(100%) invert(84%) sepia(85%) saturate(1022%) hue-rotate(356deg) brightness(103%) contrast(101%)",
+    "brightness(0) saturate(100%) invert(63%) sepia(4%) saturate(300%) hue-rotate(11deg) brightness(94%) contrast(88%)",
+    "brightness(0) invert(1)",
+    "brightness(0) saturate(100%) invert(11%) sepia(6%) saturate(602%) hue-rotate(12deg) brightness(92%) contrast(90%)",
+  ];
+
+  useEffect(() => {
+    const timeout = window.setTimeout(() => {
+      setFigureState((prev) => {
+        if (bandHeadingFigures.length <= 1) return prev;
+
+        let next = prev.activeIndex;
+        while (next === prev.activeIndex) {
+          next = Math.floor(Math.random() * bandHeadingFigures.length);
+        }
+
+        return {
+          activeIndex: next,
+          previousIndex: prev.activeIndex,
+          activeColorIndex: (prev.activeColorIndex + 1) % figureColorFilters.length,
+          previousColorIndex: prev.activeColorIndex,
+        };
+      });
+    }, 1465);
+
+    return () => window.clearTimeout(timeout);
+  }, [figureState.activeIndex, bandHeadingFigures.length]);
+
+  return (
+    <div
+      className="flex h-12 w-full max-w-[22rem] items-end justify-between md:h-16 lg:h-20"
+      aria-label="Exit Smiling band member silhouettes"
+    >
+      {bandHeadingFigures.map((figure, index) => (
+        <div key={figure.name} className="relative h-full w-7 md:w-9 lg:w-11">
+          <img
+            src={figure.src}
+            alt={figure.name}
+            className={`absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,255,255,0.16)] transition-opacity duration-[1200ms] ease-in-out ${
+              index === figureState.activeIndex
+                ? "opacity-100"
+                : index === figureState.previousIndex
+                  ? "opacity-0"
+                  : "opacity-0"
+            }`}
+            style={{
+              filter: figureColorFilters[
+                index === figureState.activeIndex
+                  ? figureState.activeColorIndex
+                  : index === figureState.previousIndex
+                    ? figureState.previousColorIndex
+                    : figureState.activeColorIndex
+              ],
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Band() {
   const bandBioImages = [
     {
@@ -3208,6 +3306,23 @@ export function PressKit({ standalone = false }) {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58 md:text-base">
               For booking, press, festival, radio, school, and venue enquiries, use the contacts below or link directly to the official social channels.
             </p>
+            <div className="mt-6 rounded-3xl border border-yellow-200/18 bg-yellow-200/8 p-5">
+              <p className="text-xs font-black uppercase tracking-[0.28em] text-yellow-100/70">Why Exit Smiling?</p>
+              <h3 className="mt-3 text-2xl font-black uppercase leading-none text-white">
+                Deeper than just a smile
+              </h3>
+              <div className="mt-4 space-y-3 text-sm leading-6 text-white/68">
+                <p>
+                  Max&apos;s avid reading inspired the name Exit Smiling. He uncovered the paradox at the heart of Catch-22: trapped by rules that contradict themselves where even our escape depends on playing along with the system. Perhaps you can relate?
+                </p>
+                <p className="font-black uppercase tracking-[0.12em] text-yellow-50">
+                  Smile. Agree. Move on.
+                </p>
+                <p>
+                  While that might work for our world systems, it won&apos;t work for us. As a band, we have no filters, no fake exits. Just our creativity and noise telling the truth.
+                </p>
+              </div>
+            </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <a
@@ -3757,6 +3872,7 @@ function ReleasePreviewModal({ video, onClose }) {
 function MerchImageModal({ open, onClose, image, title }) {
   if (!open || !image) return null;
 
+  const useStaticLargeImage = image === exitSmilingDebutSingleCoverLarge;
   const merchPanelPositions = [
     '0% 0%',
     '33.333% 0%',
@@ -3782,24 +3898,32 @@ function MerchImageModal({ open, onClose, image, title }) {
         </button>
 
         <div className="flex max-h-[90vh] items-center justify-center rounded-3xl border border-white/10 bg-[#0a0a0a] p-4 md:p-6">
-          <div className="relative aspect-[5/8] w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-black md:max-w-lg">
-            {merchPanelPositions.map((position, index) => (
-              <div
-                key={position}
-                className={`absolute inset-0 bg-no-repeat ${index === 0 ? 'opacity-100 animate-[merchPanelFadeFirst_17.3s_ease-in-out_infinite,merchPanelZoom_17.3s_ease-in-out_infinite]' : 'opacity-0 animate-[merchPanelFade_17.3s_ease-in-out_infinite,merchPanelZoom_17.3s_ease-in-out_infinite]'}`}
-                style={{
-                  backgroundImage: `url(${image})`,
-                  backgroundSize: '430% 214%',
-                  backgroundPosition: position,
-                  animationDelay: `${index * 2.16}s`,
-                }}
-                aria-hidden={index === 0 ? undefined : 'true'}
-                aria-label={index === 0 ? title : undefined}
-                role={index === 0 ? 'img' : undefined}
-              />
-            ))}
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.28)_100%)]" />
-          </div>
+          {useStaticLargeImage ? (
+            <img
+              src={image}
+              alt={title || "Expanded merch image"}
+              className="max-h-[88vh] w-auto max-w-[92vw] rounded-2xl border border-white/10 bg-black object-contain shadow-[0_0_60px_rgba(255,255,255,0.08)]"
+            />
+          ) : (
+            <div className="relative aspect-[5/8] w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-black md:max-w-lg">
+              {merchPanelPositions.map((position, index) => (
+                <div
+                  key={position}
+                  className={`absolute inset-0 bg-no-repeat ${index === 0 ? 'opacity-100 animate-[merchPanelFadeFirst_17.3s_ease-in-out_infinite,merchPanelZoom_17.3s_ease-in-out_infinite]' : 'opacity-0 animate-[merchPanelFade_17.3s_ease-in-out_infinite,merchPanelZoom_17.3s_ease-in-out_infinite]'}`}
+                  style={{
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: '430% 214%',
+                    backgroundPosition: position,
+                    animationDelay: `${index * 2.16}s`,
+                  }}
+                  aria-hidden={index === 0 ? undefined : 'true'}
+                  aria-label={index === 0 ? title : undefined}
+                  role={index === 0 ? 'img' : undefined}
+                />
+              ))}
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.28)_100%)]" />
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -4246,8 +4370,6 @@ function MiniCart({
     </>
   );
 }
-
-
 
 export default function App() {
   const studioAccessStorageKey = "exit_smiling_studio_access_token";
@@ -5167,6 +5289,11 @@ export default function App() {
         currentImage={currentImage}
         onSlideDurationChange={setHeroSlideDurationMs}
         onOpenReleasePreview={setReleasePreviewVideo}
+        onOpenHeroSingleImage={() => {
+          setSelectedMerchImage(exitSmilingDebutSingleCoverLarge);
+          setSelectedMerchTitle("Exit Smiling Debut Single");
+          setMerchImageOpen(true);
+        }}
       />
       <Releases onOpenReleasePreview={setReleasePreviewVideo} />
       <Gigs />
@@ -5261,3 +5388,4 @@ export default function App() {
     </div>
   );
 }
+

@@ -98,7 +98,11 @@ function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
     const [error, setError] = useState("");
     const [statusMessage, setStatusMessage] = useState("");
     const [expressReady, setExpressReady] = useState(false);
+    const [expressChecked, setExpressChecked] = useState(false);
     const [pendingFinalization, setPendingFinalization] = useState(() => readPendingOrder(cartId));
+
+    const isSecureCheckoutOrigin =
+        typeof window === "undefined" || window.isSecureContext || window.location.protocol === "https:";
 
     useEffect(() => {
         setPendingFinalization(readPendingOrder(cartId));
@@ -215,13 +219,19 @@ function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
-            <div className={expressReady ? "space-y-3" : "hidden"}>
+            <div className="space-y-3">
                 <ExpressCheckoutElement
                     onReady={({ availablePaymentMethods }) => {
+                        setExpressChecked(true);
                         setExpressReady(Boolean(availablePaymentMethods));
                     }}
                     onConfirm={handleExpressConfirm}
                     options={{
+                        paymentMethods: {
+                            applePay: "always",
+                            googlePay: "always",
+                            link: "never",
+                        },
                         buttonTheme: {
                             applePay: "white",
                             googlePay: "white",
@@ -232,13 +242,22 @@ function StripeCheckoutForm({ cartId, onSuccess, onClose }) {
                         },
                     }}
                 />
-                <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/35">
-                    <span className="h-px flex-1 bg-white/10" />
-                    <span>or pay by card</span>
-                    <span className="h-px flex-1 bg-white/10" />
-                </div>
+                {expressReady ? (
+                    <div className="flex items-center gap-3 text-[10px] uppercase tracking-[0.2em] text-white/35">
+                        <span className="h-px flex-1 bg-white/10" />
+                        <span>or pay by card</span>
+                        <span className="h-px flex-1 bg-white/10" />
+                    </div>
+                ) : null}
+                {expressChecked && !expressReady ? (
+                    <p className="rounded-2xl border border-yellow-200/15 bg-yellow-200/8 p-3 text-xs leading-5 text-yellow-50/78">
+                        {isSecureCheckoutOrigin
+                            ? "Apple Pay and Google Pay are not available for this browser, device, wallet, or Stripe domain setup. Card checkout is still available below."
+                            : "Apple Pay and Google Pay require a secure HTTPS checkout page. Open the site through the registered HTTPS domain, not a local HTTP address."}
+                    </p>
+                ) : null}
             </div>
-            <PaymentElement />
+            <PaymentElement options={{ paymentMethodOrder: ["card"] }} />
             {statusMessage ? <p className="text-sm text-white/70">{statusMessage}</p> : null}
             {error ? <p className="text-sm text-red-400">{error}</p> : null}
             {pendingFinalization ? (

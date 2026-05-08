@@ -156,6 +156,9 @@ export async function initializeStripePayment(cart) {
       headers: commonHeaders,
       body: JSON.stringify({
         provider_id: "pp_stripe_stripe",
+        data: {
+          payment_method_types: ["card"],
+        },
       }),
     }
   );
