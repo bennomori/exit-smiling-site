@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /pos
+Disallow: /pos/
+
+Sitemap: https://www.exitsmiling.com.au/sitemap.xml
