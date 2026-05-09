@@ -113,10 +113,13 @@ cd ~/exit-smiling-site/exit-smiling-backend/.medusa/server
 Backend deploy script on AWS:
 
 ```bash
-bash /home/ubuntu/deploy-backend-aws.sh
+cd /home/ubuntu/exit-smiling-site
+git pull --ff-only
+chmod +x scripts/deploy-backend-aws.sh
+scripts/deploy-backend-aws.sh
 ```
 
-The script pulls latest Git changes, builds Medusa, installs production dependencies in `.medusa/server`, copies `.env`, and restarts PM2.
+The script pulls latest Git changes, builds Medusa, installs production dependencies in `.medusa/server`, copies `.env`, copies static assets, restarts PM2, and checks local/public backend health.
 
 If deploy fails because the AWS working tree has local changes, inspect before overwriting:
 
@@ -130,8 +133,61 @@ If the local changes are already safely in Git or only server-local build noise,
 
 ```bash
 git stash push -u -m pre-deploy-server-local-changes
-bash /home/ubuntu/deploy-backend-aws.sh
+scripts/deploy-backend-aws.sh
 ```
+
+See `BACKEND_DEPLOY.md` for the slower beginner-safe version of this process.
+
+## Live Health Check
+
+Run this after any deployment, DNS change, backend restart, or Stripe/Medusa change.
+
+From Windows PowerShell:
+
+```powershell
+cd C:\exit-smiling-site
+powershell -ExecutionPolicy Bypass -File scripts\check-live-health.ps1
+```
+
+Expected result:
+
+```text
+Health check passed.
+```
+
+This checks the website, media Worker, backend API, product API, production JS bundle, and confirms the live JS has no old Cloudinary references.
+
+## Media Admin
+
+Private media catalogue:
+
+```text
+https://www.exitsmiling.com.au/media-admin
+```
+
+Use this to find current media URLs, preview grouped R2 assets, copy URLs, and download assets.
+
+Rules:
+
+- Keep `/media-admin` private behind Cloudflare Access or the site preview gate.
+- To replace an image/video without code changes, upload the replacement to Cloudflare R2 using the exact same key shown on the media card.
+- To add a new image/video, use a clean folder/key, update `media-r2-map.csv`, update `src/mediaAssets.js` if it should appear in `/media-admin`, and update the site/POS code if it should be used live.
+- Do not delete the old R2 `cloudinary/` fallback folder until the site has been stable for several days.
+
+Dry-run old fallback cleanup:
+
+```powershell
+cd C:\exit-smiling-site
+powershell -ExecutionPolicy Bypass -File scripts\cleanup-old-r2-cloudinary.ps1
+```
+
+Only after several stable days:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\cleanup-old-r2-cloudinary.ps1 -Delete
+```
+
+See `MEDIA_ADMIN.md` for the full media workflow.
 
 ## PM2 Commands
 
@@ -299,6 +355,96 @@ Expected result: HTTP `200 OK`.
 
 For real verification, use Stripe Dashboard test transactions or Stripe CLI test events.
 
+## POS Before A Gig
+
+Run this checklist before doors open.
+
+- Confirm tablet has internet through venue Wi-Fi, phone hotspot, or tablet SIM.
+- Open `https://www.exitsmiling.com.au/pos`.
+- Connect the Stripe S710 reader from the POS reader controls.
+- Add one low-value test item or use Stripe test mode if still testing.
+- Confirm product images load.
+- Confirm stock quantities show under sizes.
+- Confirm card, cash, complimentary, discount, and receipt flows are visible.
+- Confirm staff dropdown contains the expected names.
+- Confirm shipping address prompt flashes if adding a no-stock/print-on-demand item.
+- Confirm recent sales panel opens and does not show errors.
+- Keep the tablet in landscape mode for practical cart/product layout.
+
+If using two tablets:
+
+- Only one tablet can control one Stripe S710 reader at a time.
+- Use a second reader for a second active card-taking tablet.
+- Simulated reader can remain for testing only.
+
+## POS After A Gig
+
+Run this after the merch stand closes.
+
+- Check POS daily totals for card, cash, complimentary, and total sales.
+- Confirm recent POS sales are visible.
+- Confirm Medusa Admin shows the POS orders.
+- Confirm Stripe Dashboard shows card payments and any refunds.
+- Confirm cash and complimentary sales are recorded in Medusa, not Stripe.
+- Run a database backup on AWS.
+
+AWS backup command:
+
+```bash
+/home/ubuntu/backup-medusa-db.sh
+aws s3 ls s3://exit-smiling-medusa-backups | tail
+```
+
+## Website Change Checklist
+
+After changing the public website:
+
+```powershell
+cd C:\exit-smiling-site
+npm.cmd run build
+git status
+git add .
+git commit -m "Describe the website change"
+git push
+npx.cmd wrangler pages deployment list --project-name exit-smiling-site
+powershell -ExecutionPolicy Bypass -File scripts\check-live-health.ps1
+```
+
+Then manually check:
+
+- Home page loads.
+- Merch loads.
+- Checkout opens.
+- EPK page loads.
+- Media/video that changed plays correctly.
+- Mobile menu still opens/closes.
+
+## Backend Change Checklist
+
+After changing backend code, Medusa routes, Stripe, order alerts, POS order logging, or MailerLite/Postmark logic:
+
+- Push the code to GitHub.
+- SSH into AWS.
+- Run `scripts/deploy-backend-aws.sh`.
+- Check PM2 status.
+- Run the Windows live health check.
+- Place one small test order if checkout/POS/order logic changed.
+
+Windows:
+
+```powershell
+ssh -i C:\Users\ben\.ssh\exit-smiling-aws-key.pem ubuntu@54.253.36.230
+```
+
+AWS:
+
+```bash
+cd /home/ubuntu/exit-smiling-site
+git pull --ff-only
+scripts/deploy-backend-aws.sh
+pm2 status
+```
+
 ## Order Alerts
 
 Postmark order alerts are sent by the backend after orders. Relevant backend env variables:
@@ -335,11 +481,19 @@ pm2 logs exit-smiling-medusa --lines 80
 sudo nginx -t
 ```
 
+Then from Windows:
+
+```powershell
+cd C:\exit-smiling-site
+powershell -ExecutionPolicy Bypass -File scripts\check-live-health.ps1
+```
+
 If the website is blank:
 
 - Check latest Cloudflare deployment status.
 - Open browser console for runtime errors.
 - Confirm the active Cloudflare deployment points to the latest Git commit.
+- If only one browser/device is broken, hard refresh or clear site cache.
 
 If images are broken:
 
@@ -348,12 +502,29 @@ curl -I https://api.exitsmiling.com.au/static/1777200456033-accessories.jpg
 ls -lh /var/www/exit-smiling-static | head
 ```
 
+For R2-hosted site images/videos, check `/media-admin` and open the exact asset URL.
+
 If checkout fails:
 
 - Check Stripe Dashboard payment status.
 - Check Medusa Admin order status.
 - Check PM2 logs.
 - Confirm backend `.env` has current Stripe and webhook values.
+
+If POS reader fails:
+
+- Confirm the S710 has internet.
+- Confirm the tablet has internet.
+- Re-register the reader code in POS if needed.
+- Confirm only one tablet is trying to control that reader.
+- Use simulated reader only for testing when the real reader is unavailable.
+
+If order alert emails fail:
+
+- Confirm the order appears in Medusa.
+- Confirm Postmark sender is verified.
+- Check PM2 logs for Postmark errors.
+- Use the store order-alert test endpoint only if you need to isolate email delivery.
 
 ## Secret Handling
 
