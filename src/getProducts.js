@@ -114,7 +114,7 @@ export async function getProducts() {
 
     if (!value) return value;
 
-    return value.replace(/^https?:\/\/localhost:9000\/static\//i, "/static/");
+    return value.replace(/^https?:\/\/localhost:9000\/static\//i, `${baseUrl}/static/`);
   };
 
   const products = (data.products || []).map((product) => ({

@@ -1054,6 +1054,8 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
 
 function Store({
   products,
+  productsLoading,
+  productsError,
   onAddToCart,
   onOpenMerchImage,
   selectedOptionsByProduct,
@@ -1398,8 +1400,17 @@ function Store({
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {products?.length === 0 && (
+          {productsLoading && products?.length === 0 && (
             <p className="text-white/50">Loading merch...</p>
+          )}
+
+          {!productsLoading && productsError && products?.length === 0 && (
+            <div className="rounded-3xl border border-red-400/25 bg-red-950/25 p-5 text-sm text-red-100">
+              <p className="font-semibold uppercase tracking-[0.18em] text-red-200">
+                Merch could not load
+              </p>
+              <p className="mt-2 text-red-100/80">{productsError}</p>
+            </div>
           )}
 
           {products?.map((product) => {
@@ -4374,6 +4385,8 @@ export default function App() {
   const [currentImage, setCurrentImage] = useState(0);
   const [heroSlideDurationMs, setHeroSlideDurationMs] = useState(defaultSlideDurationMs);
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
+  const [productsError, setProductsError] = useState("");
   const [merchImageOpen, setMerchImageOpen] = useState(false);
   const [selectedFeaturedAudioImage, setSelectedFeaturedAudioImage] = useState(null)
   const [releasePreviewVideo, setReleasePreviewVideo] = useState("");
@@ -4422,10 +4435,15 @@ export default function App() {
   useEffect(() => {
     async function loadProducts() {
       try {
+        setProductsLoading(true);
+        setProductsError("");
         const data = await getProducts();
         setProducts(data);
         setSelectedOptionsByProduct({});
       } catch (err) {
+        setProductsError(err?.message || "Failed to load merch.");
+      } finally {
+        setProductsLoading(false);
       }
     }
 
@@ -5293,6 +5311,8 @@ export default function App() {
       <FanListSignup />
       <Store
         products={products}
+        productsLoading={productsLoading}
+        productsError={productsError}
         onAddToCart={handleAddToCart}
         onOpenMerchImage={(image, title) => {
           setSelectedMerchImage(image);
