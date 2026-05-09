@@ -90,7 +90,7 @@ foreach ($row in $videoRows) {
     -y `
     -i $sourcePath `
     -map 0:v:0 `
-    -map 0:a? `
+    -map 0:a:0? `
     -sn `
     -vf "scale='min($MaxWidth,iw)':-2" `
     -c:v libx264 `

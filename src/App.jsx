@@ -1900,13 +1900,13 @@ function MemberCard({ member }) {
           {
             type: 'video',
             title: 'Joey Timber Sledding',
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-timber-sledding.mov',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-timber-sledding.mp4',
             poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-timber-sledding-poster.jpg',
           },
           {
             type: 'video',
             title: 'Joey Wakesurfing',
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-wakesurfing.mov',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-wakesurfing.mp4',
             poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-wakesurfing-poster.jpg',
             volume: 0.2,
           },

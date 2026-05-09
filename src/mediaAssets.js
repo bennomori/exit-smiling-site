@@ -248,7 +248,7 @@ export const mediaAssets = [
   },
   {
     "oldFile": "joey_ts_o6r3ma.mov",
-    "key": "bio/joey/joey-timber-sledding.mov",
+    "key": "bio/joey/joey-timber-sledding.mp4",
     "description": "Joey timber sledding video"
   },
   {
@@ -258,7 +258,7 @@ export const mediaAssets = [
   },
   {
     "oldFile": "joey_wakesurfing_nfxtqj.mov",
-    "key": "bio/joey/joey-wakesurfing.mov",
+    "key": "bio/joey/joey-wakesurfing.mp4",
     "description": "Joey wakesurfing video"
   },
   {
