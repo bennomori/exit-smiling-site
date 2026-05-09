@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import CheckoutSuccess from "./CheckoutSuccess";
 import EpkPage from "./EpkPage";
+import MediaAdmin from "./MediaAdmin";
 import NotFound from "./NotFound";
 import PosApp from "./PosApp";
 import PreviewGate from "./PreviewGate";
@@ -15,6 +16,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Routes>
         <Route path="/" element={<App />} />
         <Route path="/epk" element={<EpkPage />} />
+        <Route
+          path="/media-admin"
+          element={
+            <PreviewGate>
+              <MediaAdmin />
+            </PreviewGate>
+          }
+        />
         <Route
           path="/pos"
           element={
