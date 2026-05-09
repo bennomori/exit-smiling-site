@@ -52,8 +52,15 @@ function copyToClipboard(value) {
 }
 
 function AssetCard({ asset }) {
+  const [copied, setCopied] = useState(false);
   const url = getAssetUrl(asset);
   const type = getAssetType(asset);
+  const copyUrl = () => {
+    copyToClipboard(url).then(() => {
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    });
+  };
 
   return (
     <article className="group overflow-hidden rounded-3xl border border-white/10 bg-white/[0.035] transition duration-300 hover:-translate-y-1 hover:border-yellow-200/35 hover:bg-white/[0.065] hover:shadow-[0_0_30px_rgba(250,204,21,0.12)]">
@@ -107,10 +114,10 @@ function AssetCard({ asset }) {
           </a>
           <button
             type="button"
-            onClick={() => copyToClipboard(url)}
+            onClick={copyUrl}
             className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/75 transition hover:border-yellow-200/60 hover:bg-yellow-200 hover:text-black"
           >
-            Copy URL
+            {copied ? "Copied" : "Copy URL"}
           </button>
           <a
             href={url}
