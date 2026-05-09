@@ -36,8 +36,6 @@ const brand = {
 const previewAccessStorageKey = "exit_smiling_preview_access";
 const previewUsername = "ES";
 const previewPassword = "bakedbeans";
-const privateMemberDetailsEnabled =
-  String(import.meta.env.VITE_ENABLE_PRIVATE_MEMBER_DETAILS || "").toLowerCase() === "true";
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
@@ -1877,7 +1875,7 @@ function MemberCard({ member }) {
         ? "Max brings a calm confidence and natural leadership to Exit Smiling. As the bands bass player, lyric writer, and oldest member, he helps anchor the group both musically and personally. His steady presence gives the younger members someone to look up to, while his songwriting and ideas help shape the bands sound and direction.\n\nAway from the stage, Max has always been active, curious, and quietly driven. He was school captain in Year 6, represented his school in cross country, and has played both club and representative soccer, often taking on the role of captain. He also loves mountain biking with his dad and has represented his school in MTB riding, bringing the same focus, balance, and determination to sport that he brings to music.\n\nMax learned to ski when he was 10 and has frothed on it ever since. He also learned to fish from his grandparents and still loves going out with them whenever he can. At different times he has been heavily into chess and tabletop gaming, although these days band life, school, sport, and bass practice do not leave much room for downtime.\n\nHe is also an avid reader and someone who thinks deeply about ideas, words, and stories - a quality that naturally feeds into his songwriting and lyrics. Whether he is locking in the groove on bass, helping shape a song, or offering quiet leadership behind the scenes, Max brings maturity, creativity, and a glimpse of the future for Exit Smiling."
       : null;
   const canShowPrivateMemberDetails =
-    privateMemberDetailsEnabled && Boolean(memberAchievements);
+    member.name === 'Joey' && Boolean(memberAchievements);
   const detailVideos =
     member.name === 'Joey'
       ? [
