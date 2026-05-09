@@ -189,8 +189,17 @@ export default function MediaAdmin() {
         </div>
 
         <div className="mt-6 rounded-3xl border border-yellow-200/15 bg-yellow-200/8 p-5 text-sm leading-7 text-yellow-50/78">
-          This page is a visual catalogue only. To replace an asset, upload a new file to Cloudflare R2 using the exact
-          key shown on the card. The public URL remains stable if the key stays the same.
+          <p className="text-xs font-black uppercase tracking-[0.28em] text-yellow-100">
+            Internal only
+          </p>
+          <p className="mt-3">
+            This page is a private visual catalogue for Exit Smiling site assets. Keep it behind Cloudflare Access or
+            the site preview gate.
+          </p>
+          <p className="mt-3">
+            To replace an asset without code changes, upload the new file to Cloudflare R2 using the exact key shown on
+            the card. The public URL remains stable if the key stays the same.
+          </p>
         </div>
 
         <div className="mt-8 flex flex-wrap gap-2">
