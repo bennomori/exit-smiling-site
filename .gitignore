@@ -11,3 +11,5 @@ dist
 **/.env.*
 cloudinary-export/files/
 temp_*.mp4
+medusa-prod.dump
+medusa-prod.sql

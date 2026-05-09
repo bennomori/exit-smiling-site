@@ -2880,13 +2880,6 @@ function PressImageLibraryModal({ open, onClose, assets }) {
             <h2 className="mt-2 text-3xl font-black uppercase text-white md:text-5xl">Select / Download</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            <a
-              href="/press-kit/exit-smiling-press-kit.zip"
-              download="exit-smiling-press-kit.zip"
-              className="rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
-            >
-              Download Press Kit ZIP
-            </a>
             <button
               type="button"
               onClick={onClose}
@@ -3325,17 +3318,10 @@ export function PressKit({ standalone = false }) {
             </div>
 
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
-              <a
-                href="/press-kit/exit-smiling-press-kit.zip"
-                download="exit-smiling-press-kit.zip"
-                className="rounded-2xl border border-white bg-white px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
-              >
-                Download Press Kit ZIP
-              </a>
               <button
                 type="button"
                 onClick={() => setImageLibraryOpen(true)}
-                className="rounded-2xl border border-yellow-200/25 bg-yellow-200/10 px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-yellow-50 transition hover:border-yellow-100/55 hover:bg-yellow-200/18"
+                className="rounded-2xl border border-white bg-white px-4 py-3 text-center text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90"
               >
                 Open Image Library
               </button>

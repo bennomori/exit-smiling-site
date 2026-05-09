@@ -105,13 +105,53 @@ function getShippingMethodLines(order: any) {
   })
 }
 
+function getNumber(value: unknown) {
+  const numberValue = Number(value || 0)
+
+  return Number.isFinite(numberValue) ? numberValue : 0
+}
+
+function getItemTotal(item: any) {
+  const directTotal =
+    getNumber(item?.total) ||
+    getNumber(item?.item_total) ||
+    getNumber(item?.subtotal) - getNumber(item?.discount_total)
+
+  if (directTotal > 0) {
+    return directTotal
+  }
+
+  return getNumber(item?.unit_price || item?.detail?.unit_price) * getItemQuantity(item)
+}
+
+function getShippingTotal(order: any) {
+  return (order?.shipping_methods || []).reduce(
+    (sum: number, method: any) => sum + (getNumber(method?.total) || getNumber(method?.amount)),
+    0
+  )
+}
+
 function getOrderTotal(order: any) {
+  const summaryTotal =
+    getNumber(order?.summary?.current_order_total) ||
+    getNumber(order?.summary?.totals?.current_order_total) ||
+    getNumber(order?.summary?.paid_total) ||
+    getNumber(order?.summary?.totals?.paid_total) ||
+    getNumber(order?.summary?.transaction_total) ||
+    getNumber(order?.summary?.totals?.transaction_total) ||
+    getNumber(order?.summary?.original_order_total) ||
+    getNumber(order?.summary?.totals?.original_order_total)
+
+  const derivedTotal =
+    (order?.items || []).reduce((sum: number, item: any) => sum + getItemTotal(item), 0) +
+    getShippingTotal(order)
+
   const collected = (order?.payment_collections || []).reduce(
-    (sum: number, collection: any) => sum + Number(collection?.amount || 0),
+    (sum: number, collection: any) => sum + getNumber(collection?.amount),
     0
   )
 
-  return Number(order?.total || 0) || collected
+  return summaryTotal || getNumber(order?.total) || derivedTotal || collected
 }
 
 function getVariantAvailableQuantity(variant: any) {
@@ -273,6 +313,10 @@ export async function sendOrderAlert(container: any, orderId: string, options: O
       "email",
       "currency_code",
       "total",
+      "summary.current_order_total",
+      "summary.paid_total",
+      "summary.transaction_total",
+      "summary.original_order_total",
       "payment_status",
       "metadata",
       "shipping_address.first_name",
@@ -286,12 +330,19 @@ export async function sendOrderAlert(container: any, orderId: string, options: O
       "shipping_address.phone",
       "shipping_methods.name",
       "shipping_methods.amount",
+      "shipping_methods.total",
       "items.title",
       "items.thumbnail",
       "items.variant_id",
       "items.variant_title",
       "items.quantity",
       "items.detail.quantity",
+      "items.detail.unit_price",
+      "items.unit_price",
+      "items.subtotal",
+      "items.discount_total",
+      "items.item_total",
+      "items.total",
       "items.metadata",
       "payment_collections.amount",
     ],
