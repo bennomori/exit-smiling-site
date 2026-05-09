@@ -23,19 +23,19 @@ const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 const brandLogo =
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-yellow-transparent.png";
 const smileyLogo =
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/exit_smiling_cover_rounded_nologo_transparent_xnkq5y.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/pos/pos-smiley-mark-transparent.png";
 const receiptLogo =
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Black-TransparentBackground_mnwlqy.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-black-transparent.png";
 const receiptQrCode =
   "https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=https%3A%2F%2Fwww.exitsmiling.com.au";
 const heroImages = [
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_01b_aiag6j.jpg",
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03_kbggnz.jpg",
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_05_avhs0w.jpg",
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_02_jp3xuz.jpg",
-  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_2_zy1uqv.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-01.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-03.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-04.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-02.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-06.jpg",
 ];
 
 function formatCurrency(amount) {
