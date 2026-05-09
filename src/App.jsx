@@ -20,11 +20,11 @@ import {
 } from "./cart";
 import { registerFanUpdatesAccess, verifyFanUpdatesAccess } from "./fanUpdates";
 
-const primaryLogo = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615239/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png';
-const markLogo = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775614405/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png';
-const heroLogoBlack = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775614404/ExitSmilingLOGO-Black-TransparentBackground_mnwlqy.png';
-const heroLogoYellow = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775614405/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png';
-const heroLogoWhite = 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776305886/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png';
+const primaryLogo = 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png';
+const markLogo = 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png';
+const heroLogoBlack = 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Black-TransparentBackground_mnwlqy.png';
+const heroLogoYellow = 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png';
+const heroLogoWhite = 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/copy_of_exitsmilinglogo-white-blackbackground_qzq2fa_c8b4fb.png';
 
 const brand = {
   name: 'Exit Smiling',
@@ -44,12 +44,12 @@ const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishable
 
 const defaultSlideDurationMs = 3000;
 const heroImages = [
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615943/Exit_Smiling_-_01b_aiag6j.jpg', position: 'center' },
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615939/Exit_Smiling_-_03_kbggnz.jpg', position: 'center' },
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615934/Exit_Smiling_-_05_avhs0w.jpg', position: 'center' },
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615928/Exit_Smiling_-_02_jp3xuz.jpg', position: 'center' },
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775615928/Exit_Smiling_-_05b_ika3gn.jpg', position: 'center' },
-  { type: 'image', src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777178649/band_bio_2_zy1uqv.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_01b_aiag6j.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03_kbggnz.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_05_avhs0w.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_02_jp3xuz.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_05b_ika3gn.jpg', position: 'center' },
+  { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_2_zy1uqv.jpg', position: 'center' },
 ];
 
 const tourDates = [
@@ -60,7 +60,7 @@ const tourDates = [
     time: '4PM-9PM AEST',
     href: 'https://www.eventbrite.com/e/currents-battle-of-the-bands-2026-live-youth-music-event-tickets-1981828560574',
     mapHref: 'https://maps.app.goo.gl/mTMXRXCejsmioYwb6',
-    posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777242237/BOBS_q8x6y3.jpg',
+    posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/BOBS_q8x6y3.jpg',
     note: 'Currents: Battle of the Bands - Youth Week live music competition - Free event - Pizza, DJs, chill out spaces',
   },
   {
@@ -70,7 +70,7 @@ const tourDates = [
     time: 'Friday',
     href: 'https://events.humanitix.com/archie-at-smokey-dans-426/tickets?fbclid=IwY2xjawRKMDpleHRuA2FlbQIxMABicmlkETFGbmJIM3pkNXlDdklmWW9Vc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHin3kekDUp3KtzaNksuoRsJnoFDcdMcTgyPg986XG8ra6T20ev90Sl4nB4Gn_aem_7D5dBKgOLCSFaAtC_kBKjA',
     mapHref: 'https://maps.app.goo.gl/5GcQGcPbFMi9R5Rx8',
-    posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777225102/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg',
+    posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg',
     note: 'ARCHIE EP release tour (Together Apart) - with Grace Faletoese + Exit Smiling',
   },
   {
@@ -80,7 +80,7 @@ const tourDates = [
     time: '1PM',
     href: 'https://events.humanitix.com/narooma-oyster-festival-2026/tickets',
     mapHref: 'https://maps.app.goo.gl/L6tbtCGbjuTXrXi79',
-    posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777244900/Naroomaoysterfestivalexitsmilinggigposter_anrfip.png',
+    posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Naroomaoysterfestivalexitsmilinggigposter_anrfip.png',
     note: 'Live show',
   },
   {
@@ -90,7 +90,7 @@ const tourDates = [
     time: '7PM',
     href: '#',
     mapHref: 'https://maps.app.goo.gl/Ex1Qa4t2vH4ysSQP6',
-    posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777245825/oystercovegigposter_uxbdpg.png',
+    posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/oystercovegigposter_uxbdpg.png',
     note: 'Live show',
   },
   {
@@ -100,7 +100,7 @@ const tourDates = [
     time: '6:30PM-10PM AEST',
     href: 'https://events.humanitix.com/exit-smiling/tickets',
     mapHref: 'https://maps.app.goo.gl/7i9yxXRrR6kNqKd49',
-    posterImage: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777272233/starfishdeli_gig_poster_2_gz3yyv.png',
+    posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/starfishdeli_gig_poster_2_gz3yyv.png',
     note: 'Debut single launch show',
   },
 ];
@@ -112,16 +112,16 @@ const videos = [
 ];
 
 const pastGigPosterImages = [
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225190/IMG_0835_b1otk4.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225102/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777225092/545094081_1354974783302185_1251938289003598998_n_nqn2or.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777321764/halloween_v6s0bg.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/IMG_0835_b1otk4.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/678288251_1559201329546195_9058621081292561778_n_dkblaj.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/545094081_1354974783302185_1251938289003598998_n_nqn2or.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/halloween_v6s0bg.jpg",
 ];
 
 const exitSmilingDebutSingleCover =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1778121889/exitsmiling_single_wrinkledpaper_bcudfh.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/exitsmiling_single_wrinkledpaper_bcudfh.png";
 const exitSmilingDebutSingleCoverLarge =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1778122135/ES_wrinkledlogo_quality_pjmbkr.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ES_wrinkledlogo_quality_pjmbkr.png";
 
 const releases = [
   {
@@ -132,7 +132,7 @@ const releases = [
     image: exitSmilingDebutSingleCover,
     imageAlt: 'Exit Smiling Debut Single',
     previewVideo: {
-      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4',
+      src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_Single_preview_ay9def.mp4',
       disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
     },
     overlayText: 'PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26',
@@ -142,10 +142,10 @@ const releases = [
     meta: 'Single - TBD',
     href: '#',
     blurb: 'TBD single release.',
-    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777593491/hometown_hero_il9lzy.png',
+    image: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/hometown_hero_il9lzy.png',
     imageAlt: 'Home Town Hero',
     previewVideo: {
-      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777172335/band_bio_n5bkm7.mp4',
+      src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_n5bkm7.mp4',
       startAt: 6,
       endAt: 46,
       note: 'Band bio preview clip',
@@ -157,10 +157,10 @@ const releases = [
     meta: 'Single - TBD',
     href: '#',
     blurb: 'TBD single release.',
-    image: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777591804/Lost_in_space_found_in_you_nudvc3.png',
+    image: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Lost_in_space_found_in_you_nudvc3.png',
     imageAlt: 'Lost In You Single',
     previewVideo: {
-      src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1776198516/LIY_czohda.mp4',
+      src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/LIY_czohda.mp4',
       startAt: 34,
       endAt: 54,
       note: 'Selected female-vocal preview clip',
@@ -181,7 +181,7 @@ const merch = [
 ];
 
 const fallbackMerchImage =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1776113173/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Colorful__Exit_Smiling__T-shirts_display_j5gm3q.png";
 
 const mostPopularProductImageOverrides = {
   // Add custom promo images by Medusa product title, handle, or id.
@@ -241,14 +241,14 @@ const studioSessions = [
   {
     title: 'Studio Session 01',
     subtitle: 'Private rough edit',
-    thumb: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1776205411/cadennceesversionnthumbnnail_stpw6w.png',
-    video: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1776205381/cadenceESversion_idciep.mp4',
+    thumb: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadennceesversionnthumbnnail_stpw6w.png',
+    video: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadenceESversion_idciep.mp4',
   },
   {
     title: 'Studio Session 02',
     subtitle: 'Private rough edit',
-    thumb: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_60/LIY_czohda.jpg',
-    video: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1776197722/LIY_czohda.mp4',
+    thumb: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/LIY_czohda.jpg',
+    video: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/LIY_czohda.mp4',
   },
 ];
 
@@ -618,7 +618,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
               <div className="relative mt-4 flex aspect-square w-full flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-yellow-100/18 bg-[#11100b] p-5 shadow-[inset_0_0_40px_rgba(250,204,21,0.05)] animate-[fadeIn_0.55s_ease_forwards]">
                 <div className="pointer-events-none absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_15%_10%,rgba(250,204,21,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%),repeating-linear-gradient(0deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_18px)]" />
                 <img
-                  src="https://res.cloudinary.com/dkffwzpba/image/upload/v1778026869/Screenshot_2026-05-06_102033_kcetie.png"
+                  src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Screenshot_2026-05-06_102033_kcetie.png"
                   alt=""
                   aria-hidden="true"
                   decoding="async"
@@ -696,7 +696,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
                   type="button"
                   onClick={() =>
                     onOpenReleasePreview({
-                      src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_Single_preview_ay9def.mp4",
                       disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
                     })
                   }
@@ -1004,7 +1004,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 className="relative cursor-pointer overflow-hidden"
                 onClick={() =>
                   onOpenReleasePreview({
-                    src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1777544676/Exit_Smiling_Single_preview_ay9def.mp4",
+                    src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_Single_preview_ay9def.mp4",
                     disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
                   })
                 }
@@ -1038,7 +1038,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 className="relative cursor-pointer overflow-hidden"
                 onClick={() =>
                   onOpenAudioImage({
-                    image: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777543242/abc_radio_studio_kvt1cg.jpg",
+                    image: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/abc_radio_studio_kvt1cg.jpg",
                     title: "ABC Radio Live Show",
                     youtubeId: "FhFmBOPrCkw",
                     youtubeTitle: "ABC Radio Live Show with Alice Ansara",
@@ -1046,7 +1046,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 }
               >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110" style={{ backgroundImage: "url('https://res.cloudinary.com/dkffwzpba/image/upload/v1777543242/abc_radio_studio_kvt1cg.jpg')" }} />
+                <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.04] group-hover:brightness-110" style={{ backgroundImage: "url('https://exit-smiling-media.bennoclark.workers.dev/cloudinary/abc_radio_studio_kvt1cg.jpg')" }} />
                 <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center px-6 text-center">
                   <div className="text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.7)]">
                     <p className="text-xl font-normal uppercase tracking-[0.22em] md:text-2xl">LIVE WITH</p>
@@ -1355,7 +1355,7 @@ function Store({
               onMouseLeave={handleMerchPreviewLeave}
             >
               <a
-                href="https://res.cloudinary.com/dkffwzpba/video/upload/v1777165207/socials_professional_impact_720_lzrocb.mp4"
+                href="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/socials_professional_impact_720_lzrocb.mp4"
                 target="_blank"
                 rel="noreferrer"
                 className="inline-flex rounded-full border border-white/18 bg-white/[0.03] px-5 py-3 text-xs font-semibold uppercase tracking-[0.2em] text-white transition duration-300 hover:border-white/40 hover:bg-white/10 hover:text-white hover:shadow-[0_0_24px_rgba(255,255,255,0.12)]"
@@ -1365,7 +1365,7 @@ function Store({
               <div className="pointer-events-none absolute left-0 top-full z-20 pt-4 opacity-0 transition duration-300 translate-y-2 group-hover/merchvideo:pointer-events-auto group-hover/merchvideo:translate-y-0 group-hover/merchvideo:opacity-100">
                 <video
                   ref={merchPreviewVideoRef}
-                  src="https://res.cloudinary.com/dkffwzpba/video/upload/v1777165207/socials_professional_impact_720_lzrocb.mp4"
+                  src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/socials_professional_impact_720_lzrocb.mp4"
                   muted
                   playsInline
                   preload="metadata"
@@ -1712,93 +1712,93 @@ function MemberCard({ member }) {
     member.name === 'Max'
       ? [
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777173329/max_asleep_tht95m.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_asleep_tht95m.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777223171/max_soccer_z1wxim.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_soccer_z1wxim.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777223763/max_logo_shirt_lvc2cy.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_logo_shirt_lvc2cy.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777246184/max_ski_gqtsvm.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_ski_gqtsvm.jpg',
             className: 'object-top',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777246858/max_team_labo_xxkzgc.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_team_labo_xxkzgc.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777247367/max_fishing_xqq7wb.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_fishing_xqq7wb.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777247576/max_soccer_2_l8neun.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_soccer_2_l8neun.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777247857/max_fishing_2_uygwgl.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_fishing_2_uygwgl.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_waterslide_neqc0a.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_waterslide_neqc0a.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_fendertokyo_qodsws.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_fendertokyo_qodsws.jpg',
             className: '',
           },
           {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_jamberoo_giorua.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_jamberoo_giorua.jpg',
             className: '',
           },
           ]
       : member.name === 'Joey'
         ? [
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03b_yzf01a.jpg',
               className: 'object-top',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777174022/joey_helmet_qu5nid.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_helmet_qu5nid.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259171/joey_flying_wwqh15.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_flying_wwqh15.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259729/joey_fender_cxctl2.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_fender_cxctl2.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_4/joeysnowcat_whfx9o.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joeysnowcat_whfx9o.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_ts_o6r3ma.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_ts_o6r3ma.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_wakesurfing_nfxtqj.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_wakesurfing_nfxtqj.jpg',
               className: '',
             },
           ]
       : member.name === 'Lando'
         ? [
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03b-lando_ynxwqw.jpg',
               className: 'object-top',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/lando_crowd_zf6g0w.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/lando_crowd_zf6g0w.jpg',
               className: '',
               credit: 'Photo: Cohen Maberly',
             },
@@ -1806,11 +1806,11 @@ function MemberCard({ member }) {
       : member.name === 'Cadence'
         ? [
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Screenshot_2026-04-08_141112_q6uhq9.png',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777606934/cadence_crowd_sh5bik.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadence_crowd_sh5bik.jpg',
               className: '',
               credit: 'Photo: Cohen Maberly',
             },
@@ -1818,11 +1818,11 @@ function MemberCard({ member }) {
       : member.name === 'Julian'
         ? [
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03-julian_wxjhwb.jpg',
               className: '',
             },
             {
-              src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777609081/julian_rotation_colored_fofequ.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/julian_rotation_colored_fofequ.jpg',
               className: '',
             },
           ]
@@ -1835,28 +1835,28 @@ function MemberCard({ member }) {
   const livePreview =
     member.name === 'Cadence'
       ? {
-          src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777275358/cadence_1_ltneql.mp4',
+          src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadence_1_ltneql.mp4',
           label: 'Everlong Cover - Cadence on vocals',
         }
       : member.name === 'Joey'
         ? {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_0,eo_26/v1777152126/joey_bombtrack_fp1sz9.mp4?trim=26',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_bombtrack_fp1sz9.mp4',
             label: 'Joey on lead guitar',
             endAtSeconds: 26,
           }
       : member.name === 'Lando'
         ? {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777153684/lando_bombtrack_cuseb2.mp4',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/lando_bombtrack_cuseb2.mp4',
             label: 'Lando on vocals',
           }
       : member.name === 'Julian'
         ? {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777610254/julian_closeup_ukme9s.mp4',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/julian_closeup_ukme9s.mp4',
             label: 'Julian on drums',
           }
       : member.name === 'Max'
         ? {
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777608826/max_closeup_vrzhqx.mp4',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_closeup_vrzhqx.mp4',
             label: 'Max on bass',
           }
       : null;
@@ -1885,30 +1885,30 @@ function MemberCard({ member }) {
           {
             type: 'video',
             title: 'Joey Snow Grooming',
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777252242/joeysnowcat_whfx9o.mp4',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_4/joeysnowcat_whfx9o.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joeysnowcat_whfx9o.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joeysnowcat_whfx9o.jpg',
           },
           {
             type: 'image',
             title: 'Pilot Training',
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259171/joey_flying_wwqh15.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_flying_wwqh15.jpg',
           },
           {
             type: 'image',
             title: 'Fender Tokyo',
-            src: 'https://res.cloudinary.com/dkffwzpba/image/upload/v1777259729/joey_fender_cxctl2.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_fender_cxctl2.jpg',
           },
           {
             type: 'video',
             title: 'Joey Timber Sledding',
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777260496/joey_ts_o6r3ma.mov',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_ts_o6r3ma.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_ts_o6r3ma.mov',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_ts_o6r3ma.jpg',
           },
           {
             type: 'video',
             title: 'Joey Wakesurfing',
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777261582/joey_wakesurfing_nfxtqj.mov',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_wakesurfing_nfxtqj.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_wakesurfing_nfxtqj.mov',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_wakesurfing_nfxtqj.jpg',
             volume: 0.2,
           },
         ]
@@ -1917,20 +1917,20 @@ function MemberCard({ member }) {
             {
               type: 'video',
               title: 'Slip Sliding Away',
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777265239/max_waterslide_neqc0a.mp4',
-              poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_waterslide_neqc0a.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_waterslide_neqc0a.mp4',
+              poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_waterslide_neqc0a.jpg',
             },
             {
               type: 'video',
               title: 'Tokyo Fender Shopping',
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777265240/max_fendertokyo_qodsws.mp4',
-              poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_fendertokyo_qodsws.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_fendertokyo_qodsws.mp4',
+              poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_fendertokyo_qodsws.jpg',
             },
             {
               type: 'video',
               title: 'Black Hole Surfing',
-              src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777265241/max_jamberoo_giorua.mp4',
-              poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_jamberoo_giorua.jpg',
+              src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_jamberoo_giorua.mp4',
+              poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_jamberoo_giorua.jpg',
             },
           ]
       : [];
@@ -1938,32 +1938,32 @@ function MemberCard({ member }) {
     member.name === 'Cadence'
       ? {
           title: null,
-          src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777270913/cadence_bio_clip_sxvvyh.mp4',
-          poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/cadence_bio_clip_sxvvyh.jpg',
+          src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadence_bio_clip_sxvvyh.mp4',
+          poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadence_bio_clip_sxvvyh.jpg',
         }
       : member.name === 'Joey'
       ? {
           title: null,
-          src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777253439/joey_hendrix_wj6jsu.mp4',
-          poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/joey_hendrix_wj6jsu.jpg',
+          src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_hendrix_wj6jsu.mp4',
+          poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_hendrix_wj6jsu.jpg',
         }
       : member.name === 'Julian'
         ? {
             title: null,
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777257286/JD_drums_bg1bg6.mp4',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/JD_drums_bg1bg6.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/JD_drums_bg1bg6.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/JD_drums_bg1bg6.jpg',
           }
       : member.name === 'Lando'
         ? {
             title: null,
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777264563/Lando_vocals_mooesv.mp4',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/Lando_vocals_mooesv.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Lando_vocals_mooesv.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Lando_vocals_mooesv.jpg',
           }
       : member.name === 'Max'
         ? {
             title: null,
-            src: 'https://res.cloudinary.com/dkffwzpba/video/upload/v1777267831/max_bass_pedz6b.mp4',
-            poster: 'https://res.cloudinary.com/dkffwzpba/video/upload/so_2/max_bass_pedz6b.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_bass_pedz6b.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_bass_pedz6b.jpg',
           }
       : null;
 
@@ -2155,11 +2155,11 @@ function MemberCard({ member }) {
       >
         <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.16),transparent_62%)] opacity-0 transition duration-300 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition duration-300 group-hover:opacity-40" />
-        {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" loading="lazy" decoding="async" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Cadence' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Lando' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Julian' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" loading="lazy" decoding="async" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Max' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Joey' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
         {visibleLighterSideImages?.length ? (
           <>
             <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex items-center justify-between opacity-0 transition duration-300 group-hover:opacity-100">
@@ -2553,9 +2553,9 @@ function BandLivePreview() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const previewStartTime = 1.2;
   const thumbnailSrc =
-    "https://res.cloudinary.com/dkffwzpba/video/upload/so_4/band_bio_n5bkm7.jpg";
+    "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_n5bkm7.jpg";
   const previewVideoSrc =
-    "https://res.cloudinary.com/dkffwzpba/video/upload/v1777172335/band_bio_n5bkm7.mp4";
+    "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_n5bkm7.mp4";
 
   const handleLoadedMetadata = () => {
     const video = videoRef.current;
@@ -2691,23 +2691,23 @@ function BandHeadingFigures() {
   const bandHeadingFigures = [
     {
       name: "Max",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198389/max_white_m6hkiy.png",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_white_m6hkiy.png",
     },
     {
       name: "Lando",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/lando_white_vo0dok.png",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/lando_white_vo0dok.png",
     },
     {
       name: "Cadence",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198433/cadence_white_br6gks.png",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/cadence_white_br6gks.png",
     },
     {
       name: "Joey",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/joey_white_oudg6s.png",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/joey_white_oudg6s.png",
     },
     {
       name: "Julian",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1778198390/julian_white_wf68ww.png",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/julian_white_wf68ww.png",
     },
   ];
   const [figureState, setFigureState] = useState({
@@ -2784,37 +2784,37 @@ function Band() {
   const bandBioImages = [
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615928/Exit_Smiling_-_02_jp3xuz.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_02_jp3xuz.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615934/Exit_Smiling_-_05_avhs0w.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_05_avhs0w.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615939/Exit_Smiling_-_03_kbggnz.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03_kbggnz.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615943/Exit_Smiling_-_01b_aiag6j.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_01b_aiag6j.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777609335/smoke_band_w9ktya.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/smoke_band_w9ktya.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1775625623/Exit_Smiling_-_Live_Photo_01_lj5nhg.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_Live_Photo_01_lj5nhg.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
     {
       type: "image",
-      src: "https://res.cloudinary.com/dkffwzpba/image/upload/v1777173329/max_asleep_tht95m.jpg",
+      src: "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/max_asleep_tht95m.jpg",
       className: "grayscale group-hover/bandmoments:grayscale-0",
     },
   ];
@@ -3785,7 +3785,7 @@ function PosterModal({ open, onClose }) {
       <div className="relative w-full max-w-5xl">
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <div className="flex items-center justify-center rounded-2xl bg-black p-4 md:p-8">
-          <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster enlarged" decoding="async" className="max-h-[85vh] w-auto max-w-full object-contain" />
+          <img src="https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster enlarged" decoding="async" className="max-h-[85vh] w-auto max-w-full object-contain" />
         </div>
       </div>
     </div>

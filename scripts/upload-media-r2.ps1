@@ -18,7 +18,7 @@ if (-not $files.Count) {
 foreach ($file in $files) {
   $key = "$Prefix/$($file.Name)"
   Write-Host "Uploading $key"
-  npx.cmd wrangler r2 object put "$Bucket/$key" --file "$($file.FullName)"
+  npx.cmd wrangler r2 object put "$Bucket/$key" --file "$($file.FullName)" --remote
 }
 
 Write-Host "Uploaded $($files.Count) files to R2 bucket '$Bucket' under '$Prefix/'."

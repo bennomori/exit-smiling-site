@@ -23,19 +23,19 @@ const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
 const brandLogo =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775614405/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Yellow-TransparentBackground_ccivvd.png";
 const smileyLogo =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1778110144/exit_smiling_cover_rounded_nologo_transparent_xnkq5y.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/exit_smiling_cover_rounded_nologo_transparent_xnkq5y.png";
 const receiptLogo =
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775614404/ExitSmilingLOGO-Black-TransparentBackground_mnwlqy.png";
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/ExitSmilingLOGO-Black-TransparentBackground_mnwlqy.png";
 const receiptQrCode =
   "https://api.qrserver.com/v1/create-qr-code/?size=96x96&data=https%3A%2F%2Fwww.exitsmiling.com.au";
 const heroImages = [
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615943/Exit_Smiling_-_01b_aiag6j.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615939/Exit_Smiling_-_03_kbggnz.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615934/Exit_Smiling_-_05_avhs0w.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1775615928/Exit_Smiling_-_02_jp3xuz.jpg",
-  "https://res.cloudinary.com/dkffwzpba/image/upload/v1777178649/band_bio_2_zy1uqv.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_01b_aiag6j.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_03_kbggnz.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_05_avhs0w.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/Exit_Smiling_-_02_jp3xuz.jpg",
+  "https://exit-smiling-media.bennoclark.workers.dev/cloudinary/band_bio_2_zy1uqv.jpg",
 ];
 
 function formatCurrency(amount) {

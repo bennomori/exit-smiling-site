@@ -1,0 +1,8 @@
+name = "exit-smiling-media"
+main = "workers/media-worker.js"
+compatibility_date = "2026-05-09"
+workers_dev = true
+
+[[r2_buckets]]
+binding = "EXIT_SMILING_MEDIA"
+bucket_name = "exit-smiling-media"
