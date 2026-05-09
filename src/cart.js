@@ -14,7 +14,7 @@ function normalizeMediaUrl(url) {
 
   if (!value) return value;
 
-  return value.replace(/^https?:\/\/localhost:9000\/static\//i, "/static/");
+  return value.replace(/^https?:\/\/localhost:9000\/static\//i, `${baseUrl}/static/`);
 }
 
 function normalizeCart(cart) {
