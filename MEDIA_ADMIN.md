@@ -42,4 +42,5 @@ Use this when the site needs a new image or video.
 
 - Do not rename an asset key already used by the live site unless the code is updated at the same time.
 - Do not delete the old `cloudinary/` fallback folder from R2 until the site has been stable for several days.
+- When ready, use `scripts/cleanup-old-r2-cloudinary.ps1` in dry-run mode first, then rerun with `-Delete`.
 - Do not commit local database exports such as `medusa-prod.dump` or `medusa-prod.sql`.

@@ -185,8 +185,7 @@ const fallbackMerchImage =
 
 const mostPopularProductImageOverrides = {
   // Add custom promo images by Medusa product title, handle, or id.
-  // Example:
-  // "light grey hoodie black logo": "https://res.cloudinary.com/.../custom-hero.jpg",
+  // Example: "light grey hoodie black logo": "https://exit-smiling-media.bennoclark.workers.dev/merch/custom-hero.jpg",
 };
 
 const members = [
