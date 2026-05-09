@@ -285,7 +285,7 @@ function Header({ cart, onToggleMiniCart }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
             <a href="#top" className="flex items-center">
-              <img src={brand.markLogo} alt={brand.logoAlt} className="h-16 w-16 object-contain md:h-20 md:w-20" />
+              <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="h-16 w-16 object-contain md:h-20 md:w-20" />
               <span className="sr-only">{brand.name}</span>
             </a>
             <nav className="hidden gap-12 text-sm uppercase tracking-[0.2em] md:flex">
@@ -361,7 +361,7 @@ function Header({ cart, onToggleMiniCart }) {
           <div className="relative z-10 mx-auto flex h-full max-w-md flex-col overflow-hidden rounded-[2rem] border border-white/12 bg-[#070707] p-5 shadow-[0_0_60px_rgba(0,0,0,0.72)]">
             <div className="flex items-center justify-between">
               <a href="#top" onClick={closeMobileMenu} className="flex items-center gap-3">
-                <img src={brand.markLogo} alt={brand.logoAlt} className="h-14 w-14 object-contain" />
+                <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="h-14 w-14 object-contain" />
                 <span className="text-sm font-black uppercase tracking-[0.24em] text-white">Exit Smiling</span>
               </a>
               <button
@@ -560,24 +560,28 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
               <img
                 src={heroLogoWhite}
                 alt={brand.logoAlt}
+                decoding="async"
                 className="relative h-auto w-full object-contain opacity-95 animate-[logoLumaPulse_6.5s_ease-in-out_infinite,logoMorphWhite_16s_ease-in-out_infinite]"
               />
               <img
                 src={heroLogoYellow}
                 alt=""
                 aria-hidden="true"
+                decoding="async"
                 className="pointer-events-none absolute inset-0 h-auto w-full object-contain opacity-0 animate-[logoLumaPulse_6.5s_ease-in-out_infinite,logoMorphYellow_16s_ease-in-out_infinite]"
               />
               <img
                 src={heroLogoBlack}
                 alt=""
                 aria-hidden="true"
+                decoding="async"
                 className="pointer-events-none absolute inset-0 h-auto w-full object-contain opacity-0 animate-[logoLumaPulse_6.5s_ease-in-out_infinite,logoMorphBlack_16s_ease-in-out_infinite]"
               />
               <img
                 src={heroLogoWhite}
                 alt=""
                 aria-hidden="true"
+                decoding="async"
                 className="pointer-events-none absolute inset-0 h-auto w-full object-contain opacity-0 mix-blend-screen animate-[logoGlitch_11s_steps(1,end)_infinite]"
               />
             </div>
@@ -617,6 +621,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
                   src="https://res.cloudinary.com/dkffwzpba/image/upload/v1778026869/Screenshot_2026-05-06_102033_kcetie.png"
                   alt=""
                   aria-hidden="true"
+                  decoding="async"
                   className="pointer-events-none absolute right-[-12%] top-[10%] w-[78%] max-w-[24rem] mix-blend-screen"
                   style={{
                     animation: 'heroCatch22ImagePulse 8.4s ease-in-out infinite',
@@ -750,6 +755,8 @@ function Releases({ onOpenReleasePreview }) {
                   <img
                     src={item.image}
                     alt={item.imageAlt}
+                    loading="lazy"
+                    decoding="async"
                     className="aspect-square w-full object-cover scale-[1.03] transition duration-500 ease-out filter contrast-110 brightness-105 group-hover:grayscale group-hover:brightness-95 group-hover:scale-[1.06]"
                   />
                   {item.overlayText ? (
@@ -862,6 +869,8 @@ function Gigs() {
                       key={`past-gig-poster-${index}`}
                       src={image}
                       alt={`Past gig poster ${index + 1}`}
+                      loading="lazy"
+                      decoding="async"
                       className={`absolute inset-0 h-full w-full object-cover transition duration-500 ease-out ${
                         isHoveringPastGigs && index === activePastGigPosterIndex ? "opacity-100" : "opacity-0"
                       }`}
@@ -905,6 +914,8 @@ function Gigs() {
                       <img
                         src={show.posterImage}
                         alt={`${show.city} gig poster`}
+                        loading="lazy"
+                        decoding="async"
                         className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
                       />
                     </div>
@@ -920,6 +931,8 @@ function Gigs() {
                       <img
                         src={show.posterImage}
                         alt={`${show.city} gig poster`}
+                        loading="lazy"
+                        decoding="async"
                         className="aspect-[3/4] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.045]"
                       />
                     </div>
@@ -966,6 +979,7 @@ function Gigs() {
               <img
                 src={selectedGigPoster.src}
                 alt={selectedGigPoster.title}
+                decoding="async"
                 className="max-h-[86vh] w-full rounded-3xl object-contain shadow-[0_0_40px_rgba(255,255,255,0.12)]"
               />
             </div>
@@ -1374,6 +1388,8 @@ function Store({
                 <img
                   src={topProductImage}
                   alt={topProduct ? `${topProduct.title} - most popular merch` : "Most popular merch"}
+                  loading="lazy"
+                  decoding="async"
                   className="block h-[280px] w-[160px] object-cover object-center transition duration-500 ease-out [filter:contrast(1.08)_brightness(1.02)] group-hover/popular:scale-[1.06] group-hover/popular:brightness-110"
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/85 via-black/10 to-transparent" />
@@ -1459,6 +1475,8 @@ function Store({
                     <img
                       src={image}
                       alt={product.title}
+                      loading="lazy"
+                      decoding="async"
                       className="max-h-[520px] w-full cursor-pointer object-contain transition duration-500 ease-out group-hover/image:scale-[1.055] group-hover/image:brightness-110"
                       onClick={() => onOpenMerchImage?.(image, product.title)}
                     />
@@ -2137,11 +2155,11 @@ function MemberCard({ member }) {
       >
         <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.16),transparent_62%)] opacity-0 transition duration-300 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition duration-300 group-hover:opacity-40" />
-        {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Cadence' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775621525/Screenshot_2026-04-08_141112_q6uhq9.png" alt="Cadence" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Lando' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622141/Exit_Smiling_-_03b-lando_ynxwqw.jpg" alt="Lando" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Julian' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622887/Exit_Smiling_-_03-julian_wxjhwb.jpg" alt="Julian" loading="lazy" decoding="async" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Max' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775625733/copy_of_exit_smiling_-_live_photo_03_z80ybc_e8e030.jpg" alt="Max" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {member.name === 'Joey' ? <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1775622030/Exit_Smiling_-_03b_yzf01a.jpg" alt="Joey" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
         {visibleLighterSideImages?.length ? (
           <>
             <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex items-center justify-between opacity-0 transition duration-300 group-hover:opacity-100">
@@ -2159,6 +2177,8 @@ function MemberCard({ member }) {
                 key={`${member.name}-off-stage-${index}`}
                 src={image.src}
                 alt={`${member.name} off stage ${index + 1}`}
+                loading="lazy"
+                decoding="async"
                 className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${image.className}`}
                 style={
                   isHoveringBioImage && activeHoverImageIndex === index
@@ -2383,6 +2403,8 @@ function MemberCard({ member }) {
                         <img
                           src={video.src}
                           alt={video.title}
+                          loading="lazy"
+                          decoding="async"
                           className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/detailvideo:scale-[1.03] group-hover/detailvideo:brightness-110"
                         />
                       )}
@@ -2431,6 +2453,7 @@ function MemberCard({ member }) {
               <img
                 src={selectedFlashback.src}
                 alt={selectedFlashback.title}
+                decoding="async"
                 className="max-h-[78vh] w-full rounded-2xl object-contain"
               />
             )}
@@ -2501,6 +2524,7 @@ function MemberCard({ member }) {
                     key={`${member.name}-hover-gallery-${index}`}
                     src={image.src}
                     alt={`${member.name} gallery ${index + 1}`}
+                    decoding="async"
                     className={`absolute inset-0 h-full w-full object-contain transition duration-700 ease-out ${index === activeHoverGalleryIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-[1.02]'} ${image.className}`}
                   />
                 ))}
@@ -2731,6 +2755,8 @@ function BandHeadingFigures() {
           <img
             src={figure.src}
             alt={figure.name}
+            loading="lazy"
+            decoding="async"
             className={`absolute inset-0 h-full w-full object-contain object-bottom drop-shadow-[0_0_14px_rgba(255,255,255,0.16)] transition-opacity duration-[1200ms] ease-in-out ${
               index === figureState.activeIndex
                 ? "opacity-100"
@@ -2822,6 +2848,8 @@ function Band() {
                 key={image.src}
                 src={image.src}
                 alt="Exit Smiling band"
+                loading="lazy"
+                decoding="async"
                 className={`absolute inset-0 h-full w-full object-cover transition duration-700 ease-out ${image.className} ${
                   index === activeBandBioImageIndex ? "scale-[1.03] opacity-100" : "scale-100 opacity-0"
                 }`}
@@ -2906,6 +2934,7 @@ function PressImageLibraryModal({ open, onClose, assets }) {
             <img
               src={previewAsset.href}
               alt={previewAsset.alt}
+              decoding="async"
               className="max-h-[72vh] w-full rounded-2xl object-contain bg-black"
             />
             <div className="p-4">
@@ -2936,6 +2965,8 @@ function PressImageLibraryModal({ open, onClose, assets }) {
                     <img
                       src={asset.href}
                       alt={asset.alt}
+                      loading="lazy"
+                      decoding="async"
                       className="aspect-[4/3] w-full object-cover transition duration-500 group-hover:scale-[1.04] group-hover:brightness-110"
                     />
                     <div className="absolute left-3 top-3 rounded-full border border-white/20 bg-black/65 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-white backdrop-blur">
@@ -3011,6 +3042,8 @@ function LogoAssetGrid({ logos }) {
               <img
                 src={logo.href}
                 alt={logo.alt}
+                loading="lazy"
+                decoding="async"
                 className="max-h-full max-w-full object-contain transition duration-300 group-hover/logo:scale-[1.18]"
               />
             </div>
@@ -3285,7 +3318,7 @@ export function PressKit({ standalone = false }) {
         {standalone ? (
           <div className="mb-10 flex flex-wrap items-center justify-between gap-4">
             <a href="/" className="inline-flex items-center gap-3 rounded-full border border-white/12 bg-white/[0.035] px-4 py-3 text-xs font-black uppercase tracking-[0.18em] text-white transition hover:border-white/35 hover:bg-white/10">
-              <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 object-contain" />
+              <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="h-8 w-8 object-contain" />
               Exit Smiling
             </a>
             <div className="flex flex-wrap gap-2">
@@ -3352,6 +3385,8 @@ export function PressKit({ standalone = false }) {
             <img
               src={pressPhotoUrl}
               alt="Exit Smiling press photo"
+              loading="lazy"
+              decoding="async"
               className="aspect-[4/3] w-full rounded-2xl object-cover object-center"
             />
           </div>
@@ -3569,7 +3604,7 @@ function Footer() {
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
         <div>
           <div className="flex items-center gap-3">
-            <img src={brand.markLogo} alt={brand.logoAlt} className="h-8 w-8 rounded-full border border-white/10 object-cover" />
+            <img src={brand.markLogo} alt={brand.logoAlt} loading="lazy" decoding="async" className="h-8 w-8 rounded-full border border-white/10 object-cover" />
             <span>(c) 2026 {brand.name}</span>
           </div>
           <a
@@ -3750,7 +3785,7 @@ function PosterModal({ open, onClose }) {
       <div className="relative w-full max-w-5xl">
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <div className="flex items-center justify-center rounded-2xl bg-black p-4 md:p-8">
-          <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster enlarged" className="max-h-[85vh] w-auto max-w-full object-contain" />
+          <img src="https://res.cloudinary.com/dkffwzpba/image/upload/v1776116501/Exit_Smiling_band_at_twilight_n6dn9n.png" alt="Signed Poster enlarged" decoding="async" className="max-h-[85vh] w-auto max-w-full object-contain" />
         </div>
       </div>
     </div>
@@ -3780,6 +3815,7 @@ function FeaturedAudioImageModal({ item, onClose }) {
           <img
             src={item.image}
             alt={item.title || "Featured content enlarged"}
+            decoding="async"
             className="max-h-[85vh] w-auto max-w-full rounded-2xl object-contain"
           />
         </div>
@@ -3899,6 +3935,7 @@ function MerchImageModal({ open, onClose, image, title }) {
             <img
               src={image}
               alt={title || "Expanded merch image"}
+              decoding="async"
               className="max-h-[88vh] w-auto max-w-[92vw] rounded-2xl border border-white/10 bg-black object-contain shadow-[0_0_60px_rgba(255,255,255,0.08)]"
             />
           ) : (
@@ -4142,7 +4179,7 @@ function MiniCart({
               >
                 <div className="h-16 w-16 overflow-hidden rounded-xl border border-white/10 bg-black">
                   {item.thumbnail ? (
-                    <img src={item.thumbnail} alt={item.title} className="h-full w-full object-cover" />
+                    <img src={item.thumbnail} alt={item.title} loading="lazy" decoding="async" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-white/35">
                       No image
@@ -5245,7 +5282,7 @@ export default function App() {
         <div className="mx-auto flex min-h-screen max-w-md items-center px-6 py-12">
           <div className="w-full rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-[0_0_40px_rgba(255,255,255,0.08)]">
             <div className="mb-6 text-center">
-              <img src={brand.markLogo} alt={brand.logoAlt} className="mx-auto h-16 w-16 object-contain" />
+              <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="mx-auto h-16 w-16 object-contain" />
               <p className="mt-5 text-[10px] uppercase tracking-[0.32em] text-white/45">Preview Access</p>
               <h1 className="mt-3 text-3xl font-black uppercase text-white">Exit Smiling</h1>
               <p className="mt-3 text-sm text-white/60">This preview is temporarily password protected.</p>
