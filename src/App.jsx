@@ -3665,6 +3665,43 @@ function Footer() {
           </a>
         </div>
       </div>
+
+      <div className="mx-auto mt-10 grid max-w-7xl gap-4 border-t border-white/10 pt-8 md:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Merch Support</p>
+          <p className="mt-3 text-sm leading-6 text-white/68">
+            Questions about orders, sizing, print-on-demand timing, or merch table sales can be sent to{" "}
+            <a href="mailto:paul@pauldolphindesigns.com.au" className="font-semibold text-white hover:text-yellow-100">
+              paul@pauldolphindesigns.com.au
+            </a>
+            .
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Shipping + Timing</p>
+          <p className="mt-3 text-sm leading-6 text-white/68">
+            In-stock items are packed as soon as practical. Print-on-demand items require an extra custom print run and
+            may take about 7 additional days before shipping.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Returns + Issues</p>
+          <p className="mt-3 text-sm leading-6 text-white/68">
+            If an item arrives damaged, incorrect, or materially different from the order, contact us with your order
+            number and photos so we can review and resolve it.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Privacy + Payments</p>
+          <p className="mt-3 text-sm leading-6 text-white/68">
+            Checkout payments are processed securely by Stripe. We only use customer details to process orders, shipping,
+            support, and opted-in band updates.
+          </p>
+        </div>
+      </div>
     </footer>
   );
 }
