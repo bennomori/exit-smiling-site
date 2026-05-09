@@ -463,12 +463,38 @@ Use the live order flow to verify:
 
 ## Uptime Monitoring
 
-Configure an external monitor such as UptimeRobot or Better Stack:
+Better Stack is configured for external uptime monitoring.
 
 - Website monitor: `https://www.exitsmiling.com.au`
 - API monitor: `https://api.exitsmiling.com.au/health`
 - Expected status: `200`
-- Interval: `5 minutes`
+- Check type: HTTP status code / status
+- HTTP method: `GET`
+- Check frequency: `3 minutes`
+- Confirmation period: `1-2 minutes`
+- Recovery period: `3 minutes`
+- SSL/TLS verification: On
+- IP version: IPv4 only if available, otherwise default
+- Regions: Australia and Asia preferred; all regions is acceptable if no false positives occur
+- Request headers: none
+- Alerting: e-mail alerts to the Better Stack team / Ben
+
+Do not use the fake onboarding header:
+
+```text
+Authorization: Bearer 12345678abcdef==
+```
+
+The API health monitor must hit `/health`, not `/store/regions`. `/store/regions` intentionally returns a publishable-key warning without a frontend key.
+
+Manual local health check from Windows:
+
+```powershell
+cd C:\exit-smiling-site
+powershell -ExecutionPolicy Bypass -File scripts\check-live-health.ps1
+```
+
+If Better Stack supports test notifications, send one and confirm the alert email arrives.
 
 ## Incident Checklist
 
