@@ -3410,7 +3410,9 @@ export function PressKit({ standalone = false }) {
               <p><span className="font-semibold text-white">Location:</span> South Coast NSW, Australia</p>
               <p><span className="font-semibold text-white">Style:</span> Young alternative rock band, original songs, live covers, high-energy local shows</p>
               <p><span className="font-semibold text-white">Current focus:</span> Debut single launch, live shows, studio sessions, and official merch</p>
-              <p><span className="font-semibold text-white">Booking:</span> <a href="mailto:megan@goodvibesentertainment.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">megan@goodvibesentertainment.com.au</a></p>
+              <p><span className="font-semibold text-white">Booking agent:</span> Good Vibes Entertainment - <a href="mailto:megan@goodvibesentertainment.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">megan@goodvibesentertainment.com.au</a></p>
+              <p><span className="font-semibold text-white">Direct band bookings:</span> <a href="mailto:bookings@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">bookings@exitsmiling.com.au</a></p>
+              <p><span className="font-semibold text-white">Press / EPK:</span> <a href="mailto:press@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">press@exitsmiling.com.au</a></p>
               <p><span className="font-semibold text-white">Band contact:</span> <a href="mailto:hello@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">hello@exitsmiling.com.au</a></p>
             </div>
 
@@ -3717,9 +3719,9 @@ function Footer() {
 
         <div className="text-white/70">
           <p className="mb-2 text-xs uppercase tracking-[0.3em] text-white/50">Bookings</p>
-          <p className="font-semibold text-white">Megan Small</p>
-          <p>Good Vibes Entertainment</p>
-          <p>
+          <p className="font-semibold text-white">Good Vibes Entertainment</p>
+          <p>Megan Small</p>
+          <p className="mt-1">
             <a href="mailto:megan@goodvibesentertainment.com.au" className="hover:text-white">
               megan@goodvibesentertainment.com.au
             </a>
@@ -3727,6 +3729,12 @@ function Footer() {
           <p>
             <a href="tel:+61244080108" className="hover:text-white">
               (02) 4408 0108
+            </a>
+          </p>
+          <p className="mt-4 font-semibold text-white">Direct with the band</p>
+          <p>
+            <a href="mailto:bookings@exitsmiling.com.au" className="hover:text-white">
+              bookings@exitsmiling.com.au
             </a>
           </p>
         </div>
@@ -3738,6 +3746,12 @@ function Footer() {
           <p>
             <a href="mailto:hello@exitsmiling.com.au" className="hover:text-white">
               hello@exitsmiling.com.au
+            </a>
+          </p>
+          <p className="mt-3 text-xs uppercase tracking-[0.24em] text-white/40">Press / EPK</p>
+          <p>
+            <a href="mailto:press@exitsmiling.com.au" className="hover:text-white">
+              press@exitsmiling.com.au
             </a>
           </p>
         </div>
