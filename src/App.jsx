@@ -3301,6 +3301,10 @@ export function PressKit({ standalone = false }) {
       subtitle: "Live performance video",
       youtubeId: "nlqhNT8FOuk",
       youtubeActionLabel: "Watch on YouTube",
+      customThumbnail: "https://img.youtube.com/vi/nlqhNT8FOuk/maxresdefault.jpg",
+      customThumbnailAlt: "Exit Smiling performing Bombtrack live",
+      customKicker: "Evening Gig",
+      customHeadline: "Bombtrack (RATM Cover)",
     },
     {
       title: "ABC Radio Live Show",
@@ -3309,6 +3313,8 @@ export function PressKit({ standalone = false }) {
       youtubeActionLabel: "Listen on YouTube",
       customThumbnail: "/press-kit/images/exit-smiling-abc-radio-studio.jpg",
       customThumbnailAlt: "Exit Smiling in ABC Radio studio with Alice Ansara",
+      customKicker: "ABC Radio",
+      customHeadline: "Live with Alice Ansara",
     },
   ];
 
@@ -3456,8 +3462,8 @@ export function PressKit({ standalone = false }) {
                     Audio
                   </span>
                   <span className="absolute bottom-5 left-5 right-5">
-                    <span className="block text-xs font-black uppercase tracking-[0.28em] text-yellow-100/80">ABC Radio</span>
-                    <span className="mt-2 block text-2xl font-black uppercase leading-none text-white md:text-3xl">Live with Alice Ansara</span>
+                    <span className="block text-xs font-black uppercase tracking-[0.28em] text-yellow-100/80">{video.customKicker || video.subtitle}</span>
+                    <span className="mt-2 block text-2xl font-black uppercase leading-none text-white md:text-3xl">{video.customHeadline || video.title}</span>
                     <span className="mt-4 inline-flex rounded-full border border-white/30 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-black transition group-hover:bg-yellow-100">
                       {video.youtubeActionLabel}
                     </span>
