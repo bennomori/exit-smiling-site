@@ -454,12 +454,77 @@ Postmark order alerts are sent by the backend after orders. Relevant backend env
 - `ORDER_ALERT_EMAILS`
 - `ORDER_ALERT_PUBLIC_ASSET_BASE_URL`
 
+Current production sender/recipient:
+
+- `ORDER_ALERT_FROM_EMAIL=orders@exitsmiling.com.au`
+- `ORDER_ALERT_EMAILS=orders@exitsmiling.com.au`
+
+The PM2 production app runs from the built server folder:
+
+```bash
+/home/ubuntu/exit-smiling-site/exit-smiling-backend/.medusa/server
+```
+
+If changing order alert env values manually, update the `.env` file in that built server folder, then restart PM2:
+
+```bash
+cd /home/ubuntu/exit-smiling-site/exit-smiling-backend/.medusa/server
+grep -n "ORDER_ALERT_FROM_EMAIL\|ORDER_ALERT_EMAILS" .env
+pm2 restart exit-smiling-medusa
+```
+
 Use the live order flow to verify:
 
 - Medusa order appears
 - Stripe payment appears
 - Postmark alert arrives
 - Email subject total matches order total
+
+Manual order alert resend/test using an existing order display ID:
+
+```bash
+curl -i -X POST "https://api.exitsmiling.com.au/store/order-alerts/send" -H "x-publishable-api-key: MEDUSA_PUBLISHABLE_KEY" -H "Content-Type: application/json" -d '{"order_id":"88","source":"Manual branded sender test","force":true}'
+```
+
+## Email Operations
+
+Google Workspace is active for `exitsmiling.com.au`.
+
+Primary paid mailbox:
+
+- `ben@exitsmiling.com.au`
+
+Aliases on that mailbox:
+
+- `hello@exitsmiling.com.au`
+- `merch@exitsmiling.com.au`
+- `bookings@exitsmiling.com.au`
+- `press@exitsmiling.com.au`
+- `orders@exitsmiling.com.au`
+
+Configured send-as identities in Gmail:
+
+- `Exit Smiling <hello@exitsmiling.com.au>`
+- `Exit Smiling Merch <merch@exitsmiling.com.au>`
+- `Exit Smiling Bookings <bookings@exitsmiling.com.au>`
+- `Exit Smiling Press <press@exitsmiling.com.au>`
+- `Exit Smiling Orders <orders@exitsmiling.com.au>`
+
+Email DNS/authentication status:
+
+- Google MX active.
+- SPF includes Google, Postmark, and MailerLite.
+- DMARC exists in monitor mode (`p=none`).
+- Postmark domain authentication is verified for `exitsmiling.com.au`.
+- Google DKIM is pending until Google allows DKIM generation, usually 24-72 hours after Gmail activation.
+
+When Google DKIM becomes available:
+
+1. Go to Google Admin -> Apps -> Google Workspace -> Gmail -> Authenticate email.
+2. Generate a `2048` bit DKIM TXT record for `exitsmiling.com.au`.
+3. Add the TXT record in Cloudflare DNS.
+4. Return to Google Admin and start authentication.
+5. Send a test email from `hello@exitsmiling.com.au` and confirm it arrives normally.
 
 ## Uptime Monitoring
 
