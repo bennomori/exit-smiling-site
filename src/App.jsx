@@ -3397,7 +3397,7 @@ export function PressKit({ standalone = false }) {
               <p><span className="font-semibold text-white">Style:</span> Young alternative rock band, original songs, live covers, high-energy local shows</p>
               <p><span className="font-semibold text-white">Current focus:</span> Debut single launch, live shows, studio sessions, and official merch</p>
               <p><span className="font-semibold text-white">Booking:</span> <a href="mailto:megan@goodvibesentertainment.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">megan@goodvibesentertainment.com.au</a></p>
-              <p><span className="font-semibold text-white">Band contact:</span> <a href="mailto:paul@pauldolphindesigns.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">paul@pauldolphindesigns.com.au</a></p>
+              <p><span className="font-semibold text-white">Band contact:</span> <a href="mailto:hello@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">hello@exitsmiling.com.au</a></p>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
@@ -3630,11 +3630,11 @@ function Footer() {
 
         <div className="text-white/70">
           <p className="mb-2 text-xs uppercase tracking-[0.3em] text-white/50">Band Contact</p>
-          <p className="font-semibold text-white">Paul Dolphin</p>
+          <p className="font-semibold text-white">Exit Smiling</p>
           <p>Exit Smiling</p>
           <p>
-            <a href="mailto:paul@pauldolphindesigns.com.au" className="hover:text-white">
-              paul@pauldolphindesigns.com.au
+            <a href="mailto:hello@exitsmiling.com.au" className="hover:text-white">
+              hello@exitsmiling.com.au
             </a>
           </p>
         </div>
@@ -3671,8 +3671,8 @@ function Footer() {
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Merch Support</p>
           <p className="mt-3 text-sm leading-6 text-white/68">
             Questions about orders, sizing, print-on-demand timing, or merch table sales can be sent to{" "}
-            <a href="mailto:paul@pauldolphindesigns.com.au" className="font-semibold text-white hover:text-yellow-100">
-              paul@pauldolphindesigns.com.au
+            <a href="mailto:merch@exitsmiling.com.au" className="font-semibold text-white hover:text-yellow-100">
+              merch@exitsmiling.com.au
             </a>
             .
           </p>
