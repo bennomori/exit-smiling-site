@@ -3063,6 +3063,7 @@ function LogoAssetGrid({ logos }) {
 
 export function PressKit({ standalone = false }) {
   const [imageLibraryOpen, setImageLibraryOpen] = useState(false);
+  const [selectedPressVideo, setSelectedPressVideo] = useState(null);
   const logoAssets = [
     {
       id: "logo-white",
@@ -3306,6 +3307,8 @@ export function PressKit({ standalone = false }) {
       subtitle: "Live with Alice Ansara",
       youtubeId: "FhFmBOPrCkw",
       youtubeActionLabel: "Listen on YouTube",
+      customThumbnail: "/press-kit/images/exit-smiling-abc-radio-studio.jpg",
+      customThumbnailAlt: "Exit Smiling in ABC Radio studio with Alice Ansara",
     },
   ];
 
@@ -3434,16 +3437,44 @@ export function PressKit({ standalone = false }) {
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           {videos.map((video) => (
             <article key={video.youtubeId} className="overflow-hidden rounded-3xl border border-white/10 bg-black/45">
-              <div className="aspect-video w-full bg-black">
-                <iframe
-                  src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0`}
-                  title={video.title}
-                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  loading="lazy"
-                  className="h-full w-full border-0"
-                />
-              </div>
+              {video.customThumbnail ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedPressVideo(video)}
+                  className="group relative block aspect-video w-full overflow-hidden bg-black text-left"
+                  aria-label={`${video.youtubeActionLabel}: ${video.title}`}
+                >
+                  <img
+                    src={video.customThumbnail}
+                    alt={video.customThumbnailAlt || video.title}
+                    loading="lazy"
+                    decoding="async"
+                    className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.04] group-hover:brightness-110"
+                  />
+                  <span className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/22 to-transparent" />
+                  <span className="absolute left-5 top-5 rounded-full border border-white/18 bg-black/42 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/78">
+                    Audio
+                  </span>
+                  <span className="absolute bottom-5 left-5 right-5">
+                    <span className="block text-xs font-black uppercase tracking-[0.28em] text-yellow-100/80">ABC Radio</span>
+                    <span className="mt-2 block text-2xl font-black uppercase leading-none text-white md:text-3xl">Live with Alice Ansara</span>
+                    <span className="mt-4 inline-flex rounded-full border border-white/30 bg-white px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-black transition group-hover:bg-yellow-100">
+                      {video.youtubeActionLabel}
+                    </span>
+                  </span>
+                </button>
+              ) : (
+                <div className="aspect-video w-full bg-black">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0`}
+                    title={video.title}
+                    allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    allowFullScreen
+                    loading="lazy"
+                    className="h-full w-full border-0"
+                  />
+                </div>
+              )}
               <div className="p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-yellow-100/62">{video.subtitle}</p>
                 <h3 className="mt-2 text-xl font-black uppercase text-white">{video.title}</h3>
@@ -3464,8 +3495,61 @@ export function PressKit({ standalone = false }) {
           onClose={() => setImageLibraryOpen(false)}
           assets={pressImages}
         />
+        <PressVideoModal
+          video={selectedPressVideo}
+          onClose={() => setSelectedPressVideo(null)}
+        />
       </div>
     </section>
+  );
+}
+
+function PressVideoModal({ video, onClose }) {
+  useEffect(() => {
+    if (!video) return;
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose?.();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [video, onClose]);
+
+  if (!video) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/90 px-4 py-10" onClick={onClose}>
+      <div className="relative w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
+        <div className="mb-4 flex items-center justify-between gap-4">
+          <a
+            href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+            target="_blank"
+            rel="noreferrer"
+            onClick={onClose}
+            className="rounded-full border border-white/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-white/75 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+          >
+            {video.youtubeActionLabel || "Watch on YouTube"}
+          </a>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-full border border-white/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-white/75 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+          >
+            Close
+          </button>
+        </div>
+        <iframe
+          src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=1&rel=0`}
+          title={video.title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          className="aspect-video w-full rounded-2xl border border-white/10 bg-black"
+        />
+      </div>
+    </div>
   );
 }
 
