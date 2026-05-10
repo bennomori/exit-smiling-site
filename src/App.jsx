@@ -3305,6 +3305,7 @@ export function PressKit({ standalone = false }) {
       customThumbnailAlt: "Exit Smiling performing Bombtrack live",
       customKicker: "Evening Gig",
       customHeadline: "Bombtrack (RATM Cover)",
+      mediaTypeLabel: "Video",
     },
     {
       title: "ABC Radio Live Show",
@@ -3315,6 +3316,7 @@ export function PressKit({ standalone = false }) {
       customThumbnailAlt: "Exit Smiling in ABC Radio studio with Alice Ansara",
       customKicker: "ABC Radio",
       customHeadline: "Live with Alice Ansara",
+      mediaTypeLabel: "Audio",
     },
   ];
 
@@ -3459,7 +3461,7 @@ export function PressKit({ standalone = false }) {
                   />
                   <span className="absolute inset-0 bg-gradient-to-t from-black/82 via-black/22 to-transparent" />
                   <span className="absolute left-5 top-5 rounded-full border border-white/18 bg-black/42 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-white/78">
-                    Audio
+                    {video.mediaTypeLabel || "Video"}
                   </span>
                   <span className="absolute bottom-5 left-5 right-5">
                     <span className="block text-xs font-black uppercase tracking-[0.28em] text-yellow-100/80">{video.customKicker || video.subtitle}</span>
