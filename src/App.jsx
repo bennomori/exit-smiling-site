@@ -296,7 +296,7 @@ function Header({ cart, onToggleMiniCart }) {
 
           <div className="flex items-center gap-4 md:gap-4 lg:gap-5">
             <div className="hidden items-center gap-2 md:flex">
-              <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
+              <a href="https://www.instagram.com/exit_smiling/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
                 <InstagramIcon className="h-4 w-4" />
               </a>
 
@@ -410,7 +410,7 @@ function Header({ cart, onToggleMiniCart }) {
             <div className="mt-auto border-t border-white/10 pt-5">
               <p className="mb-3 text-[10px] uppercase tracking-[0.28em] text-white/35">Follow</p>
               <div className="flex flex-wrap gap-3">
-                <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
+                <a href="https://www.instagram.com/exit_smiling/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
                   <InstagramIcon className="h-4 w-4" />
                 </a>
                 <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
@@ -3283,7 +3283,7 @@ export function PressKit({ standalone = false }) {
   ];
   const pressPhotoUrl = pressImages[0].href;
   const pressLinks = [
-    { href: "https://www.instagram.com/exitsmiling33/", label: "Instagram" },
+    { href: "https://www.instagram.com/exit_smiling/", label: "Instagram" },
     { href: "https://www.facebook.com/profile.php?id=61584318366927", label: "Facebook" },
     { href: "https://www.youtube.com/@ExitSmiling-u8i", label: "YouTube" },
     { href: "https://www.tiktok.com/@exit_smiling", label: "TikTok" },
@@ -3757,7 +3757,7 @@ function Footer() {
         </div>
 
         <div className="flex items-center gap-3 text-white/70 md:justify-start xl:justify-end">
-          <a href="https://www.instagram.com/exitsmiling33/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
+          <a href="https://www.instagram.com/exit_smiling/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
             <InstagramIcon className="h-4 w-4" />
           </a>
 
@@ -3830,7 +3830,7 @@ function MobileSocialBar() {
     <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2 md:hidden">
       <div className="flex flex-col items-center justify-center gap-2 rounded-full border border-white/10 bg-black/55 p-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur">
         <a
-          href="https://www.instagram.com/exitsmiling33/"
+          href="https://www.instagram.com/exit_smiling/"
           target="_blank"
           rel="noreferrer"
           aria-label="Instagram"
