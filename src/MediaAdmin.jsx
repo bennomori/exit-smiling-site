@@ -2,8 +2,11 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { MEDIA_BASE_URL, mediaAssets } from "./mediaAssets";
 
+const medusaBaseUrl = import.meta.env.VITE_MEDUSA_URL || "";
+const publishableKey = import.meta.env.VITE_MEDUSA_PUBLISHABLE_KEY;
 const imageExtensions = new Set(["jpg", "jpeg", "png", "gif", "webp", "svg"]);
 const videoExtensions = new Set(["mp4", "mov"]);
+const maxUploadBytes = 25 * 1024 * 1024;
 
 function getExtension(key) {
   return key.split(".").pop()?.toLowerCase() || "";
@@ -23,6 +26,12 @@ function getFolder(key) {
 
 function getAssetUrl(asset) {
   return `${MEDIA_BASE_URL}/${asset.key}`;
+}
+
+function getAcceptValue(type) {
+  if (type === "image") return "image/*";
+  if (type === "video") return "video/*";
+  return "*/*";
 }
 
 function groupAssets(assets) {
@@ -51,15 +60,96 @@ function copyToClipboard(value) {
   return Promise.resolve();
 }
 
-function AssetCard({ asset }) {
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || "");
+      resolve(result.includes(",") ? result.split(",").pop() : result);
+    };
+    reader.onerror = () => reject(reader.error || new Error("Failed to read file."));
+    reader.readAsDataURL(file);
+  });
+}
+
+function AssetCard({ asset, uploadToken }) {
   const [copied, setCopied] = useState(false);
-  const url = getAssetUrl(asset);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [replaceStatus, setReplaceStatus] = useState({ tone: "idle", message: "" });
+  const [cacheBust, setCacheBust] = useState("");
+  const url = `${getAssetUrl(asset)}${cacheBust ? `?v=${cacheBust}` : ""}`;
+  const cleanUrl = getAssetUrl(asset);
   const type = getAssetType(asset);
   const copyUrl = () => {
-    copyToClipboard(url).then(() => {
+    copyToClipboard(cleanUrl).then(() => {
       setCopied(true);
       window.setTimeout(() => setCopied(false), 1800);
     });
+  };
+  const canReplace = type === "image" || type === "video";
+
+  const handleReplace = async () => {
+    if (!selectedFile) {
+      setReplaceStatus({ tone: "error", message: "Choose a replacement file first." });
+      return;
+    }
+    if (!uploadToken.trim()) {
+      setReplaceStatus({ tone: "error", message: "Enter the media upload token at the top of the page." });
+      return;
+    }
+    if (!publishableKey) {
+      setReplaceStatus({ tone: "error", message: "Missing frontend Medusa publishable key." });
+      return;
+    }
+    if (selectedFile.size > maxUploadBytes) {
+      setReplaceStatus({ tone: "error", message: "File is over 25MB. Optimise large videos first, then upload by script." });
+      return;
+    }
+    if (type === "image" && !selectedFile.type.startsWith("image/")) {
+      setReplaceStatus({ tone: "error", message: "This slot expects an image file." });
+      return;
+    }
+    if (type === "video" && !selectedFile.type.startsWith("video/")) {
+      setReplaceStatus({ tone: "error", message: "This slot expects a video file." });
+      return;
+    }
+
+    setReplaceStatus({ tone: "pending", message: "Uploading replacement..." });
+
+    try {
+      const dataBase64 = await readFileAsBase64(selectedFile);
+      const response = await fetch(`${medusaBaseUrl}/store/media-admin/replace`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-publishable-api-key": publishableKey,
+        },
+        body: JSON.stringify({
+          token: uploadToken.trim(),
+          key: asset.key,
+          contentType: selectedFile.type || "application/octet-stream",
+          size: selectedFile.size,
+          dataBase64,
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result?.message || `Upload failed with status ${response.status}.`);
+      }
+
+      setCacheBust(String(Date.now()));
+      setSelectedFile(null);
+      setReplaceStatus({
+        tone: "success",
+        message: `Replaced ${asset.key} (${Math.round((result.bytes || selectedFile.size) / 1024)}KB).`,
+      });
+    } catch (error) {
+      setReplaceStatus({
+        tone: "error",
+        message: error?.message || "Replacement failed.",
+      });
+    }
   };
 
   return (
@@ -120,13 +210,60 @@ function AssetCard({ asset }) {
             {copied ? "Copied" : "Copy URL"}
           </button>
           <a
-            href={url}
+            href={cleanUrl}
             download
             className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/75 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
           >
             Download
           </a>
         </div>
+
+        {canReplace ? (
+          <div className="rounded-2xl border border-yellow-200/15 bg-yellow-200/7 p-3">
+            <p className="text-[10px] font-black uppercase tracking-[0.22em] text-yellow-100/70">
+              Replace same slot
+            </p>
+            <p className="mt-2 text-xs leading-5 text-white/55">
+              Uploading here overwrites this exact R2 key, so all existing site references keep working.
+              {type === "video" ? " Optimise large videos with FFmpeg before replacement." : ""}
+            </p>
+            <input
+              type="file"
+              accept={getAcceptValue(type)}
+              onChange={(event) => {
+                setSelectedFile(event.target.files?.[0] || null);
+                setReplaceStatus({ tone: "idle", message: "" });
+              }}
+              className="mt-3 w-full rounded-xl border border-white/10 bg-black/35 px-3 py-2 text-xs text-white/70 file:mr-3 file:rounded-full file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-[10px] file:font-black file:uppercase file:tracking-[0.16em] file:text-black"
+            />
+            {selectedFile ? (
+              <p className="mt-2 break-all text-xs text-white/50">
+                {selectedFile.name} - {Math.round(selectedFile.size / 1024)}KB
+              </p>
+            ) : null}
+            <button
+              type="button"
+              onClick={handleReplace}
+              disabled={replaceStatus.tone === "pending"}
+              className="mt-3 rounded-full border border-yellow-200/45 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-yellow-50 transition hover:bg-yellow-200 hover:text-black disabled:cursor-wait disabled:opacity-60"
+            >
+              {replaceStatus.tone === "pending" ? "Replacing..." : "Replace Asset"}
+            </button>
+            {replaceStatus.message ? (
+              <p
+                className={`mt-3 text-xs leading-5 ${
+                  replaceStatus.tone === "success"
+                    ? "text-emerald-200"
+                    : replaceStatus.tone === "error"
+                      ? "text-red-200"
+                      : "text-white/55"
+                }`}
+              >
+                {replaceStatus.message}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </div>
     </article>
   );
@@ -134,6 +271,7 @@ function AssetCard({ asset }) {
 
 export default function MediaAdmin() {
   const [search, setSearch] = useState("");
+  const [uploadToken, setUploadToken] = useState("");
   const filteredAssets = mediaAssets.filter((asset) => {
     const haystack = `${asset.key} ${asset.description} ${asset.oldFile}`.toLowerCase();
     return haystack.includes(search.toLowerCase());
@@ -204,8 +342,25 @@ export default function MediaAdmin() {
             the site preview gate.
           </p>
           <p className="mt-3">
-            To replace an asset without code changes, upload the new file to Cloudflare R2 using the exact key shown on
-            the card. The public URL remains stable if the key stays the same.
+            To replace an asset without code changes, enter the media upload token below and use the Replace panel on
+            the relevant card. The upload overwrites the exact R2 key shown on the card, keeping the public URL stable.
+          </p>
+        </div>
+
+        <div className="mt-6 rounded-3xl border border-white/10 bg-white/[0.035] p-5">
+          <label htmlFor="media-upload-token" className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">
+            Media upload token
+          </label>
+          <input
+            id="media-upload-token"
+            type="password"
+            value={uploadToken}
+            onChange={(event) => setUploadToken(event.target.value)}
+            placeholder="Enter upload token before replacing assets"
+            className="mt-3 w-full rounded-2xl border border-white/12 bg-black/45 px-5 py-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-yellow-200/55 focus:bg-black/65"
+          />
+          <p className="mt-3 text-xs leading-5 text-white/45">
+            This token is checked by the AWS backend and is not stored by the browser.
           </p>
         </div>
 
@@ -251,7 +406,7 @@ export default function MediaAdmin() {
               </div>
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                 {grouped[folder].map((asset) => (
-                  <AssetCard key={asset.key} asset={asset} />
+                  <AssetCard key={asset.key} asset={asset} uploadToken={uploadToken} />
                 ))}
               </div>
             </section>

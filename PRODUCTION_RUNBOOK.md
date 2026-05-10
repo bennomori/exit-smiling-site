@@ -526,6 +526,30 @@ When Google DKIM becomes available:
 4. Return to Google Admin and start authentication.
 5. Send a test email from `hello@exitsmiling.com.au` and confirm it arrives normally.
 
+## Media Admin Replacement
+
+The private `/media-admin` page can replace image/video assets by overwriting the same Cloudflare R2 key. This keeps all existing site URLs stable.
+
+Backend env variables required in the production `.env` file used by PM2:
+
+- `R2_ACCOUNT_ID`
+- `R2_ACCESS_KEY_ID`
+- `R2_SECRET_ACCESS_KEY`
+- `R2_BUCKET_NAME=exit-smiling-media`
+- `MEDIA_ADMIN_UPLOAD_TOKEN`
+- `MEDIA_ADMIN_UPLOAD_MAX_BYTES` optional, defaults to `26214400` / 25MB
+
+The upload token is entered manually in `/media-admin` before using any Replace panel. Do not commit the token to Git or expose it in frontend env files.
+
+Replacement behavior:
+
+- Images must replace image slots.
+- Videos must replace video slots.
+- The R2 key is overwritten in place.
+- The public URL remains unchanged.
+- The browser preview is cache-busted after upload.
+- Large videos should still be optimised locally with `scripts/optimize-r2-videos.ps1` before replacement. This first version does not run server-side FFmpeg.
+
 ## Uptime Monitoring
 
 Better Stack is configured for external uptime monitoring.
