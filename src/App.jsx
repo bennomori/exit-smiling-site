@@ -3630,7 +3630,7 @@ function Footer() {
 
         <div className="text-white/70">
           <p className="mb-2 text-xs uppercase tracking-[0.3em] text-white/50">Band Contact</p>
-          <p className="font-semibold text-white">Exit Smiling</p>
+          <p className="font-semibold text-white">Paul Dolphin</p>
           <p>Exit Smiling</p>
           <p>
             <a href="mailto:hello@exitsmiling.com.au" className="hover:text-white">
