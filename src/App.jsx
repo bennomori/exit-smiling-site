@@ -3744,8 +3744,8 @@ function Footer() {
           <p className="font-semibold text-white">Paul Dolphin</p>
           <p>Exit Smiling</p>
           <p>
-            <a href="mailto:hello@exitsmiling.com.au" className="hover:text-white">
-              hello@exitsmiling.com.au
+            <a href="mailto:manager@exitsmiling.com.au" className="hover:text-white">
+              manager@exitsmiling.com.au
             </a>
           </p>
           <p className="mt-3 text-xs uppercase tracking-[0.24em] text-white/40">Press / EPK</p>
