@@ -1039,6 +1039,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                     title: "ABC Radio Live Show",
                     youtubeId: "FhFmBOPrCkw",
                     youtubeTitle: "ABC Radio Live Show with Alice Ansara",
+                    youtubeActionLabel: "Listen on YouTube",
                   })
                 }
               >
@@ -3298,11 +3299,13 @@ export function PressKit({ standalone = false }) {
       title: "Bombtrack (RATM Cover)",
       subtitle: "Live performance video",
       youtubeId: "nlqhNT8FOuk",
+      youtubeActionLabel: "Watch on YouTube",
     },
     {
       title: "ABC Radio Live Show",
       subtitle: "Live with Alice Ansara",
       youtubeId: "FhFmBOPrCkw",
+      youtubeActionLabel: "Listen on YouTube",
     },
   ];
 
@@ -3444,6 +3447,14 @@ export function PressKit({ standalone = false }) {
               <div className="p-5">
                 <p className="text-xs uppercase tracking-[0.28em] text-yellow-100/62">{video.subtitle}</p>
                 <h3 className="mt-2 text-xl font-black uppercase text-white">{video.title}</h3>
+                <a
+                  href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="mt-4 inline-flex rounded-full border border-white/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+                >
+                  {video.youtubeActionLabel || "Watch on YouTube"}
+                </a>
               </div>
             </article>
           ))}
@@ -3862,6 +3873,17 @@ function FeaturedAudioImageModal({ item, onClose }) {
               allowFullScreen
               className="aspect-video w-full bg-black"
             />
+            <div className="flex justify-end border-t border-white/10 bg-white/[0.035] p-3">
+              <a
+                href={`https://www.youtube.com/watch?v=${item.youtubeId}`}
+                target="_blank"
+                rel="noreferrer"
+                onClick={onClose}
+                className="rounded-full border border-white/15 px-4 py-2 text-[11px] font-black uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white"
+              >
+                {item.youtubeActionLabel || "Watch on YouTube"}
+              </a>
+            </div>
           </div>
         ) : item.audio ? (
           <audio src={item.audio} autoPlay controls className="mt-4 w-full" />
