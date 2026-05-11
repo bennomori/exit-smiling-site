@@ -550,6 +550,65 @@ Replacement behavior:
 - The browser preview is cache-busted after upload.
 - Large videos should still be optimised locally with `scripts/optimize-r2-videos.ps1` before replacement. This first version does not run server-side FFmpeg.
 
+## New Merch Product Images
+
+Do not use Medusa Admin image upload for new production product images right now. In production, Medusa Admin uploads can save product image URLs as `http://localhost:9000/static/...`, which breaks for browsers outside the AWS server.
+
+Preferred workflow for new merch/accessory products:
+
+1. Create the product, variants, prices, inventory, and shipping profile in Medusa Admin without images.
+2. Upload the product image to Cloudflare R2 with a clean stable key.
+3. Link the R2 URL to the Medusa product image table.
+4. Set the product `thumbnail` to the same R2 URL.
+5. Refresh the site/POS and test option selection/add-to-cart.
+
+Example R2 upload from Windows PowerShell:
+
+```powershell
+cd C:\exit-smiling-site
+npx.cmd wrangler r2 object put "exit-smiling-media/merch/accessories/bracelet.jpg" --file "C:\Users\ben\Downloads\bracelet.jpg" --remote
+curl.exe -I https://exit-smiling-media.bennoclark.workers.dev/merch/accessories/bracelet.jpg
+```
+
+Example Medusa image attach from AWS Ubuntu:
+
+```bash
+sudo -u postgres psql -d medusa -c "insert into image (id, url, metadata, created_at, updated_at, rank, product_id) values ('img_bracelet_01', 'https://exit-smiling-media.bennoclark.workers.dev/merch/accessories/bracelet.jpg', '{}', now(), now(), 0, 'PRODUCT_ID_HERE') on conflict (id) do update set url = excluded.url, updated_at = now(), product_id = excluded.product_id, rank = excluded.rank;"
+```
+
+Example thumbnail update:
+
+```bash
+sudo -u postgres psql -d medusa -c "update product set thumbnail = 'https://exit-smiling-media.bennoclark.workers.dev/merch/accessories/bracelet.jpg', updated_at = now() where id = 'PRODUCT_ID_HERE';"
+```
+
+Verification query:
+
+```bash
+sudo -u postgres psql -d medusa -c "select id, title, thumbnail from product where id = 'PRODUCT_ID_HERE';"
+```
+
+Use predictable image IDs:
+
+- `img_bracelet_01`
+- `img_earrings_01`
+- `img_guitar_picks_01`
+- `img_product_slug_01`
+
+Use predictable R2 keys:
+
+- `merch/accessories/bracelet.jpg`
+- `merch/accessories/earrings.jpg`
+- `merch/accessories/guitar-picks.jpg`
+- `merch/accessories/product-slug.jpg`
+
+If Medusa Admin image upload is accidentally used and saves `localhost`, repair steps:
+
+1. Confirm the file exists in `.medusa/server/static`.
+2. Copy it to `/var/www/exit-smiling-static/` if it needs to be served via `https://api.exitsmiling.com.au/static/...`.
+3. Update the `image.url` row from `http://localhost:9000/static/...` to the public URL.
+4. Set `product.thumbnail` to the public URL.
+
 ## Uptime Monitoring
 
 Better Stack is configured for external uptime monitoring.
