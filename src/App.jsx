@@ -948,7 +948,7 @@ function Gigs() {
                   </div>
                 )
               ) : null}
-              <div className="relative z-30 flex flex-col items-start gap-2">
+              <div className="relative z-30 flex flex-col items-start gap-2 md:items-center">
                 {isUpcoming ? (
                   <span className="inline-flex items-center gap-2 rounded-full border border-yellow-200/70 bg-yellow-300/18 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-yellow-50 shadow-[0_0_30px_rgba(250,204,21,0.32)] animate-pulse">
                     <span className="relative flex h-3 w-3">
