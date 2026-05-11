@@ -904,7 +904,7 @@ function Gigs() {
             return (
             <div
               key={showKey}
-              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto_auto] md:items-center ${isUpcoming ? 'bg-yellow-300/[0.035]' : 'bg-white/[0.015] opacity-65 hover:opacity-100'}`}
+              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_minmax(0,1fr)_150px_210px] md:items-center ${isUpcoming ? 'bg-yellow-300/[0.035]' : 'bg-white/[0.015] opacity-65 hover:opacity-100'}`}
               onMouseEnter={() => setActiveGigPosterKey(show.posterImage ? showKey : null)}
               onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
             >
@@ -916,7 +916,7 @@ function Gigs() {
                     onClick={() => setSelectedGigPoster({ src: show.posterImage, title: `${show.city} gig poster` })}
                     onMouseEnter={() => setActiveGigPosterKey(showKey)}
                     onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
-                    className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
+                    className={`absolute right-5 top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
                   >
                     <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
                       <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
@@ -933,7 +933,7 @@ function Gigs() {
                   <div
                     onMouseEnter={() => setActiveGigPosterKey(showKey)}
                     onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
-                    className={`absolute right-[20%] top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
+                    className={`absolute right-5 top-1/2 z-20 hidden w-[min(240px,24vw)] -translate-y-1/2 transition duration-300 xl:block ${isPosterActive ? "pointer-events-auto translate-x-0 opacity-100" : "pointer-events-none translate-x-4 opacity-0"}`}
                   >
                     <div className="overflow-hidden rounded-3xl border border-white/12 bg-black/90 shadow-[0_0_34px_rgba(255,255,255,0.14)]">
                       <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/55 via-black/10 to-black/10" />
@@ -961,7 +961,7 @@ function Gigs() {
                   <span className="text-white/72">{show.mapHref ? 'Venue map available' : 'Venue highlighted'}</span>
                 </div>
               </div>
-              <div className="flex items-center justify-start md:justify-center">
+              <div className="relative z-30 flex items-center justify-start md:justify-center">
                 <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${isUpcoming ? 'border-yellow-200/70 bg-yellow-300/18 text-yellow-50 shadow-[0_0_30px_rgba(250,204,21,0.32)] animate-pulse' : 'border-white/10 bg-white/[0.03] text-white/38'}`}>
                   {isUpcoming ? (
                     <span className="relative flex h-3 w-3">
