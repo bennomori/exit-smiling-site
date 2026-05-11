@@ -1956,7 +1956,7 @@ export default function PosApp() {
             )}
           </section>
 
-          <aside className={`order-2 max-h-[calc(100dvh-1.5rem)] self-start overflow-y-auto overscroll-contain [overflow-anchor:none] [-webkit-overflow-scrolling:touch] touch-pan-y rounded-[1.5rem] border border-white/10 bg-[#080808]/95 p-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-[0.92rem] shadow-[0_20px_70px_rgba(0,0,0,0.45)] backdrop-blur md:sticky md:top-4 md:z-30 md:block md:max-h-[calc(100dvh-2rem)] md:p-4 md:pb-5 lg:top-6 lg:max-h-[calc(100dvh-3rem)] ${cartLines.length || lastReceipt ? "fixed bottom-3 right-3 z-40 w-[46vw] min-w-[18rem] max-w-[24rem] md:sticky md:bottom-auto md:right-auto md:w-auto md:min-w-0 md:max-w-none" : "hidden md:block"}`}>
+          <aside className={`order-2 self-start overflow-visible rounded-[1.5rem] border border-white/10 bg-[#080808]/95 p-3 pb-[calc(1.25rem+env(safe-area-inset-bottom))] text-[0.92rem] shadow-[0_20px_70px_rgba(0,0,0,0.45)] backdrop-blur md:z-30 md:block md:p-4 md:pb-5 ${cartLines.length || lastReceipt ? "block w-full md:w-auto" : "hidden md:block"}`}>
             <p className="text-xs uppercase tracking-[0.28em] text-white/45">Current Sale</p>
             <h2 className="mt-1 text-xl font-black uppercase md:text-2xl">POS Cart</h2>
 
