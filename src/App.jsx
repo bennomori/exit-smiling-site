@@ -52,6 +52,7 @@ const heroImages = [
 
 const tourDates = [
   {
+    dateIso: '2026-04-18',
     date: 'APR 18',
     city: 'Moruya, NSW',
     venue: 'RSL Memorial Hall - 11 Page St, Moruya NSW 2537',
@@ -62,6 +63,7 @@ const tourDates = [
     note: 'Currents: Battle of the Bands - Youth Week live music competition - Free event - Pizza, DJs, chill out spaces',
   },
   {
+    dateIso: '2026-04-24',
     date: 'APR 24',
     city: 'Tomakin, NSW',
     venue: "Smokey Dan's",
@@ -72,6 +74,7 @@ const tourDates = [
     note: 'ARCHIE EP release tour (Together Apart) - with Grace Faletoese + Exit Smiling',
   },
   {
+    dateIso: '2026-05-02',
     date: 'MAY 2',
     city: 'Narooma, NSW',
     venue: 'Narooma Oyster Festival',
@@ -82,6 +85,7 @@ const tourDates = [
     note: 'Live show',
   },
   {
+    dateIso: '2026-05-16',
     date: 'MAY 16',
     city: 'Oyster Cove, NSW',
     venue: 'Oyster Cove Cocktail Bar',
@@ -92,6 +96,7 @@ const tourDates = [
     note: 'Live show',
   },
   {
+    dateIso: '2026-06-12',
     date: 'JUN 12',
     city: 'Batemans Bay, NSW',
     venue: 'The Starfish Deli - Starfish Sessions (Upstairs)',
@@ -802,6 +807,11 @@ function Gigs() {
   const [activeGigPosterKey, setActiveGigPosterKey] = useState(null);
   const [selectedGigPoster, setSelectedGigPoster] = useState(null);
   const posterSegmentDuration = 3.0;
+  const today = useMemo(() => {
+    const now = new Date();
+    now.setHours(0, 0, 0, 0);
+    return now;
+  }, []);
 
   useEffect(() => {
     if (!isHoveringPastGigs) {
@@ -888,15 +898,17 @@ function Gigs() {
             const hasTickets = trimmedHref.startsWith("http");
             const showKey = `${show.date}-${show.city}`;
             const isPosterActive = activeGigPosterKey === showKey;
+            const showDate = new Date(`${show.dateIso}T00:00:00`);
+            const isUpcoming = showDate >= today;
 
             return (
             <div
               key={showKey}
-              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto] md:items-center ${index === 0 ? 'bg-white/5' : ''}`}
+              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto] md:items-center ${isUpcoming ? 'bg-yellow-300/[0.035]' : 'bg-white/[0.015] opacity-65 hover:opacity-100'}`}
               onMouseEnter={() => setActiveGigPosterKey(show.posterImage ? showKey : null)}
               onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
             >
-              <div className="pointer-events-none absolute inset-0 rounded-[inherit] border border-transparent opacity-0 transition duration-300 group-hover:border-white/30 group-hover:opacity-100" />
+              <div className={`pointer-events-none absolute inset-0 rounded-[inherit] border transition duration-300 ${isUpcoming ? 'border-yellow-300/20 shadow-[0_0_24px_rgba(250,204,21,0.08)] animate-pulse group-hover:border-yellow-200/55 group-hover:shadow-[0_0_40px_rgba(250,204,21,0.18)]' : 'border-transparent opacity-0 group-hover:border-white/30 group-hover:opacity-100'}`} />
               {show.posterImage ? (
                 index < 3 ? (
                   <button
@@ -936,11 +948,22 @@ function Gigs() {
                   </div>
                 )
               ) : null}
-              <div className="text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.22)]">{show.date}</div>
+              <div className="flex items-center gap-3">
+                <div className={`text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white ${isUpcoming ? 'text-yellow-100 drop-shadow-[0_0_14px_rgba(250,204,21,0.24)]' : 'text-white/55'}`}>{show.date}</div>
+                <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${isUpcoming ? 'border-yellow-300/35 bg-yellow-300/12 text-yellow-100' : 'border-white/10 bg-white/[0.03] text-white/38'}`}>
+                  {isUpcoming ? (
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-60 animate-ping" />
+                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-yellow-200" />
+                    </span>
+                  ) : null}
+                  {isUpcoming ? 'Upcoming' : 'Played'}
+                </span>
+              </div>
               <div>
-                <div className="text-lg font-semibold uppercase transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.18)]">{show.city}</div>
-                <div className="text-sm text-white/60 transition duration-300 group-hover:text-white/80">{show.venue}</div>
-                <div className="mt-1 text-xs uppercase tracking-[0.18em] text-white/45 transition duration-300 group-hover:text-white/65">{show.time} - {show.note}</div>
+                <div className={`text-lg font-semibold uppercase transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.18)] ${isUpcoming ? 'text-white' : 'text-white/70'}`}>{show.city}</div>
+                <div className={`text-sm transition duration-300 group-hover:text-white/80 ${isUpcoming ? 'text-white/68' : 'text-white/45'}`}>{show.venue}</div>
+                <div className={`mt-1 text-xs uppercase tracking-[0.18em] transition duration-300 group-hover:text-white/65 ${isUpcoming ? 'text-yellow-100/65' : 'text-white/35'}`}>{show.time} - {show.note}</div>
                 <div className="mt-3 flex max-h-0 items-center gap-2 overflow-hidden text-[10px] uppercase tracking-[0.24em] text-white/60 opacity-0 transition-all duration-300 group-hover:max-h-10 group-hover:opacity-100">
                   <span className="relative flex h-3 w-3 items-center justify-center">
                     <span className="absolute inline-flex h-3 w-3 rounded-full bg-white/25 animate-ping" />
@@ -960,7 +983,7 @@ function Gigs() {
                     Map
                   </a>
                 ) : null}
-                <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className="ml-auto rounded-full border border-white/20 px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black">
+                <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className={`ml-auto rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black ${isUpcoming ? 'border-yellow-300/45 text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.12)]' : 'border-white/15 text-white/45'}`}>
                   {hasTickets ? 'Tickets' : 'Soon'}
                 </a>
               </div>
