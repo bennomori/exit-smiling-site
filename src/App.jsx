@@ -267,6 +267,7 @@ const studioSessions = [
 
 function Header({ cart, onToggleMiniCart }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [touchLandscape, setTouchLandscape] = useState(false);
   const socialButtonClass = 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-500 hover:border-white/35 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]';
   const cartCount = cart?.items?.reduce((sum, item) => sum + item.quantity, 0) || 0;
   const navItems = [
@@ -278,6 +279,22 @@ function Header({ cart, onToggleMiniCart }) {
     { href: '#press-kit', label: 'EPK' },
   ];
   const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  useEffect(() => {
+    const updateHeaderMode = () => {
+      const isTouchDevice = Boolean(window.matchMedia?.("(pointer: coarse)")?.matches || navigator.maxTouchPoints > 0);
+      setTouchLandscape(isTouchDevice && window.innerWidth > window.innerHeight);
+    };
+
+    updateHeaderMode();
+    window.addEventListener("resize", updateHeaderMode);
+    window.addEventListener("orientationchange", updateHeaderMode);
+
+    return () => {
+      window.removeEventListener("resize", updateHeaderMode);
+      window.removeEventListener("orientationchange", updateHeaderMode);
+    };
+  }, []);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -294,7 +311,7 @@ function Header({ cart, onToggleMiniCart }) {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur">
+      <header className={`${touchLandscape ? "relative" : "sticky top-0"} z-50 border-b border-white/10 bg-black/80 backdrop-blur`}>
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-8">
             <a href="#top" className="flex items-center">
