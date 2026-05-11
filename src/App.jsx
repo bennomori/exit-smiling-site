@@ -904,7 +904,7 @@ function Gigs() {
             return (
             <div
               key={showKey}
-              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto] md:items-center ${isUpcoming ? 'bg-yellow-300/[0.035]' : 'bg-white/[0.015] opacity-65 hover:opacity-100'}`}
+              className={`group relative grid gap-4 px-5 py-5 transition duration-300 ease-out hover:z-10 hover:scale-[1.015] hover:bg-white/[0.08] hover:shadow-[0_0_36px_rgba(255,255,255,0.14)] md:grid-cols-[160px_1fr_auto_auto] md:items-center ${isUpcoming ? 'bg-yellow-300/[0.035]' : 'bg-white/[0.015] opacity-65 hover:opacity-100'}`}
               onMouseEnter={() => setActiveGigPosterKey(show.posterImage ? showKey : null)}
               onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
             >
@@ -948,18 +948,7 @@ function Gigs() {
                   </div>
                 )
               ) : null}
-              <div className="flex items-center gap-3">
-                <div className={`text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white ${isUpcoming ? 'text-yellow-100 drop-shadow-[0_0_14px_rgba(250,204,21,0.24)]' : 'text-white/55'}`}>{show.date}</div>
-                <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${isUpcoming ? 'border-yellow-300/35 bg-yellow-300/12 text-yellow-100' : 'border-white/10 bg-white/[0.03] text-white/38'}`}>
-                  {isUpcoming ? (
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-300 opacity-60 animate-ping" />
-                      <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-yellow-200" />
-                    </span>
-                  ) : null}
-                  {isUpcoming ? 'Upcoming' : 'Played'}
-                </span>
-              </div>
+              <div className={`text-xl font-bold uppercase tracking-[0.2em] transition duration-300 group-hover:text-white ${isUpcoming ? 'text-yellow-100 drop-shadow-[0_0_14px_rgba(250,204,21,0.24)]' : 'text-white/55'}`}>{show.date}</div>
               <div>
                 <div className={`text-lg font-semibold uppercase transition duration-300 group-hover:text-white group-hover:drop-shadow-[0_0_14px_rgba(255,255,255,0.18)] ${isUpcoming ? 'text-white' : 'text-white/70'}`}>{show.city}</div>
                 <div className={`text-sm transition duration-300 group-hover:text-white/80 ${isUpcoming ? 'text-white/68' : 'text-white/45'}`}>{show.venue}</div>
@@ -972,7 +961,18 @@ function Gigs() {
                   <span className="text-white/72">{show.mapHref ? 'Venue map available' : 'Venue highlighted'}</span>
                 </div>
               </div>
-              <div className="flex flex-wrap items-start justify-between gap-3 md:min-w-[210px]">
+              <div className="flex items-center justify-start md:justify-center">
+                <span className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] ${isUpcoming ? 'border-yellow-200/70 bg-yellow-300/18 text-yellow-50 shadow-[0_0_30px_rgba(250,204,21,0.32)] animate-pulse' : 'border-white/10 bg-white/[0.03] text-white/38'}`}>
+                  {isUpcoming ? (
+                    <span className="relative flex h-3 w-3">
+                      <span className="absolute inline-flex h-full w-full rounded-full bg-yellow-200 opacity-85 animate-ping" />
+                      <span className="relative inline-flex h-3 w-3 rounded-full bg-yellow-100 shadow-[0_0_14px_rgba(250,204,21,0.9)]" />
+                    </span>
+                  ) : null}
+                  {isUpcoming ? 'Upcoming' : 'Played'}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center justify-between gap-3 md:min-w-[210px]">
                 {show.mapHref ? (
                   <a
                     href={show.mapHref}
