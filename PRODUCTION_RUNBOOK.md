@@ -2,6 +2,36 @@
 
 This runbook covers the live website, AWS Medusa backend, backups, and common recovery commands. Do not add secrets to this file.
 
+## Index
+
+- [Live URLs](#live-urls)
+- [Hosting](#hosting)
+- [Local Development](#local-development)
+- [Git And Frontend Deploys](#git-and-frontend-deploys)
+- [AWS Login](#aws-login)
+- [Backend Deploy](#backend-deploy)
+- [Live Health Check](#live-health-check)
+- [Media Admin](#media-admin)
+- [PM2 Commands](#pm2-commands)
+- [Nginx Commands](#nginx-commands)
+- [Backend Environment](#backend-environment)
+- [Static Product Media](#static-product-media)
+- [Database Backups](#database-backups)
+- [Database Restore](#database-restore)
+- [Medusa Admin](#medusa-admin)
+- [Stripe](#stripe)
+- [POS Before A Gig](#pos-before-a-gig)
+- [POS After A Gig](#pos-after-a-gig)
+- [Website Change Checklist](#website-change-checklist)
+- [Backend Change Checklist](#backend-change-checklist)
+- [Order Alerts](#order-alerts)
+- [Email Operations](#email-operations)
+- [Media Admin Replacement](#media-admin-replacement)
+- [New Merch Product Images](#new-merch-product-images)
+- [Uptime Monitoring](#uptime-monitoring)
+- [Incident Checklist](#incident-checklist)
+- [Secret Handling](#secret-handling)
+
 ## Live URLs
 
 - Website: https://www.exitsmiling.com.au
