@@ -312,13 +312,13 @@ function Header({ cart, onToggleMiniCart }) {
   return (
     <>
       <header className={`${touchLandscape ? "relative" : "sticky top-0"} z-50 border-b border-white/10 bg-black/80 backdrop-blur`}>
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-          <div className="flex items-center gap-8">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 md:px-5 lg:px-6">
+          <div className="flex min-w-0 items-center gap-4 lg:gap-8">
             <a href="#top" className="flex items-center">
-              <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="h-16 w-16 object-contain md:h-20 md:w-20" />
+              <img src={brand.markLogo} alt={brand.logoAlt} decoding="async" className="h-16 w-16 object-contain md:h-16 md:w-16 lg:h-20 lg:w-20" />
               <span className="sr-only">{brand.name}</span>
             </a>
-            <nav className="hidden gap-12 text-sm uppercase tracking-[0.2em] md:flex">
+            <nav className="hidden min-w-0 gap-4 whitespace-nowrap text-[11px] uppercase tracking-[0.12em] md:flex lg:gap-8 lg:text-xs lg:tracking-[0.16em] xl:gap-12 xl:text-sm xl:tracking-[0.2em]">
               {navItems.map((item) => (
                 <a key={item.href} href={item.href} className="relative text-white/80 transition hover:text-white after:absolute after:-bottom-1 after:left-0 after:h-[1px] after:w-0 after:bg-white after:transition-all after:duration-300 hover:after:w-full">
                   {item.label}
@@ -327,8 +327,8 @@ function Header({ cart, onToggleMiniCart }) {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 md:gap-4 lg:gap-5">
-            <div className="hidden items-center gap-2 md:flex">
+          <div className="flex shrink-0 items-center gap-3 md:gap-3 lg:gap-4 xl:gap-5">
+            <div className="hidden items-center gap-1 lg:gap-2 md:flex">
               <a href="https://www.instagram.com/exit_smiling/" target="_blank" rel="noreferrer" aria-label="Instagram" className={socialButtonClass}>
                 <InstagramIcon className="h-4 w-4" />
               </a>
