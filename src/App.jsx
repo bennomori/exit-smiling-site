@@ -3947,7 +3947,7 @@ function MobileSocialBar() {
   if (!showFloatingSocials) return null;
 
   return (
-    <div className="fixed right-[max(0.75rem,env(safe-area-inset-right))] top-[50dvh] z-50 -translate-y-1/2 translate-x-0 [transform:translate3d(0,-50%,0)]">
+    <div className="fixed bottom-[max(1rem,env(safe-area-inset-bottom))] right-[max(0.75rem,env(safe-area-inset-right))] z-50">
       <div className="flex flex-col items-center justify-center gap-2 rounded-full border border-white/10 bg-black/55 p-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur">
         <a
           href="https://www.instagram.com/exit_smiling/"
