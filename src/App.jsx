@@ -1441,11 +1441,19 @@ function Store({
               amount == null || Number.isNaN(Number(amount))
                 ? null
                 : `$${Number(amount).toFixed(2)}`;
-            const hasSelectedTypeAndSize =
-              Boolean(normalizeOptionValue(selectedOptions["type"])) &&
-              Boolean(normalizeOptionValue(selectedOptions["size"]));
+            const requiredOptionLabels = (product.options || [])
+              .map((option) => option.title || option.name)
+              .filter(Boolean);
+            const hasCompleteOptionSelection =
+              requiredOptionLabels.length > 0 &&
+              requiredOptionLabels.every((optionName) =>
+                Boolean(normalizeOptionValue(selectedOptions[normalizeOptionKey(optionName)]))
+              );
+            const selectionPrompt = requiredOptionLabels.length
+              ? `Select ${requiredOptionLabels.join(" and ")} to see price`
+              : "Select an option to see price";
             const stockInfo =
-              hasSelectedTypeAndSize && selectedVariant
+              hasCompleteOptionSelection && selectedVariant
                 ? getVariantStockInfo(selectedVariant)
                 : null;
             const sizeGuideType = detectSizeGuideType(product, selectedOptions);
@@ -1671,7 +1679,7 @@ function Store({
                   <p className="mt-3 text-center text-sm text-white/60">{price}</p>
                 ) : (
                   <p className="mt-3 text-center text-sm text-white/35">
-                    Select Type and Size to see price
+                    {selectionPrompt}
                   </p>
                 )}
 
@@ -5176,7 +5184,14 @@ export default function App() {
       const matchedVariant = findMatchingVariant(product, selectedOptions);
 
       if (!matchedVariant?.id) {
-        alert("Please choose your merch type and size.");
+        const requiredOptionLabels = (product.options || [])
+          .map((option) => option.title || option.name)
+          .filter(Boolean);
+        alert(
+          requiredOptionLabels.length
+            ? `Please choose your ${requiredOptionLabels.join(" and ")}.`
+            : "Please choose a product option."
+        );
         return;
       }
 
