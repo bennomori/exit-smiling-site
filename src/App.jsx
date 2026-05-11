@@ -107,6 +107,16 @@ const tourDates = [
     posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/starfish-deli-single-launch.png',
     note: 'Debut single launch show',
   },
+  {
+    dateIso: '2026-06-21',
+    date: 'JUN 21',
+    city: 'Moruya, NSW',
+    venue: 'Moruya Sage Winter Festival - Moruya Riverside Park (TBD)',
+    time: 'Times TBD',
+    disabledActions: true,
+    ctaLabel: 'Book TBD',
+    note: 'Live show',
+  },
 ];
 
 const videos = [
@@ -901,6 +911,7 @@ function Gigs() {
             const isPosterActive = activeGigPosterKey === showKey;
             const showDate = new Date(`${show.dateIso}T00:00:00`);
             const isUpcoming = showDate >= today;
+            const actionsDisabled = Boolean(show.disabledActions);
             const pulseDelaySeconds = ((index * 1.37) % 3.2).toFixed(2);
             const pulseDurationSeconds = (2.9 + ((index * 0.73) % 1.4)).toFixed(2);
 
@@ -979,7 +990,7 @@ function Gigs() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center justify-between gap-3 md:min-w-[210px]">
-                {show.mapHref ? (
+                {show.mapHref && !actionsDisabled ? (
                   <a
                     href={show.mapHref}
                     target="_blank"
@@ -988,10 +999,20 @@ function Gigs() {
                   >
                     Map
                   </a>
-                ) : null}
-                <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className={`ml-auto rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black ${isUpcoming ? 'border-yellow-300/45 text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.12)]' : 'border-white/15 text-white/45'}`}>
-                  {show.ctaLabel || (hasTickets ? 'Tickets' : 'Soon')}
-                </a>
+                ) : (
+                  <span className="cursor-not-allowed rounded-full border border-white/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/28">
+                    Map
+                  </span>
+                )}
+                {actionsDisabled ? (
+                  <span className="ml-auto cursor-not-allowed rounded-full border border-white/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-white/28">
+                    {show.ctaLabel || 'TBD'}
+                  </span>
+                ) : (
+                  <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className={`ml-auto rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black ${isUpcoming ? 'border-yellow-300/45 text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.12)]' : 'border-white/15 text-white/45'}`}>
+                    {show.ctaLabel || (hasTickets ? 'Tickets' : 'Soon')}
+                  </a>
+                )}
               </div>
             </div>
           )})}
