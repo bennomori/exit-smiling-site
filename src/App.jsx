@@ -909,7 +909,7 @@ function Gigs() {
               onMouseEnter={() => setActiveGigPosterKey(show.posterImage ? showKey : null)}
               onMouseLeave={() => setActiveGigPosterKey((current) => (current === showKey ? null : current))}
             >
-              <div className={`pointer-events-none absolute inset-0 rounded-[inherit] border transition duration-300 ${isUpcoming ? 'border-yellow-300/20 shadow-[0_0_24px_rgba(250,204,21,0.08)] animate-pulse group-hover:border-yellow-200/55 group-hover:shadow-[0_0_40px_rgba(250,204,21,0.18)]' : 'border-transparent opacity-0 group-hover:border-white/30 group-hover:opacity-100'}`} />
+              <div className={`pointer-events-none absolute inset-0 rounded-[inherit] border transition duration-300 ${isUpcoming ? 'border-yellow-200/35 shadow-[0_0_42px_rgba(250,204,21,0.18),inset_0_0_28px_rgba(250,204,21,0.06)] animate-pulse group-hover:border-yellow-100/70 group-hover:shadow-[0_0_62px_rgba(250,204,21,0.28),inset_0_0_34px_rgba(250,204,21,0.09)]' : 'border-transparent opacity-0 group-hover:border-white/30 group-hover:opacity-100'}`} />
               {show.posterImage ? (
                 index < 3 ? (
                   <button
