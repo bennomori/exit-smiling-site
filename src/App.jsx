@@ -3882,10 +3882,25 @@ function Footer() {
 }
 
 function MobileSocialBar() {
+  const [showFloatingSocials, setShowFloatingSocials] = useState(false);
   const socialButtonClass = 'flex h-10 w-10 items-center justify-center rounded-full border border-white/15 bg-black/70 text-white/75 shadow-[0_10px_30px_rgba(0,0,0,0.35)] backdrop-blur transition duration-300 hover:border-white/35 hover:bg-white/10 hover:text-white';
 
+  useEffect(() => {
+    const updateTouchDeviceState = () => {
+      const coarsePointer = window.matchMedia?.("(pointer: coarse)")?.matches;
+      setShowFloatingSocials(Boolean(coarsePointer || navigator.maxTouchPoints > 0));
+    };
+
+    updateTouchDeviceState();
+    window.addEventListener("resize", updateTouchDeviceState);
+
+    return () => window.removeEventListener("resize", updateTouchDeviceState);
+  }, []);
+
+  if (!showFloatingSocials) return null;
+
   return (
-    <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2 md:hidden">
+    <div className="fixed right-3 top-1/2 z-50 -translate-y-1/2">
       <div className="flex flex-col items-center justify-center gap-2 rounded-full border border-white/10 bg-black/55 p-2 shadow-[0_18px_50px_rgba(0,0,0,0.45)] backdrop-blur">
         <a
           href="https://www.instagram.com/exit_smiling/"
