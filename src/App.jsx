@@ -2184,6 +2184,13 @@ function MemberCard({ member }) {
     video.currentTime = 0;
   };
 
+  const closeMemberDetail = () => {
+    setSelectedFlashback(null);
+    setSelectedBioClip(null);
+    setHoverGalleryOpen(false);
+    setDetailOpen(false);
+  };
+
   useEffect(() => {
     const hasOpenModal = detailOpen || selectedFlashback || selectedBioClip || hoverGalleryOpen;
     if (!hasOpenModal) return;
@@ -2418,17 +2425,17 @@ function MemberCard({ member }) {
 
       {detailOpen && canShowPrivateMemberDetails ? (
         <div
-          className="fixed inset-0 z-[120] flex items-center justify-center bg-black/88 p-4"
-          onClick={() => setDetailOpen(false)}
+          className="fixed inset-0 z-[120] overflow-y-auto bg-black/88 p-4"
+          onClick={closeMemberDetail}
         >
           <div
-            className="relative w-full max-w-4xl overflow-hidden rounded-3xl border border-white/12 bg-[#090909] p-6 shadow-[0_0_40px_rgba(255,255,255,0.1)] md:p-8"
+            className="relative mx-auto my-4 w-full max-w-4xl overflow-hidden rounded-3xl border border-white/12 bg-[#090909] p-6 pb-24 shadow-[0_0_40px_rgba(255,255,255,0.1)] md:my-8 md:p-8"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(255,255,255,0.08),transparent_48%)]" />
             <button
               type="button"
-              onClick={() => setDetailOpen(false)}
+              onClick={closeMemberDetail}
               className="absolute right-5 top-5 text-sm uppercase tracking-[0.24em] text-white/55 transition hover:text-white"
             >
               Close
@@ -2489,17 +2496,24 @@ function MemberCard({ member }) {
                 </div>
               </div>
             </div>
+            <button
+              type="button"
+              onClick={closeMemberDetail}
+              className="fixed bottom-5 left-1/2 z-[140] -translate-x-1/2 rounded-full border border-white/20 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-black shadow-[0_14px_40px_rgba(0,0,0,0.45)] md:hidden"
+            >
+              Back to site
+            </button>
           </div>
         </div>
       ) : null}
 
       {selectedFlashback ? (
         <div
-          className="fixed inset-0 z-[130] flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[130] overflow-y-auto bg-black/90 p-4"
           onClick={() => setSelectedFlashback(null)}
         >
           <div
-            className="relative w-full max-w-5xl overflow-hidden rounded-3xl border border-white/12 bg-[#090909] p-4 shadow-[0_0_40px_rgba(255,255,255,0.12)] md:p-6"
+            className="relative mx-auto my-4 w-full max-w-5xl overflow-hidden rounded-3xl border border-white/12 bg-[#090909] p-4 pb-24 shadow-[0_0_40px_rgba(255,255,255,0.12)] md:my-8 md:p-6"
             onClick={(event) => event.stopPropagation()}
           >
             <button
@@ -2530,6 +2544,22 @@ function MemberCard({ member }) {
                 className="max-h-[78vh] w-full rounded-2xl object-contain"
               />
             )}
+            <div className="fixed bottom-5 left-1/2 z-[145] flex -translate-x-1/2 gap-2 md:hidden">
+              <button
+                type="button"
+                onClick={() => setSelectedFlashback(null)}
+                className="rounded-full border border-white/20 bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-black shadow-[0_14px_40px_rgba(0,0,0,0.45)]"
+              >
+                Back
+              </button>
+              <button
+                type="button"
+                onClick={closeMemberDetail}
+                className="rounded-full border border-white/18 bg-black/85 px-5 py-3 text-xs font-black uppercase tracking-[0.22em] text-white shadow-[0_14px_40px_rgba(0,0,0,0.45)]"
+              >
+                Exit
+              </button>
+            </div>
           </div>
         </div>
       ) : null}
