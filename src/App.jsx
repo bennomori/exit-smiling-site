@@ -90,7 +90,8 @@ const tourDates = [
     city: 'Oyster Cove, NSW',
     venue: 'Oyster Cove Cocktail Bar',
     time: '7PM',
-    href: '#',
+    href: 'https://www.instagram.com/oystercovecocktail/',
+    ctaLabel: 'Call to Book',
     mapHref: 'https://maps.app.goo.gl/Ex1Qa4t2vH4ysSQP6',
     posterImage: 'https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/oyster-cove-gig-poster.png',
     note: 'Live show',
@@ -984,7 +985,7 @@ function Gigs() {
                   </a>
                 ) : null}
                 <a href={trimmedHref || '#'} target={hasTickets ? '_blank' : undefined} rel={hasTickets ? 'noreferrer' : undefined} className={`ml-auto rounded-full border px-4 py-2 text-xs uppercase tracking-[0.2em] transition duration-300 group-hover:border-white group-hover:bg-white group-hover:text-black hover:border-white hover:bg-white hover:text-black ${isUpcoming ? 'border-yellow-300/45 text-yellow-100 shadow-[0_0_18px_rgba(250,204,21,0.12)]' : 'border-white/15 text-white/45'}`}>
-                  {hasTickets ? 'Tickets' : 'Soon'}
+                  {show.ctaLabel || (hasTickets ? 'Tickets' : 'Soon')}
                 </a>
               </div>
             </div>
