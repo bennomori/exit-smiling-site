@@ -21,7 +21,7 @@ Socials:
 ```text
 Instagram: https://www.instagram.com/exit_smiling/
 Facebook: https://www.facebook.com/profile.php?id=61584318366927
-YouTube: https://www.youtube.com/@ExitSmiling-u8i
+YouTube: https://www.youtube.com/@ExitSmilingOfficial
 TikTok: https://www.tiktok.com/@exit_smiling
 ```
 
@@ -43,7 +43,7 @@ TikTok: https://www.tiktok.com/@exit_smiling
       <div style="margin-top:8px;font-size:12px;color:#555555;">
         <a href="https://www.instagram.com/exit_smiling/" style="color:#555555;text-decoration:none;">Instagram</a> |
         <a href="https://www.facebook.com/profile.php?id=61584318366927" style="color:#555555;text-decoration:none;">Facebook</a> |
-        <a href="https://www.youtube.com/@ExitSmiling-u8i" style="color:#555555;text-decoration:none;">YouTube</a> |
+        <a href="https://www.youtube.com/@ExitSmilingOfficial" style="color:#555555;text-decoration:none;">YouTube</a> |
         <a href="https://www.tiktok.com/@exit_smiling" style="color:#555555;text-decoration:none;">TikTok</a>
       </div>
     </td>
@@ -68,7 +68,7 @@ TikTok: https://www.tiktok.com/@exit_smiling
       </div>
       <div style="margin-top:8px;font-size:12px;color:#555555;">
         <a href="https://www.instagram.com/exit_smiling/" style="color:#555555;text-decoration:none;">Instagram</a> |
-        <a href="https://www.youtube.com/@ExitSmiling-u8i" style="color:#555555;text-decoration:none;">YouTube</a>
+        <a href="https://www.youtube.com/@ExitSmilingOfficial" style="color:#555555;text-decoration:none;">YouTube</a>
       </div>
     </td>
   </tr>
@@ -175,5 +175,5 @@ Use this if an email client strips formatting:
 Exit Smiling
 www.exitsmiling.com.au
 Instagram: @exit_smiling
-YouTube: @ExitSmiling-u8i
+YouTube: @ExitSmilingOfficial
 ```

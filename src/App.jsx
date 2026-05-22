@@ -337,7 +337,7 @@ function Header({ cart, onToggleMiniCart }) {
                 <FacebookIcon className="h-4 w-4" />
               </a>
 
-              <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+              <a href="https://www.youtube.com/@ExitSmilingOfficial" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
                 <YoutubeIcon className="h-4 w-4" />
               </a>
 
@@ -449,7 +449,7 @@ function Header({ cart, onToggleMiniCart }) {
                 <a href="https://www.facebook.com/profile.php?id=61584318366927" target="_blank" rel="noreferrer" aria-label="Facebook" className={socialButtonClass}>
                   <FacebookIcon className="h-4 w-4" />
                 </a>
-                <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+                <a href="https://www.youtube.com/@ExitSmilingOfficial" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
                   <YoutubeIcon className="h-4 w-4" />
                 </a>
                 <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
@@ -3390,7 +3390,7 @@ export function PressKit({ standalone = false }) {
   const pressLinks = [
     { href: "https://www.instagram.com/exit_smiling/", label: "Instagram" },
     { href: "https://www.facebook.com/profile.php?id=61584318366927", label: "Facebook" },
-    { href: "https://www.youtube.com/@ExitSmiling-u8i", label: "YouTube" },
+    { href: "https://www.youtube.com/@ExitSmilingOfficial", label: "YouTube" },
     { href: "https://www.tiktok.com/@exit_smiling", label: "TikTok" },
   ];
   const highlights = [
@@ -3870,7 +3870,7 @@ function Footer() {
             <FacebookIcon className="h-4 w-4" />
           </a>
 
-          <a href="https://www.youtube.com/@ExitSmiling-u8i" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
+          <a href="https://www.youtube.com/@ExitSmilingOfficial" target="_blank" rel="noreferrer" aria-label="YouTube" className={socialButtonClass}>
             <YoutubeIcon className="h-4 w-4" />
           </a>
 
@@ -3970,7 +3970,7 @@ function MobileSocialBar() {
         </a>
 
         <a
-          href="https://www.youtube.com/@ExitSmiling-u8i"
+          href="https://www.youtube.com/@ExitSmilingOfficial"
           target="_blank"
           rel="noreferrer"
           aria-label="YouTube"
