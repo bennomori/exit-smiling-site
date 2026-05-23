@@ -167,6 +167,11 @@ export const mediaAssets = [
     "description": "Exit Smiling debut single audio preview"
   },
   {
+    "oldFile": "vinyl_spin_ndytyd.mov",
+    "key": "releases/vinyl-spin-audio-preview-loop.mp4",
+    "description": "Vinyl spin loop for debut single audio preview"
+  },
+  {
     "oldFile": "Exit_Smiling_Single_preview_ay9def.mp4",
     "key": "releases/exit-smiling-single-teaser.mp4",
     "description": "Exit Smiling debut single teaser video"

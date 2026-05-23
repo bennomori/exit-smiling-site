@@ -140,6 +140,7 @@ const debutSinglePreviewReleaseText =
   "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
 const debutSinglePreviewMedia = {
   src: "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-debut-single-preview.wav",
+  visualSrc: "https://exit-smiling-media.bennoclark.workers.dev/releases/vinyl-spin-audio-preview-loop.mp4",
   type: "audio",
   disclaimer: "AUDIO PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
 };
@@ -4238,16 +4239,27 @@ function ReleasePreviewModal({ video, onClose }) {
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <div className="rounded-3xl border border-white/10 bg-black p-3 md:p-5">
           {isAudioPreview ? (
-            <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 md:p-8">
-              <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.28em] text-white/55">
-                Exit Smiling audio preview
-              </p>
+            <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-3 md:p-5">
+              {preview.visualSrc ? (
+                <video
+                  src={preview.visualSrc}
+                  muted
+                  autoPlay
+                  loop
+                  playsInline
+                  className="max-h-[72vh] w-full rounded-2xl bg-black object-contain"
+                />
+              ) : (
+                <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.28em] text-white/55">
+                  Exit Smiling audio preview
+                </p>
+              )}
               <audio
                 ref={mediaRef}
                 src={preview.src}
                 controls
                 autoPlay
-                className="w-full"
+                className="mt-4 w-full"
               />
             </div>
           ) : (
