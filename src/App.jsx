@@ -202,6 +202,29 @@ const mostPopularProductImageOverrides = {
   // Example: "light grey hoodie black logo": "https://exit-smiling-media.bennoclark.workers.dev/merch/custom-hero.jpg",
 };
 
+const accessoryProductMatchers = [
+  "accessory",
+  "necklace",
+  "bracelet",
+  "earring",
+  "guitar pick",
+];
+
+const isAccessoryProduct = (productOrTitle) => {
+  const productText =
+    typeof productOrTitle === "string"
+      ? productOrTitle
+      : [
+          productOrTitle?.title,
+          productOrTitle?.handle,
+          productOrTitle?.type?.value,
+          productOrTitle?.type?.metadata?.name,
+        ].filter(Boolean).join(" ");
+
+  const normalized = String(productText || "").toLowerCase();
+  return accessoryProductMatchers.some((matcher) => normalized.includes(matcher));
+};
+
 const members = [
   { name: 'Cadence', role: 'Vocals' },
   { name: 'Lando', role: 'Vocals / Rhythm Guitar' },
@@ -1475,7 +1498,14 @@ function Store({
             <div className="relative overflow-hidden rounded-[1.7rem] border border-white/8 bg-black/30 p-2 shadow-[0_0_34px_rgba(255,255,255,0.08)]">
               <button
                 type="button"
-                onClick={() => topProduct && onOpenMerchImage?.(topProductImage, topProduct.title)}
+                onClick={() =>
+                  topProduct &&
+                  onOpenMerchImage?.(
+                    topProductImage,
+                    topProduct.title,
+                    isAccessoryProduct(topProduct) ? "plain" : "garment"
+                  )
+                }
                 className="group/popular relative block overflow-hidden rounded-[1.2rem] text-left"
                 disabled={!topProduct}
               >
@@ -1569,7 +1599,13 @@ function Store({
               >
                 <button
                   type="button"
-                  onClick={() => onOpenMerchImage?.(image, product.title)}
+                  onClick={() =>
+                    onOpenMerchImage?.(
+                      image,
+                      product.title,
+                      isAccessoryProduct(product) ? "plain" : "garment"
+                    )
+                  }
                   className="group/image relative w-full overflow-hidden rounded-2xl border border-white/10 bg-black text-left transition duration-300 ease-out hover:border-white/25 hover:shadow-[0_0_32px_rgba(255,255,255,0.12)]"
                 >
                   <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover/image:opacity-100" />
@@ -1580,7 +1616,13 @@ function Store({
                       loading="lazy"
                       decoding="async"
                       className="max-h-[520px] w-full cursor-pointer object-contain transition duration-500 ease-out group-hover/image:scale-[1.055] group-hover/image:brightness-110"
-                      onClick={() => onOpenMerchImage?.(image, product.title)}
+                      onClick={() =>
+                        onOpenMerchImage?.(
+                          image,
+                          product.title,
+                          isAccessoryProduct(product) ? "plain" : "garment"
+                        )
+                      }
                     />
                   </div>
 
@@ -4205,10 +4247,11 @@ function ReleasePreviewModal({ video, onClose }) {
   );
 }
 
-function MerchImageModal({ open, onClose, image, title }) {
+function MerchImageModal({ open, onClose, image, title, mode = "garment" }) {
   if (!open || !image) return null;
 
   const useStaticLargeImage = image === exitSmilingDebutSingleCoverLarge;
+  const usePlainImage = useStaticLargeImage || mode === "plain";
   const merchPanelPositions = [
     '0% 0%',
     '33.333% 0%',
@@ -4234,7 +4277,7 @@ function MerchImageModal({ open, onClose, image, title }) {
         </button>
 
         <div className="flex max-h-[90vh] items-center justify-center rounded-3xl border border-white/10 bg-[#0a0a0a] p-4 md:p-6">
-          {useStaticLargeImage ? (
+          {usePlainImage ? (
             <img
               src={image}
               alt={title || "Expanded merch image"}
@@ -4732,6 +4775,7 @@ export default function App() {
   const [releasePreviewVideo, setReleasePreviewVideo] = useState("");
   const [selectedMerchImage, setSelectedMerchImage] = useState("");
   const [selectedMerchTitle, setSelectedMerchTitle] = useState("");
+  const [selectedMerchImageMode, setSelectedMerchImageMode] = useState("garment");
   const [cartId, setCartId] = useState(null);
   const [cart, setCart] = useState(null);
   const [miniCartOpen, setMiniCartOpen] = useState(false);
@@ -5643,6 +5687,7 @@ export default function App() {
         onOpenHeroSingleImage={() => {
           setSelectedMerchImage(exitSmilingDebutSingleCoverLarge);
           setSelectedMerchTitle("Exit Smiling Debut Single");
+          setSelectedMerchImageMode("plain");
           setMerchImageOpen(true);
         }}
       />
@@ -5661,9 +5706,10 @@ export default function App() {
         productsLoading={productsLoading}
         productsError={productsError}
         onAddToCart={handleAddToCart}
-        onOpenMerchImage={(image, title) => {
+        onOpenMerchImage={(image, title, mode = "garment") => {
           setSelectedMerchImage(image);
           setSelectedMerchTitle(title);
+          setSelectedMerchImageMode(mode);
           setMerchImageOpen(true);
         }}
         selectedOptionsByProduct={selectedOptionsByProduct}
@@ -5681,9 +5727,11 @@ export default function App() {
           setMerchImageOpen(false);
           setSelectedMerchImage("");
           setSelectedMerchTitle("");
+          setSelectedMerchImageMode("garment");
         }}
         image={selectedMerchImage}
         title={selectedMerchTitle}
+        mode={selectedMerchImageMode}
       />
       <StudioModal
         open={studioOpen}
