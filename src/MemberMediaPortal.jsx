@@ -80,7 +80,12 @@ export default function MemberMediaPortal() {
   const [uploading, setUploading] = useState(false);
 
   const memberName = memberNamesBySlug[selectedMember] || selectedMember;
+  const isLoggedIn = Boolean(token);
   const allItems = useMemo(() => {
+    if (!isLoggedIn) {
+      return { visible: [], hidden: [] };
+    }
+
     const visibleIds = new Set(draft.order || []);
     const customItems = draft.customItems || [];
     const defaults = defaultMemberBioMedia[selectedMember] || [];
@@ -92,7 +97,7 @@ export default function MemberMediaPortal() {
     const hidden = merged.filter((item) => !visibleIds.has(item.id) || draft.hiddenIds.includes(item.id));
 
     return { visible, hidden };
-  }, [draft, selectedMember]);
+  }, [draft, isLoggedIn, selectedMember]);
 
   useEffect(() => {
     let mounted = true;
@@ -118,8 +123,8 @@ export default function MemberMediaPortal() {
     setSelectedMember(slug);
     setToken("");
     setPasscode("");
-    setDraft(getInitialMedia(slug, overrides));
-    setStatus({ tone: "idle", message: "" });
+    setDraft(getInitialMedia(slug, {}));
+    setStatus({ tone: "idle", message: "Enter this member's passcode to view their media." });
   };
 
   const handleLogin = async (event) => {
@@ -129,6 +134,7 @@ export default function MemberMediaPortal() {
     try {
       const result = await loginMemberMedia({ member: selectedMember, passcode });
       setToken(result.token);
+      setDraft(getInitialMedia(selectedMember, overrides));
       setStatus({ tone: "success", message: `Logged in as ${result.memberName || memberName}.` });
     } catch (error) {
       setToken("");
@@ -303,107 +309,130 @@ export default function MemberMediaPortal() {
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[1fr_0.42fr]">
           <div>
-            <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-              <div>
-                <h2 className="text-2xl font-black uppercase">{memberName} live rotation</h2>
-                <p className="mt-1 text-sm text-white/50">These are the visible items, in display order.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <label className={`cursor-pointer rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
-                  token && !uploading
-                    ? "border-white/25 bg-white/8 text-white hover:border-white/50"
-                    : "cursor-not-allowed border-white/10 text-white/30"
-                }`}>
-                  Upload image
-                  <input
-                    type="file"
-                    accept="image/*"
-                    disabled={!token || uploading}
-                    onChange={upload}
-                    className="hidden"
-                  />
-                </label>
-                <button
-                  type="button"
-                  onClick={save}
-                  disabled={!token}
-                  className="rounded-full bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
-                >
-                  Save changes
-                </button>
-              </div>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {allItems.visible.map((item, index) => (
-                <article key={item.id} className="rounded-3xl border border-white/10 bg-white/[0.035] p-3">
-                  <MediaPreview item={item} />
-                  {item.credit ? (
-                    <p className="mt-2 text-xs text-white/45">{item.credit}</p>
-                  ) : null}
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      onClick={() => updateDraft({ ...draft, order: moveItem(draft.order || [], item.id, "up") })}
-                      className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/65 transition hover:border-white/35 hover:text-white"
-                    >
-                      Up
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => updateDraft({ ...draft, order: moveItem(draft.order || [], item.id, "down") })}
-                      className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/65 transition hover:border-white/35 hover:text-white"
-                    >
-                      Down
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => hideItem(item.id)}
-                      className="rounded-full border border-red-300/25 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-red-100/80 transition hover:border-red-200/60 hover:text-red-50"
-                    >
-                      Hide
-                    </button>
-                    {String(item.id).startsWith("custom:") ? (
-                      <button
-                        type="button"
-                        onClick={() => removeCustomItem(item.id)}
-                        className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/45 transition hover:border-white/35 hover:text-white"
-                      >
-                        Remove upload
-                      </button>
-                    ) : null}
+            {isLoggedIn ? (
+              <>
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-2xl font-black uppercase">{memberName} live rotation</h2>
+                    <p className="mt-1 text-sm text-white/50">These are the visible items, in display order.</p>
                   </div>
-                  <p className="mt-3 text-xs text-white/35">Position {index + 1}</p>
-                </article>
-              ))}
-            </div>
+                  <div className="flex flex-wrap gap-2">
+                    <label className={`cursor-pointer rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
+                      token && !uploading
+                        ? "border-white/25 bg-white/8 text-white hover:border-white/50"
+                        : "cursor-not-allowed border-white/10 text-white/30"
+                    }`}>
+                      Upload image
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={!token || uploading}
+                        onChange={upload}
+                        className="hidden"
+                      />
+                    </label>
+                    <button
+                      type="button"
+                      onClick={save}
+                      disabled={!token}
+                      className="rounded-full bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
+                    >
+                      Save changes
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  {allItems.visible.map((item, index) => (
+                    <article key={item.id} className="rounded-3xl border border-white/10 bg-white/[0.035] p-3">
+                      <MediaPreview item={item} />
+                      {item.credit ? (
+                        <p className="mt-2 text-xs text-white/45">{item.credit}</p>
+                      ) : null}
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => updateDraft({ ...draft, order: moveItem(draft.order || [], item.id, "up") })}
+                          className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/65 transition hover:border-white/35 hover:text-white"
+                        >
+                          Up
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => updateDraft({ ...draft, order: moveItem(draft.order || [], item.id, "down") })}
+                          className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/65 transition hover:border-white/35 hover:text-white"
+                        >
+                          Down
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => hideItem(item.id)}
+                          className="rounded-full border border-red-300/25 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-red-100/80 transition hover:border-red-200/60 hover:text-red-50"
+                        >
+                          Hide
+                        </button>
+                        {String(item.id).startsWith("custom:") ? (
+                          <button
+                            type="button"
+                            onClick={() => removeCustomItem(item.id)}
+                            className="rounded-full border border-white/15 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.14em] text-white/45 transition hover:border-white/35 hover:text-white"
+                          >
+                            Remove upload
+                          </button>
+                        ) : null}
+                      </div>
+                      <p className="mt-3 text-xs text-white/35">Position {index + 1}</p>
+                    </article>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-3xl border border-white/10 bg-white/[0.035] p-8 text-center">
+                <p className="text-xs font-black uppercase tracking-[0.3em] text-yellow-100/55">Private view</p>
+                <h2 className="mt-3 text-3xl font-black uppercase">Log in as {memberName}</h2>
+                <p className="mx-auto mt-3 max-w-xl text-sm leading-6 text-white/55">
+                  This member&apos;s media stays hidden until their passcode is entered.
+                </p>
+              </div>
+            )}
           </div>
 
           <aside className="rounded-3xl border border-white/10 bg-white/[0.035] p-5">
-            <h2 className="text-xl font-black uppercase">Hidden items</h2>
-            <p className="mt-2 text-sm leading-6 text-white/50">
-              Hidden items are not deleted. They can be restored later.
-            </p>
-            <div className="mt-5 space-y-4">
-              {allItems.hidden.length ? (
-                allItems.hidden.map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-white/10 bg-black/35 p-3">
-                    <MediaPreview item={item} />
-                    <button
-                      type="button"
-                      onClick={() => showItem(item.id)}
-                      className="mt-3 w-full rounded-full border border-white/20 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/70 transition hover:border-white/45 hover:text-white"
-                    >
-                      Restore
-                    </button>
-                  </div>
-                ))
-              ) : (
-                <p className="rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-white/45">
-                  Nothing hidden for {memberName}.
+            {isLoggedIn ? (
+              <>
+                <h2 className="text-xl font-black uppercase">Hidden items</h2>
+                <p className="mt-2 text-sm leading-6 text-white/50">
+                  Hidden items are not deleted. They can be restored later.
                 </p>
-              )}
-            </div>
+                <div className="mt-5 space-y-4">
+                  {allItems.hidden.length ? (
+                    allItems.hidden.map((item) => (
+                      <div key={item.id} className="rounded-2xl border border-white/10 bg-black/35 p-3">
+                        <MediaPreview item={item} />
+                        <button
+                          type="button"
+                          onClick={() => showItem(item.id)}
+                          className="mt-3 w-full rounded-full border border-white/20 px-3 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/70 transition hover:border-white/45 hover:text-white"
+                        >
+                          Restore
+                        </button>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-white/45">
+                      Nothing hidden for {memberName}.
+                    </p>
+                  )}
+                </div>
+              </>
+            ) : (
+              <div className="rounded-2xl border border-white/10 bg-black/35 p-5">
+                <p className="text-xs font-black uppercase tracking-[0.26em] text-white/45">Hidden until login</p>
+                <p className="mt-3 text-sm leading-6 text-white/55">
+                  Select a member and enter their passcode to view or edit their media.
+                </p>
+              </div>
+            )}
           </aside>
         </section>
       </div>
