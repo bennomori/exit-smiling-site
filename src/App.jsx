@@ -1971,11 +1971,11 @@ function MemberCard({ member }) {
         ? [
             {
               src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-main.jpg',
-              className: '',
+              className: 'object-top',
             },
             {
               src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-rotation-colour.jpg',
-              className: '',
+              className: 'object-top',
             },
           ]
       : null;
