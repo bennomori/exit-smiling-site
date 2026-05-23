@@ -136,6 +136,8 @@ const exitSmilingDebutSingleCover =
   "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-cover.png";
 const exitSmilingDebutSingleCoverLarge =
   "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-cover-large.png";
+const debutSinglePreviewReleaseText =
+  "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
 
 const releases = [
   {
@@ -149,7 +151,7 @@ const releases = [
       src: 'https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-teaser.mp4',
       disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
     },
-    overlayText: 'PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26',
+    overlayText: debutSinglePreviewReleaseText,
   },
   {
     title: 'Home Town Hero',
@@ -755,8 +757,8 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
                     className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
                     style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
                   >
-                    <p className="max-w-[11rem] text-center text-sm font-black uppercase leading-tight tracking-[0.12em] text-white md:max-w-[13rem] md:text-lg">
-                      PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+                    <p className="max-w-[12rem] text-center text-[0.68rem] font-black uppercase leading-tight tracking-[0.1em] text-white md:max-w-[14rem] md:text-sm">
+                      {debutSinglePreviewReleaseText}
                     </p>
                   </div>
                 </div>
@@ -1135,8 +1137,8 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url(${exitSmilingDebutSingleCover})` }} />
                 <div className="pointer-events-none absolute inset-[-18%] z-20 flex items-center justify-center">
                   <div className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-2.5 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm">
-                    <p className="max-w-[10rem] text-center text-xs font-black uppercase leading-tight tracking-[0.12em] text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.6)] md:max-w-[12rem] md:text-base">
-                      PREVIEW ONLY - RELEASING ON APPLE MUSIC 6/12/26
+                    <p className="max-w-[11rem] text-center text-[0.62rem] font-black uppercase leading-tight tracking-[0.1em] text-white drop-shadow-[0_0_18px_rgba(0,0,0,0.6)] md:max-w-[13rem] md:text-xs">
+                      {debutSinglePreviewReleaseText}
                     </p>
                   </div>
                 </div>
