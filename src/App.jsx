@@ -5707,7 +5707,7 @@ export default function App() {
         onOpenAudioImage={setSelectedFeaturedAudioImage}
         onOpenReleasePreview={setReleasePreviewVideo}
       />
-      <StudioSessions onOpenStudio={handleStudioAccess} />
+      {/* Studio Sessions temporarily disabled; keep component/modal code for later reinstatement. */}
       <Band />
       <FanListSignup />
       <Store
