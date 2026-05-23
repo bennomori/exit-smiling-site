@@ -3238,8 +3238,18 @@ function LogoAssetGrid({ logos }) {
 }
 
 export function PressKit({ standalone = false }) {
+  const navigate = useNavigate();
   const [imageLibraryOpen, setImageLibraryOpen] = useState(false);
   const [selectedPressVideo, setSelectedPressVideo] = useState(null);
+  const handleMerchLinkClick = (event) => {
+    event.preventDefault();
+
+    navigate("/");
+    window.setTimeout(() => {
+      document.getElementById("store")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      window.history.replaceState(null, "", "/#store");
+    }, 80);
+  };
   const logoAssets = [
     {
       id: "logo-white",
@@ -3512,7 +3522,7 @@ export function PressKit({ standalone = false }) {
               <a href="/" className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white">
                 Main Site
               </a>
-              <a href="/#store" className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white">
+              <a href="/#store" onClick={handleMerchLinkClick} className="rounded-full border border-white/12 px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white">
                 Merch
               </a>
             </div>
