@@ -10,13 +10,15 @@ import {
 import {
   getPublicMemberMedia,
   loginMemberMedia,
+  prepareImageForUpload,
   readFileAsBase64,
   saveMemberMedia,
   uploadMemberMedia,
 } from "./memberMediaApi";
 
 const memberOptions = Object.entries(memberSlugs).map(([name, slug]) => ({ name, slug }));
-const maxUploadBytes = 25 * 1024 * 1024;
+const maxSourceUploadBytes = 40 * 1024 * 1024;
+const maxOptimizedUploadBytes = 8 * 1024 * 1024;
 
 function getDefaultIds(slug) {
   return (defaultMemberBioMedia[slug] || []).map((item) => item.id);
@@ -200,8 +202,8 @@ export default function MemberMediaPortal() {
       setStatus({ tone: "error", message: "Log in before uploading media." });
       return;
     }
-    if (file.size > maxUploadBytes) {
-      setStatus({ tone: "error", message: "File is over 25MB. Use a smaller image." });
+    if (file.size > maxSourceUploadBytes) {
+      setStatus({ tone: "error", message: "File is over 40MB. Use a smaller image." });
       return;
     }
     if (!file.type.startsWith("image/")) {
@@ -210,11 +212,20 @@ export default function MemberMediaPortal() {
     }
 
     setUploading(true);
-    setStatus({ tone: "pending", message: "Uploading to the media bucket..." });
+    setStatus({ tone: "pending", message: "Preparing image for upload..." });
 
     try {
-      const dataBase64 = await readFileAsBase64(file);
-      const result = await uploadMemberMedia({ token, member: selectedMember, file, dataBase64 });
+      const uploadFile = await prepareImageForUpload(file);
+
+      if (uploadFile.size > maxOptimizedUploadBytes) {
+        setStatus({ tone: "error", message: "Prepared image is still too large. Try a smaller or simpler image." });
+        return;
+      }
+
+      setStatus({ tone: "pending", message: "Uploading optimized image to the media bucket..." });
+
+      const dataBase64 = await readFileAsBase64(uploadFile);
+      const result = await uploadMemberMedia({ token, member: selectedMember, file: uploadFile, dataBase64 });
       const item = result.item;
       const nextDraft = {
         ...draft,
