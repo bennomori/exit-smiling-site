@@ -1451,7 +1451,7 @@ function Store({
           <div className="max-w-3xl">
             <SectionTitle>Merch</SectionTitle>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/65 md:text-base">
-              All our band merch is currently lovingly hand screenprinted by the band to save waste, and all proceeds go toward our Japan Tour. We print in small on-demand batches and occasional one-offs. We print once weekly, so if your choice is not currently in inventory we will let you know the approximate print time.
+              All our band merch is currently lovingly hand screenprinted by the band to save waste, and all proceeds go toward our Japan Tour. We print in small on-demand batches and occasional one-offs.
             </p>
             <div className="mt-5 grid gap-3 text-xs text-white/64 sm:grid-cols-3">
               {[
