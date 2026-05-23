@@ -1876,15 +1876,7 @@ function MemberCard({ member }) {
             className: '',
           },
           {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-fishing-01.jpg',
-            className: '',
-          },
-          {
             src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-soccer-02.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-fishing-02.jpg',
             className: '',
           },
           {
