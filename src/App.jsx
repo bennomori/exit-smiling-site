@@ -1967,8 +1967,8 @@ function MemberCard({ member }) {
   const livePreview =
     member.name === 'Cadence'
       ? {
-          src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-everlong-cover.mp4',
-          label: 'Everlong Cover - Cadence on vocals',
+          src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-top-bio-video.mp4',
+          label: 'Cadence on vocals',
         }
       : member.name === 'Joey'
         ? {
@@ -2068,11 +2068,7 @@ function MemberCard({ member }) {
       : [];
   const bioClipVideo =
     member.name === 'Cadence'
-      ? {
-          title: null,
-          src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-bio-video.mp4',
-          poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-bio-video-poster.jpg',
-        }
+      ? null
       : member.name === 'Joey'
       ? {
           title: null,

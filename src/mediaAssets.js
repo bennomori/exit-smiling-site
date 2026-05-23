@@ -52,6 +52,16 @@ export const mediaAssets = [
     "description": "Cadence Everlong cover video"
   },
   {
+    "oldFile": "cadence_bio_vid_bncxjf.mov",
+    "key": "bio/cadence/cadence-top-bio-video.mp4",
+    "description": "Cadence replacement top bio video"
+  },
+  {
+    "oldFile": "cadence_bio_vid_bncxjf.jpg",
+    "key": "bio/cadence/cadence-top-bio-video-poster.jpg",
+    "description": "Cadence replacement top bio video poster"
+  },
+  {
     "oldFile": "cadence_bio_clip_sxvvyh.jpg",
     "key": "bio/cadence/cadence-bio-video-poster.jpg",
     "description": "Cadence bio video poster"
