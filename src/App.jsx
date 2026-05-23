@@ -288,7 +288,7 @@ const studioSessions = [
   },
 ];
 
-function ComingSoonMusicButton({ ariaLabel, className, children }) {
+function ComingSoonMusicButton({ ariaLabel, className, popupPlacement = "top", children }) {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -309,7 +309,13 @@ function ComingSoonMusicButton({ ariaLabel, className, children }) {
         {children}
       </button>
       {open ? (
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-[200] mb-2 -translate-x-1/2 whitespace-nowrap rounded-full border border-yellow-200/45 bg-black/92 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-yellow-100 shadow-[0_10px_30px_rgba(0,0,0,0.45)]">
+        <span
+          className={`pointer-events-none absolute z-[200] whitespace-nowrap rounded-full border border-yellow-200/45 bg-black/92 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-yellow-100 shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
+            popupPlacement === "left"
+              ? "right-full top-1/2 mr-2 -translate-y-1/2"
+              : "bottom-full left-1/2 mb-2 -translate-x-1/2"
+          }`}
+        >
           Coming June 12
         </span>
       ) : null}
@@ -4060,11 +4066,11 @@ function MobileSocialBar() {
           <YoutubeIcon className="h-5 w-5" />
         </a>
 
-        <ComingSoonMusicButton ariaLabel="Spotify" className={socialButtonClass}>
+        <ComingSoonMusicButton ariaLabel="Spotify" className={socialButtonClass} popupPlacement="left">
           <SiSpotify className="h-5 w-5" />
         </ComingSoonMusicButton>
 
-        <ComingSoonMusicButton ariaLabel="Apple Music" className={socialButtonClass}>
+        <ComingSoonMusicButton ariaLabel="Apple Music" className={socialButtonClass} popupPlacement="left">
           <SiApplemusic className="h-5 w-5" />
         </ComingSoonMusicButton>
 
