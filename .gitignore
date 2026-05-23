@@ -15,3 +15,5 @@ temp_*.mp4
 medusa-prod.dump
 medusa-prod.sql
 video-optimized/
+member-media.json
+exit-smiling-backend/member-media.json

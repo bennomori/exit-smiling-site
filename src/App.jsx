@@ -19,6 +19,8 @@ import {
   replaceShippingMethods,
 } from "./cart";
 import { registerFanUpdatesAccess, verifyFanUpdatesAccess } from "./fanUpdates";
+import { getPublicMemberMedia } from "./memberMediaApi";
+import { mergeMemberBioMedia } from "./memberBioMedia";
 
 const primaryLogo = 'https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-white-on-black.png';
 const markLogo = 'https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-yellow-transparent.png';
@@ -1838,7 +1840,7 @@ function Store({
   );
 }
 
-function MemberCard({ member }) {
+function MemberCard({ member, memberMediaOverrides }) {
   const [detailOpen, setDetailOpen] = useState(false);
   const [selectedFlashback, setSelectedFlashback] = useState(null);
   const [selectedBioClip, setSelectedBioClip] = useState(null);
@@ -1848,118 +1850,10 @@ function MemberCard({ member }) {
   const [activeHoverGalleryIndex, setActiveHoverGalleryIndex] = useState(0);
   const imageClassName =
     "aspect-square w-full rounded-2xl border border-white/10 transition duration-500 ease-out group-hover:scale-[1.045] group-hover:brightness-110";
-  const lighterSideImages =
-    member.name === 'Max'
-      ? [
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-live-bass.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-asleep.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-soccer-01.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-logo-shirt.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-ski.jpg',
-            className: 'object-top',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-team-lab.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-soccer-02.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-waterslide-poster.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-fender-tokyo-poster.jpg',
-            className: '',
-          },
-          {
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-jamberoo-poster.jpg',
-            className: '',
-          },
-          ]
-      : member.name === 'Joey'
-        ? [
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-guitar-main.jpg',
-              className: 'object-top',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-helmet.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-pilot-training.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-fender-tokyo.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-snow-grooming-poster.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-timber-sledding-poster.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-wakesurfing-poster.jpg',
-              className: '',
-            },
-          ]
-      : member.name === 'Lando'
-        ? [
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-guitar-main.jpg',
-              className: 'object-top',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-crowd-cohen-maberly.jpg',
-              className: '',
-              credit: 'Photo: Cohen Maberly',
-            },
-          ]
-      : member.name === 'Cadence'
-        ? [
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-main.jpg',
-              className: '',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-crowd-cohen-maberly.jpg',
-              className: '',
-              credit: 'Photo: Cohen Maberly',
-            },
-          ]
-      : member.name === 'Julian'
-        ? [
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-main.jpg',
-              className: 'object-top',
-            },
-            {
-              src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-rotation-colour.jpg',
-              className: 'object-top',
-            },
-          ]
-      : null;
-  const visibleLighterSideImages = useMemo(() => lighterSideImages || [], [member.name]);
+  const visibleLighterSideImages = useMemo(
+    () => mergeMemberBioMedia(member.name, memberMediaOverrides),
+    [member.name, memberMediaOverrides]
+  );
   const hoverImageSegmentDuration = 2.1;
   const liveVideoRef = useRef(null);
   const bioClipVideoRef = useRef(null);
@@ -2152,6 +2046,7 @@ function MemberCard({ member }) {
   const activeHoverImageCredit =
     isHoveringBioImage ? visibleLighterSideImages[activeHoverImageIndex]?.credit : null;
   const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
+  const primaryBioImage = visibleLighterSideImages[0] || null;
 
   useEffect(() => {
     if (!isHoveringBioImage || visibleLighterSideImages.length <= 1) {
@@ -2290,11 +2185,15 @@ function MemberCard({ member }) {
       >
         <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_50%_30%,rgba(255,255,255,0.16),transparent_62%)] opacity-0 transition duration-300 group-hover:opacity-100" />
         <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/35 via-transparent to-transparent opacity-70 transition duration-300 group-hover:opacity-40" />
-        {member.name === 'Cadence' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-main.jpg" alt="Cadence" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Lando' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-guitar-main.jpg" alt="Lando" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Julian' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-main.jpg" alt="Julian" loading="lazy" decoding="async" className={`${imageClassName} bg-black object-contain ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Max' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-live-bass.jpg" alt="Max" loading="lazy" decoding="async" className={`${imageClassName} object-cover ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
-        {member.name === 'Joey' ? <img src="https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-guitar-main.jpg" alt="Joey" loading="lazy" decoding="async" className={`${imageClassName} object-cover object-top ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`} /> : null}
+        {primaryBioImage ? (
+          <img
+            src={primaryBioImage.src}
+            alt={member.name}
+            loading="lazy"
+            decoding="async"
+            className={`${imageClassName} object-cover ${primaryBioImage.className || ""} ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`}
+          />
+        ) : null}
         {visibleLighterSideImages?.length ? (
           <>
             <div className="pointer-events-none absolute inset-x-4 top-4 z-20 flex items-center justify-between opacity-0 transition duration-300 group-hover:opacity-100">
@@ -2938,7 +2837,7 @@ function BandHeadingFigures() {
   );
 }
 
-function Band() {
+function Band({ memberMediaOverrides }) {
   const bandBioImages = [
     {
       type: "image",
@@ -3027,7 +2926,7 @@ function Band() {
       </div>
       <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
         {members.map((member) => (
-          <MemberCard key={member.name} member={member} />
+          <MemberCard key={member.name} member={member} memberMediaOverrides={memberMediaOverrides} />
         ))}
       </div>
     </section>
@@ -4786,6 +4685,7 @@ export default function App() {
   const [studioConsentChecked, setStudioConsentChecked] = useState(false);
   const [studioError, setStudioError] = useState('');
   const [selectedStudioVideo, setSelectedStudioVideo] = useState(null);
+  const [memberMediaOverrides, setMemberMediaOverrides] = useState({});
   const [currentImage, setCurrentImage] = useState(0);
   const [heroSlideDurationMs, setHeroSlideDurationMs] = useState(defaultSlideDurationMs);
   const [products, setProducts] = useState([]);
@@ -4877,6 +4777,26 @@ export default function App() {
     }
 
     restoreStudioAccess()
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    getPublicMemberMedia()
+      .then((data) => {
+        if (mounted) {
+          setMemberMediaOverrides(data?.media || {});
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setMemberMediaOverrides({});
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -5720,7 +5640,7 @@ export default function App() {
         onOpenReleasePreview={setReleasePreviewVideo}
       />
       {/* Studio Sessions temporarily disabled; keep component/modal code for later reinstatement. */}
-      <Band />
+      <Band memberMediaOverrides={memberMediaOverrides} />
       <FanListSignup />
       <Store
         products={products}

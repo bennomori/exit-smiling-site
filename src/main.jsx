@@ -5,6 +5,7 @@ import App from "./App";
 import CheckoutSuccess from "./CheckoutSuccess";
 import EpkPage from "./EpkPage";
 import MediaAdmin from "./MediaAdmin";
+import MemberMediaPortal from "./MemberMediaPortal";
 import NotFound from "./NotFound";
 import PosApp from "./PosApp";
 import PreviewGate from "./PreviewGate";
@@ -21,6 +22,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <PreviewGate>
               <MediaAdmin />
+            </PreviewGate>
+          }
+        />
+        <Route
+          path="/member-media"
+          element={
+            <PreviewGate>
+              <MemberMediaPortal />
             </PreviewGate>
           }
         />
