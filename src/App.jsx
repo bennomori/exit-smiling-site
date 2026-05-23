@@ -167,6 +167,7 @@ const releases = [
       note: 'Band bio preview clip',
       disclaimer: 'LIVE PREVIEW - HOMETOWN HERO - OFFICIAL MASTERED SINGLE COMING SOON',
     },
+    hideTeaserButton: true,
   },
   {
     title: 'Lost In You',
@@ -182,6 +183,7 @@ const releases = [
       note: 'Selected female-vocal preview clip',
       disclaimer: "LIVE PREVIEW OF 'LOST IN YOU' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
     },
+    hideTeaserButton: true,
   },
 ];
 
@@ -857,21 +859,23 @@ function Releases({ onOpenReleasePreview }) {
               <h3 className="mt-4 text-xl font-bold uppercase md:text-2xl">{name}</h3>
               <p className="mt-1 text-sm uppercase tracking-[0.2em] text-white/50">{item.meta}</p>
               <p className="mt-3 flex-1 text-sm leading-6 text-white/65">{item.blurb}</p>
-              <button
-                type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  if (item.previewVideo) onOpenReleasePreview(item.previewVideo);
-                }}
-                disabled={!item.previewVideo}
-                className={`mt-4 self-end rounded-full border px-4 py-2 text-right text-xs uppercase tracking-[0.2em] transition ${
-                  item.previewVideo
-                    ? "border-white text-white hover:bg-white hover:text-black"
-                    : "cursor-not-allowed border-white/15 text-white/35"
-                }`}
-              >
-                {item.previewVideo ? "Click for a teaser" : "Soon"}
-              </button>
+              {!item.hideTeaserButton ? (
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    if (item.previewVideo) onOpenReleasePreview(item.previewVideo);
+                  }}
+                  disabled={!item.previewVideo}
+                  className={`mt-4 self-end rounded-full border px-4 py-2 text-right text-xs uppercase tracking-[0.2em] transition ${
+                    item.previewVideo
+                      ? "border-white text-white hover:bg-white hover:text-black"
+                      : "cursor-not-allowed border-white/15 text-white/35"
+                  }`}
+                >
+                  {item.previewVideo ? "Click for a teaser" : "Soon"}
+                </button>
+              ) : null}
             </article>
           );
         })}
