@@ -17,3 +17,5 @@ medusa-prod.sql
 video-optimized/
 member-media.json
 exit-smiling-backend/member-media.json
+gig-admin.json
+exit-smiling-backend/gig-admin.json

@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import CheckoutSuccess from "./CheckoutSuccess";
 import EpkPage from "./EpkPage";
+import GigAdmin from "./GigAdmin";
 import MediaAdmin from "./MediaAdmin";
 import MemberMediaPortal from "./MemberMediaPortal";
 import NotFound from "./NotFound";
@@ -30,6 +31,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <PreviewGate>
               <MemberMediaPortal />
+            </PreviewGate>
+          }
+        />
+        <Route
+          path="/gig-admin"
+          element={
+            <PreviewGate>
+              <GigAdmin />
             </PreviewGate>
           }
         />

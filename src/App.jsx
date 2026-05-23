@@ -19,6 +19,7 @@ import {
   replaceShippingMethods,
 } from "./cart";
 import { registerFanUpdatesAccess, verifyFanUpdatesAccess } from "./fanUpdates";
+import { getPublicGigs } from "./gigAdminApi";
 import { getPublicMemberMedia } from "./memberMediaApi";
 import { mergeMemberBioMedia } from "./memberBioMedia";
 
@@ -889,11 +890,37 @@ function Gigs() {
   const [activePastGigPosterIndex, setActivePastGigPosterIndex] = useState(0);
   const [activeGigPosterKey, setActiveGigPosterKey] = useState(null);
   const [selectedGigPoster, setSelectedGigPoster] = useState(null);
+  const [portalGigs, setPortalGigs] = useState([]);
   const posterSegmentDuration = 3.0;
   const today = useMemo(() => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
     return now;
+  }, []);
+  const visibleTourDates = useMemo(
+    () =>
+      [...tourDates, ...portalGigs]
+        .filter((show) => show?.dateIso && show?.date && show?.city && show?.venue)
+        .sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
+    [portalGigs],
+  );
+
+  useEffect(() => {
+    let mounted = true;
+
+    getPublicGigs()
+      .then((data) => {
+        if (!mounted) return;
+        setPortalGigs(data.gigs || []);
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setPortalGigs([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -976,10 +1003,10 @@ function Gigs() {
           </div>
         </div>
         <div className="mt-10 divide-y divide-white/10 rounded-3xl border border-white/10">
-          {tourDates.map((show, index) => {
+          {visibleTourDates.map((show, index) => {
             const trimmedHref = typeof show.href === "string" ? show.href.trim() : "";
             const hasTickets = trimmedHref.startsWith("http");
-            const showKey = `${show.date}-${show.city}`;
+            const showKey = show.id || `${show.date}-${show.city}-${show.venue}`;
             const isPosterActive = activeGigPosterKey === showKey;
             const showDate = new Date(`${show.dateIso}T00:00:00`);
             const isUpcoming = showDate >= today;
