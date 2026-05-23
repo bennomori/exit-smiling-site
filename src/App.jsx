@@ -138,6 +138,11 @@ const exitSmilingDebutSingleCoverLarge =
   "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-cover-large.png";
 const debutSinglePreviewReleaseText =
   "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
+const debutSinglePreviewMedia = {
+  src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1779522448/ES_f5pihg.wav",
+  type: "audio",
+  disclaimer: "AUDIO PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+};
 
 const releases = [
   {
@@ -147,10 +152,7 @@ const releases = [
     blurb: 'Launching live at Starfish Sessions in Batemans Bay.',
     image: exitSmilingDebutSingleCover,
     imageAlt: 'Exit Smiling Debut Single',
-    previewVideo: {
-      src: 'https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-teaser.mp4',
-      disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
-    },
+    previewVideo: debutSinglePreviewMedia,
     overlayText: debutSinglePreviewReleaseText,
   },
   {
@@ -777,12 +779,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
               ) : (
                 <button
                   type="button"
-                  onClick={() =>
-                    onOpenReleasePreview({
-                      src: "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-teaser.mp4",
-                      disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
-                    })
-                  }
+                  onClick={() => onOpenReleasePreview(debutSinglePreviewMedia)}
                   className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
                 >
                   Listen
@@ -1121,12 +1118,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
             {i === 0 ? (
               <div
                 className="relative cursor-pointer overflow-hidden"
-                onClick={() =>
-                  onOpenReleasePreview({
-                    src: "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-teaser.mp4",
-                    disclaimer: "LIVE PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
-                  })
-                }
+                onClick={() => onOpenReleasePreview(debutSinglePreviewMedia)}
               >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
                 <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url(${exitSmilingDebutSingleCover})` }} />
@@ -4196,10 +4188,10 @@ function FeaturedAudioImageModal({ item, onClose }) {
 }
 
 function ReleasePreviewModal({ video, onClose }) {
-  const videoRef = useRef(null);
+  const mediaRef = useRef(null);
 
   useEffect(() => {
-    const element = videoRef.current;
+    const element = mediaRef.current;
     if (!video || !element) return;
 
     const preview = typeof video === "string" ? { src: video } : video;
@@ -4239,18 +4231,34 @@ function ReleasePreviewModal({ video, onClose }) {
   if (!video) return null;
 
   const preview = typeof video === "string" ? { src: video } : video;
+  const isAudioPreview = preview.type === "audio" || /\.wav($|\?)/i.test(preview.src || "");
   return (
     <div className="fixed inset-0 z-[103] flex items-center justify-center bg-black/92 p-4" onClick={onClose}>
       <div className="relative w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <div className="rounded-3xl border border-white/10 bg-black p-3 md:p-5">
-          <video
-            ref={videoRef}
-            src={preview.src}
-            controls
-            autoPlay
-            className="max-h-[85vh] w-full rounded-2xl bg-black"
-          />
+          {isAudioPreview ? (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.035] p-5 md:p-8">
+              <p className="mb-4 text-center text-xs font-black uppercase tracking-[0.28em] text-white/55">
+                Exit Smiling audio preview
+              </p>
+              <audio
+                ref={mediaRef}
+                src={preview.src}
+                controls
+                autoPlay
+                className="w-full"
+              />
+            </div>
+          ) : (
+            <video
+              ref={mediaRef}
+              src={preview.src}
+              controls
+              autoPlay
+              className="max-h-[85vh] w-full rounded-2xl bg-black"
+            />
+          )}
           <p className="mt-4 text-center text-xs font-semibold uppercase tracking-[0.2em] text-white/65 md:text-sm">
             {preview.disclaimer || "LIVE PREVIEW - OFFICIAL MASTERED SINGLE COMING SOON"}
           </p>
