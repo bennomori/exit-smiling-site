@@ -162,6 +162,11 @@ export const mediaAssets = [
     "description": "Exit Smiling rounded cover logo"
   },
   {
+    "oldFile": "ES_f5pihg.wav",
+    "key": "releases/exit-smiling-debut-single-preview.wav",
+    "description": "Exit Smiling debut single audio preview"
+  },
+  {
     "oldFile": "Exit_Smiling_Single_preview_ay9def.mp4",
     "key": "releases/exit-smiling-single-teaser.mp4",
     "description": "Exit Smiling debut single teaser video"

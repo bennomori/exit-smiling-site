@@ -139,7 +139,7 @@ const exitSmilingDebutSingleCoverLarge =
 const debutSinglePreviewReleaseText =
   "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
 const debutSinglePreviewMedia = {
-  src: "https://res.cloudinary.com/dkffwzpba/video/upload/v1779522448/ES_f5pihg.wav",
+  src: "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-debut-single-preview.wav",
   type: "audio",
   disclaimer: "AUDIO PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
 };
