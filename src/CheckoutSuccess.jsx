@@ -22,7 +22,7 @@ export default function CheckoutSuccess() {
                         If you ordered a print-on-demand item you will receive your order after the custom print run. Thanks for your patience.
                     </p>
                     <a
-                        href="/"
+                        href="/#store"
                         className="mt-8 inline-block rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-black transition hover:opacity-90"
                     >
                         Back to Store
