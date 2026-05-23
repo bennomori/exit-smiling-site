@@ -3478,7 +3478,7 @@ export function PressKit({ standalone = false }) {
     "Original music played on ABC Radio, including live studio interview content.",
     "Winners of school Battle of the Bands and Eurobodalla Battle of the Bands.",
     "Live appearances at Smokey Dans, Starfish Deli Live, Nelligen Hotel, Narooma Oyster Festival, and more.",
-    "Shared bills or stages with Flavuh, Archie, Merci, Mercy, Thunderfox, Spindrift Saga, and other South Coast artists.",
+    "Shared stages with Flavuh, Archie, Thunderfox, Spindrift Saga, and other South Coast artists.",
   ];
   const videos = [
     {
