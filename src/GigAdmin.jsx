@@ -5,6 +5,68 @@ import { loginMemberMedia } from "./memberMediaApi";
 import { memberNamesBySlug, memberSlugs } from "./memberBioMedia";
 
 const memberOptions = Object.entries(memberSlugs).map(([name, slug]) => ({ name, slug }));
+const defaultSiteGigs = [
+  {
+    id: "default-2026-04-18-battle-of-the-bands",
+    dateIso: "2026-04-18",
+    date: "APR 18",
+    city: "Moruya, NSW",
+    venue: "RSL Memorial Hall - 11 Page St, Moruya NSW 2537",
+    time: "4PM-9PM AEST",
+    note: "Currents: Battle of the Bands - Youth Week live music competition",
+    source: "Built-in site gig",
+  },
+  {
+    id: "default-2026-04-24-smokey-dans",
+    dateIso: "2026-04-24",
+    date: "APR 24",
+    city: "Tomakin, NSW",
+    venue: "Smokey Dan's",
+    time: "Friday",
+    note: "ARCHIE EP release tour",
+    source: "Built-in site gig",
+  },
+  {
+    id: "default-2026-05-02-narooma-oyster-festival",
+    dateIso: "2026-05-02",
+    date: "MAY 2",
+    city: "Narooma, NSW",
+    venue: "Narooma Oyster Festival",
+    time: "1PM",
+    note: "Live show",
+    source: "Built-in site gig",
+  },
+  {
+    id: "default-2026-05-16-oyster-cove",
+    dateIso: "2026-05-16",
+    date: "MAY 16",
+    city: "Oyster Cove, NSW",
+    venue: "Oyster Cove Cocktail Bar",
+    time: "7PM",
+    note: "Live show",
+    source: "Built-in site gig",
+  },
+  {
+    id: "default-2026-06-12-starfish-deli",
+    dateIso: "2026-06-12",
+    date: "JUN 12",
+    city: "Batemans Bay, NSW",
+    venue: "The Starfish Deli - Starfish Sessions (Upstairs)",
+    time: "6:30PM-10PM AEST",
+    note: "Debut single launch show",
+    source: "Built-in site gig",
+  },
+  {
+    id: "default-2026-06-21-moruya-sage-winter-festival",
+    dateIso: "2026-06-21",
+    date: "JUN 21",
+    city: "Moruya, NSW",
+    venue: "Moruya Sage Winter Festival - Moruya Riverside Park (TBD)",
+    time: "Times TBD",
+    note: "Live show",
+    source: "Built-in site gig",
+  },
+];
 
 function emptyGig() {
   return {
@@ -30,15 +92,20 @@ export default function GigAdmin() {
   const [passcode, setPasscode] = useState("");
   const [token, setToken] = useState("");
   const [gigs, setGigs] = useState([]);
+  const [hiddenDefaultGigIds, setHiddenDefaultGigIds] = useState([]);
   const [form, setForm] = useState(() => emptyGig());
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
 
   const memberName = memberNamesBySlug[selectedMember] || selectedMember;
   const isLoggedIn = Boolean(token);
-  const upcomingGigs = useMemo(
-    () => [...gigs].sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
-    [gigs],
+  const visibleSiteGigs = useMemo(
+    () =>
+      [
+        ...defaultSiteGigs.filter((gig) => !hiddenDefaultGigIds.includes(gig.id)),
+        ...gigs.map((gig) => ({ ...gig, source: "Portal-added gig" })),
+      ].sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
+    [gigs, hiddenDefaultGigIds],
   );
 
   useEffect(() => {
@@ -48,6 +115,7 @@ export default function GigAdmin() {
       .then((data) => {
         if (!mounted) return;
         setGigs(data.gigs || []);
+        setHiddenDefaultGigIds(data.hiddenDefaultGigIds || []);
       })
       .catch((error) => {
         if (!mounted) return;
@@ -105,6 +173,7 @@ export default function GigAdmin() {
         },
       });
       setGigs((result.gigs || []).filter((gig) => !gig.hidden));
+      setHiddenDefaultGigIds(result.hiddenDefaultGigIds || []);
       setForm(emptyGig());
       setStatus({ tone: "success", message: "Gig saved. It will now appear in the public GIGS section." });
     } catch (error) {
@@ -125,6 +194,7 @@ export default function GigAdmin() {
     try {
       const result = await hideGig({ token, member: selectedMember, id });
       setGigs((result.gigs || []).filter((gig) => !gig.hidden));
+      setHiddenDefaultGigIds(result.hiddenDefaultGigIds || []);
       setStatus({ tone: "success", message: "Gig removed from the public GIGS section." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Remove failed." });
@@ -333,18 +403,19 @@ export default function GigAdmin() {
           </form>
 
           <aside className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 md:p-6">
-            <h2 className="text-2xl font-black uppercase">Added Gigs</h2>
+            <h2 className="text-2xl font-black uppercase">Current Site Gigs</h2>
             <p className="mt-2 text-sm leading-6 text-white/50">
-              This list only shows gigs added through this portal.
+              This includes built-in site gigs and portal-added gigs. Removing a built-in gig hides it from the public site.
             </p>
             <div className="mt-5 space-y-3">
-              {upcomingGigs.length ? (
-                upcomingGigs.map((gig) => (
+              {visibleSiteGigs.length ? (
+                visibleSiteGigs.map((gig) => (
                   <article key={gig.id} className="rounded-2xl border border-white/10 bg-black/35 p-4">
                     <p className="text-xs font-black uppercase tracking-[0.24em] text-yellow-100/70">{gig.date}</p>
                     <h3 className="mt-2 text-base font-black uppercase text-white">{gig.city}</h3>
                     <p className="mt-1 text-sm text-white/60">{gig.venue}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/38">{gig.time} - {gig.note}</p>
+                    <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/30">{gig.source}</p>
                     <button
                       type="button"
                       onClick={() => removeGig(gig.id)}
@@ -357,7 +428,7 @@ export default function GigAdmin() {
                 ))
               ) : (
                 <p className="rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-white/45">
-                  No portal-added gigs yet.
+                  No visible gigs.
                 </p>
               )}
             </div>

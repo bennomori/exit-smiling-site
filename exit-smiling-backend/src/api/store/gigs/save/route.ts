@@ -29,6 +29,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     return res.status(200).json({
       ok: true,
       gigs,
+      hiddenDefaultGigIds: store.hiddenDefaultGigIds || [],
     })
   } catch (error: any) {
     return res.status(400).json({

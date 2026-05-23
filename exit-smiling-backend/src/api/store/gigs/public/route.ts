@@ -1,5 +1,5 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { publicGigs, readGigStore } from "../../../../lib/gig-admin"
+import { hiddenDefaultGigIds, publicGigs, readGigStore } from "../../../../lib/gig-admin"
 
 export async function GET(_req: MedusaRequest, res: MedusaResponse) {
   try {
@@ -8,6 +8,7 @@ export async function GET(_req: MedusaRequest, res: MedusaResponse) {
     return res.status(200).json({
       ok: true,
       gigs: publicGigs(store),
+      hiddenDefaultGigIds: hiddenDefaultGigIds(store),
     })
   } catch (error: any) {
     return res.status(500).json({

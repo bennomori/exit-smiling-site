@@ -55,6 +55,7 @@ const heroImages = [
 
 const tourDates = [
   {
+    id: 'default-2026-04-18-battle-of-the-bands',
     dateIso: '2026-04-18',
     date: 'APR 18',
     city: 'Moruya, NSW',
@@ -66,6 +67,7 @@ const tourDates = [
     note: 'Currents: Battle of the Bands - Youth Week live music competition - Free event - Pizza, DJs, chill out spaces',
   },
   {
+    id: 'default-2026-04-24-smokey-dans',
     dateIso: '2026-04-24',
     date: 'APR 24',
     city: 'Tomakin, NSW',
@@ -77,6 +79,7 @@ const tourDates = [
     note: 'ARCHIE EP release tour (Together Apart) - with Grace Faletoese + Exit Smiling',
   },
   {
+    id: 'default-2026-05-02-narooma-oyster-festival',
     dateIso: '2026-05-02',
     date: 'MAY 2',
     city: 'Narooma, NSW',
@@ -88,6 +91,7 @@ const tourDates = [
     note: 'Live show',
   },
   {
+    id: 'default-2026-05-16-oyster-cove',
     dateIso: '2026-05-16',
     date: 'MAY 16',
     city: 'Oyster Cove, NSW',
@@ -100,6 +104,7 @@ const tourDates = [
     note: 'Live show',
   },
   {
+    id: 'default-2026-06-12-starfish-deli',
     dateIso: '2026-06-12',
     date: 'JUN 12',
     city: 'Batemans Bay, NSW',
@@ -111,6 +116,7 @@ const tourDates = [
     note: 'Debut single launch show',
   },
   {
+    id: 'default-2026-06-21-moruya-sage-winter-festival',
     dateIso: '2026-06-21',
     date: 'JUN 21',
     city: 'Moruya, NSW',
@@ -891,6 +897,7 @@ function Gigs() {
   const [activeGigPosterKey, setActiveGigPosterKey] = useState(null);
   const [selectedGigPoster, setSelectedGigPoster] = useState(null);
   const [portalGigs, setPortalGigs] = useState([]);
+  const [hiddenDefaultGigIds, setHiddenDefaultGigIds] = useState([]);
   const posterSegmentDuration = 3.0;
   const today = useMemo(() => {
     const now = new Date();
@@ -900,9 +907,10 @@ function Gigs() {
   const visibleTourDates = useMemo(
     () =>
       [...tourDates, ...portalGigs]
+        .filter((show) => !hiddenDefaultGigIds.includes(show.id))
         .filter((show) => show?.dateIso && show?.date && show?.city && show?.venue)
         .sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
-    [portalGigs],
+    [hiddenDefaultGigIds, portalGigs],
   );
 
   useEffect(() => {
@@ -912,10 +920,12 @@ function Gigs() {
       .then((data) => {
         if (!mounted) return;
         setPortalGigs(data.gigs || []);
+        setHiddenDefaultGigIds(data.hiddenDefaultGigIds || []);
       })
       .catch(() => {
         if (!mounted) return;
         setPortalGigs([]);
+        setHiddenDefaultGigIds([]);
       });
 
     return () => {

@@ -21,6 +21,7 @@ export type GigEntry = {
 
 export type GigStore = {
   gigs?: GigEntry[]
+  hiddenDefaultGigIds?: string[]
 }
 
 function getDataPath() {
@@ -39,9 +40,9 @@ export async function readGigStore(): Promise<GigStore> {
   try {
     const raw = await fs.readFile(getDataPath(), "utf8")
     const parsed = JSON.parse(raw)
-    return parsed && typeof parsed === "object" ? parsed : { gigs: [] }
+    return parsed && typeof parsed === "object" ? parsed : { gigs: [], hiddenDefaultGigIds: [] }
   } catch (error: any) {
-    if (error?.code === "ENOENT") return { gigs: [] }
+    if (error?.code === "ENOENT") return { gigs: [], hiddenDefaultGigIds: [] }
     throw error
   }
 }
@@ -49,7 +50,18 @@ export async function readGigStore(): Promise<GigStore> {
 export async function writeGigStore(store: GigStore) {
   const filePath = getDataPath()
   await fs.mkdir(path.dirname(filePath), { recursive: true })
-  await fs.writeFile(filePath, JSON.stringify({ gigs: store.gigs || [] }, null, 2), "utf8")
+  await fs.writeFile(
+    filePath,
+    JSON.stringify(
+      {
+        gigs: store.gigs || [],
+        hiddenDefaultGigIds: store.hiddenDefaultGigIds || [],
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  )
 }
 
 function cleanText(value: unknown, maxLength: number) {
@@ -121,4 +133,10 @@ export function publicGigs(store: GigStore) {
   return (store.gigs || [])
     .filter((gig) => !gig.hidden)
     .sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso)))
+}
+
+export function hiddenDefaultGigIds(store: GigStore) {
+  return Array.isArray(store.hiddenDefaultGigIds)
+    ? store.hiddenDefaultGigIds.map((id) => String(id || "").trim()).filter(Boolean)
+    : []
 }
