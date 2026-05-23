@@ -577,14 +577,7 @@ function HeroQuickActions() {
 function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpenHeroSingleImage }) {
   const currentHeroMedia = heroImages[currentImage];
   const [showHeroManifestoTile, setShowHeroManifestoTile] = useState(false);
-
-  useEffect(() => {
-    const interval = window.setInterval(() => {
-      setShowHeroManifestoTile((prev) => !prev);
-    }, showHeroManifestoTile ? 26640 : 10500);
-
-    return () => window.clearInterval(interval);
-  }, [showHeroManifestoTile]);
+  // Temporarily keep the hero locked on the featured release while leaving the figure animation active.
 
   return (
     <section className="relative overflow-hidden border-b border-white/10">
@@ -695,11 +688,9 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
           <HeroQuickActions />
         </div>
         <div className="relative grid gap-4 self-end">
-          {showHeroManifestoTile ? (
-            <div className="pointer-events-none absolute inset-x-6 bottom-[calc(100%+0.65rem)] z-20">
-              <BandHeadingFigures />
-            </div>
-          ) : null}
+          <div className="pointer-events-none absolute inset-x-6 bottom-[calc(100%+0.65rem)] z-20">
+            <BandHeadingFigures />
+          </div>
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
               {showHeroManifestoTile ? "Why Exit Smiling?" : "Featured release"}
