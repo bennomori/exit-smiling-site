@@ -270,7 +270,7 @@ export default function MemberMediaPortal() {
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-black uppercase tracking-[0.35em] text-yellow-100/55">Exit Smiling</p>
-            <h1 className="mt-2 text-3xl font-black uppercase md:text-5xl">Band Bio Media Portal</h1>
+            <h1 className="mt-2 text-3xl font-black uppercase md:text-5xl">Individual Band Member Bio Media Portal</h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">
               Manage your own bio rotation. Hide anything you do not want shown, upload new media, and save the order.
             </p>
@@ -322,7 +322,7 @@ export default function MemberMediaPortal() {
                 </button>
               </div>
               <p className="mt-3 text-xs leading-5 text-white/45">
-                Logged-in members can upload, hide, unhide, reorder, and save their own rotation.
+                Logged-in members can edit their bio text, upload images, hide, unhide, reorder, and save their own rotation.
               </p>
             </form>
           </div>
