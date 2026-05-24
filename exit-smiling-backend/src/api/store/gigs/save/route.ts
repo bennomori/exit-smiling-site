@@ -24,12 +24,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       gigs.push(nextGig)
     }
 
-    await writeGigStore({ gigs })
+    const hiddenDefaultGigIds = String(nextGig.id).startsWith("default-")
+      ? (store.hiddenDefaultGigIds || []).filter((id) => id !== nextGig.id)
+      : store.hiddenDefaultGigIds || []
+
+    await writeGigStore({ gigs, hiddenDefaultGigIds })
 
     return res.status(200).json({
       ok: true,
       gigs,
-      hiddenDefaultGigIds: store.hiddenDefaultGigIds || [],
+      hiddenDefaultGigIds,
     })
   } catch (error: any) {
     return res.status(400).json({

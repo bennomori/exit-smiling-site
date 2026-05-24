@@ -905,11 +905,19 @@ function Gigs() {
     return now;
   }, []);
   const visibleTourDates = useMemo(
-    () =>
-      [...tourDates, ...portalGigs]
+    () => {
+      const portalGigById = new Map(portalGigs.map((show) => [show.id, show]));
+      const defaultGigIds = new Set(tourDates.map((show) => show.id));
+      const defaultGigsWithOverrides = tourDates.map((show) =>
+        portalGigById.has(show.id) ? { ...show, ...portalGigById.get(show.id) } : show
+      );
+      const customGigs = portalGigs.filter((show) => !defaultGigIds.has(show.id));
+
+      return [...defaultGigsWithOverrides, ...customGigs]
         .filter((show) => !hiddenDefaultGigIds.includes(show.id))
         .filter((show) => show?.dateIso && show?.date && show?.city && show?.venue)
-        .sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
+        .sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso)));
+    },
     [hiddenDefaultGigIds, portalGigs],
   );
 

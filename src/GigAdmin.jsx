@@ -15,7 +15,10 @@ const defaultSiteGigs = [
     city: "Moruya, NSW",
     venue: "RSL Memorial Hall - 11 Page St, Moruya NSW 2537",
     time: "4PM-9PM AEST",
-    note: "Currents: Battle of the Bands - Youth Week live music competition",
+    href: "https://www.eventbrite.com/e/currents-battle-of-the-bands-2026-live-youth-music-event-tickets-1981828560574",
+    mapHref: "https://maps.app.goo.gl/mTMXRXCejsmioYwb6",
+    posterImage: "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/battle-of-the-bands-bobs.jpg",
+    note: "Currents: Battle of the Bands - Youth Week live music competition - Free event - Pizza, DJs, chill out spaces",
     source: "Built-in site gig",
   },
   {
@@ -25,7 +28,10 @@ const defaultSiteGigs = [
     city: "Tomakin, NSW",
     venue: "Smokey Dan's",
     time: "Friday",
-    note: "ARCHIE EP release tour",
+    href: "https://events.humanitix.com/archie-at-smokey-dans-426/tickets?fbclid=IwY2xjawRKMDpleHRuA2FlbQIxMABicmlkETFGbmJIM3pkNXlDdklmWW9Vc3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHin3kekDUp3KtzaNksuoRsJnoFDcdMcTgyPg986XG8ra6T20ev90Sl4nB4Gn_aem_7D5dBKgOLCSFaAtC_kBKjA",
+    mapHref: "https://maps.app.goo.gl/5GcQGcPbFMi9R5Rx8",
+    posterImage: "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/archie-smokey-dans-ep-release.jpg",
+    note: "ARCHIE EP release tour (Together Apart) - with Grace Faletoese + Exit Smiling",
     source: "Built-in site gig",
   },
   {
@@ -35,6 +41,9 @@ const defaultSiteGigs = [
     city: "Narooma, NSW",
     venue: "Narooma Oyster Festival",
     time: "1PM",
+    href: "https://events.humanitix.com/narooma-oyster-festival-2026/tickets",
+    mapHref: "https://maps.app.goo.gl/L6tbtCGbjuTXrXi79",
+    posterImage: "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/narooma-oyster-festival.jpg",
     note: "Live show",
     source: "Built-in site gig",
   },
@@ -45,6 +54,10 @@ const defaultSiteGigs = [
     city: "Oyster Cove, NSW",
     venue: "Oyster Cove Cocktail Bar",
     time: "7PM",
+    href: "https://www.instagram.com/oystercovecocktail/",
+    ctaLabel: "Call to Book",
+    mapHref: "https://maps.app.goo.gl/Ex1Qa4t2vH4ysSQP6",
+    posterImage: "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/oyster-cove-gig-poster.png",
     note: "Live show",
     source: "Built-in site gig",
   },
@@ -55,6 +68,9 @@ const defaultSiteGigs = [
     city: "Batemans Bay, NSW",
     venue: "The Starfish Deli - Starfish Sessions (Upstairs)",
     time: "6:30PM-10PM AEST",
+    href: "https://events.humanitix.com/exit-smiling/tickets",
+    mapHref: "https://maps.app.goo.gl/7i9yxXRrR6kNqKd49",
+    posterImage: "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/starfish-deli-single-launch.png",
     note: "Debut single launch show",
     source: "Built-in site gig",
   },
@@ -65,6 +81,8 @@ const defaultSiteGigs = [
     city: "Moruya, NSW",
     venue: "Moruya Sage Winter Festival - Moruya Riverside Park (TBD)",
     time: "Times TBD",
+    disabledActions: true,
+    ctaLabel: "Book TBD",
     note: "Live show",
     source: "Built-in site gig",
   },
@@ -72,7 +90,9 @@ const defaultSiteGigs = [
 
 function emptyGig() {
   return {
+    id: "",
     dateIso: "",
+    date: "",
     city: "",
     venue: "",
     time: "",
@@ -96,6 +116,7 @@ export default function GigAdmin() {
   const [gigs, setGigs] = useState([]);
   const [hiddenDefaultGigIds, setHiddenDefaultGigIds] = useState([]);
   const [form, setForm] = useState(() => emptyGig());
+  const [editingGigId, setEditingGigId] = useState("");
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
   const [uploadingPoster, setUploadingPoster] = useState(false);
@@ -103,11 +124,22 @@ export default function GigAdmin() {
   const memberName = memberNamesBySlug[selectedMember] || selectedMember;
   const isLoggedIn = Boolean(token);
   const visibleSiteGigs = useMemo(
-    () =>
-      [
-        ...defaultSiteGigs.filter((gig) => !hiddenDefaultGigIds.includes(gig.id)),
-        ...gigs.map((gig) => ({ ...gig, source: "Portal-added gig" })),
-      ].sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso))),
+    () => {
+      const savedGigById = new Map(gigs.map((gig) => [gig.id, gig]));
+      const defaultGigIds = new Set(defaultSiteGigs.map((gig) => gig.id));
+      const builtInGigs = defaultSiteGigs
+        .filter((gig) => !hiddenDefaultGigIds.includes(gig.id))
+        .map((gig) => ({
+          ...gig,
+          ...(savedGigById.get(gig.id) || {}),
+          source: savedGigById.has(gig.id) ? "Edited built-in site gig" : "Built-in site gig",
+        }));
+      const portalGigs = gigs
+        .filter((gig) => !defaultGigIds.has(gig.id))
+        .map((gig) => ({ ...gig, source: "Portal-added gig" }));
+
+      return [...builtInGigs, ...portalGigs].sort((a, b) => String(a.dateIso).localeCompare(String(b.dateIso)));
+    },
     [gigs, hiddenDefaultGigIds],
   );
 
@@ -178,12 +210,40 @@ export default function GigAdmin() {
       setGigs((result.gigs || []).filter((gig) => !gig.hidden));
       setHiddenDefaultGigIds(result.hiddenDefaultGigIds || []);
       setForm(emptyGig());
-      setStatus({ tone: "success", message: "Gig saved. It will now appear in the public GIGS section." });
+      setEditingGigId("");
+      setStatus({ tone: "success", message: editingGigId ? "Gig updated." : "Gig saved. It will now appear in the public GIGS section." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Save failed." });
     } finally {
       setSaving(false);
     }
+  };
+
+  const editGig = (gig) => {
+    setEditingGigId(gig.id);
+    setForm({
+      id: gig.id || "",
+      dateIso: gig.dateIso || "",
+      date: gig.date || dateLabelFromIso(gig.dateIso),
+      city: gig.city || "",
+      venue: gig.venue || "",
+      time: gig.time || "",
+      note: gig.note || "Live show",
+      href: gig.href || "",
+      mapHref: gig.mapHref || "",
+      ctaLabel: gig.ctaLabel || "",
+      posterImage: gig.posterImage || "",
+      disabledActions: Boolean(gig.disabledActions),
+      createdAt: gig.createdAt || "",
+    });
+    setStatus({ tone: "idle", message: `Editing ${gig.date || ""} ${gig.city || "gig"}.` });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const cancelEdit = () => {
+    setEditingGigId("");
+    setForm(emptyGig());
+    setStatus({ tone: "idle", message: "Edit cancelled." });
   };
 
   const removeGig = async (id) => {
@@ -325,10 +385,25 @@ export default function GigAdmin() {
 
         <section className="mt-8 grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
           <form onSubmit={submitGig} className="rounded-3xl border border-white/10 bg-white/[0.035] p-5 md:p-6">
-            <h2 className="text-2xl font-black uppercase">Add Future Gig</h2>
-            <p className="mt-2 text-sm leading-6 text-white/50">
-              Required: date, city, venue. Optional links can be added later by re-adding a corrected entry and removing the old one.
-            </p>
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h2 className="text-2xl font-black uppercase">{editingGigId ? "Edit Gig" : "Add Future Gig"}</h2>
+                <p className="mt-2 text-sm leading-6 text-white/50">
+                  {editingGigId
+                    ? "Update the selected gig. Built-in gigs are saved as editable overrides."
+                    : "Required: date, city, venue. Optional links can be added later by editing the gig."}
+                </p>
+              </div>
+              {editingGigId ? (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="rounded-full border border-white/20 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-white/65 transition hover:border-white/45 hover:text-white"
+                >
+                  Cancel edit
+                </button>
+              ) : null}
+            </div>
 
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
               <label className="grid gap-2 text-xs font-black uppercase tracking-[0.18em] text-white/45">
@@ -463,7 +538,7 @@ export default function GigAdmin() {
               disabled={!isLoggedIn || saving}
               className="mt-5 w-full rounded-full bg-yellow-100 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
             >
-              {saving ? "Saving..." : "Add gig"}
+              {saving ? "Saving..." : editingGigId ? "Save edit" : "Add gig"}
             </button>
           </form>
 
@@ -481,14 +556,24 @@ export default function GigAdmin() {
                     <p className="mt-1 text-sm text-white/60">{gig.venue}</p>
                     <p className="mt-1 text-xs uppercase tracking-[0.14em] text-white/38">{gig.time} - {gig.note}</p>
                     <p className="mt-2 text-[10px] font-black uppercase tracking-[0.18em] text-white/30">{gig.source}</p>
-                    <button
-                      type="button"
-                      onClick={() => removeGig(gig.id)}
-                      disabled={!isLoggedIn}
-                      className="mt-4 rounded-full border border-red-300/25 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-red-100/80 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
-                    >
-                      Remove from site
-                    </button>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => editGig(gig)}
+                        disabled={!isLoggedIn}
+                        className="rounded-full border border-white/20 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/70 transition hover:border-white/45 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeGig(gig.id)}
+                        disabled={!isLoggedIn}
+                        className="rounded-full border border-red-300/25 px-3 py-2 text-[10px] font-black uppercase tracking-[0.16em] text-red-100/80 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
+                      >
+                        Remove from site
+                      </button>
+                    </div>
                   </article>
                 ))
               ) : (
