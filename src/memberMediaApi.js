@@ -49,7 +49,7 @@ export async function saveMemberMedia({ token, member, media }) {
   return parseResponse(response, "Failed to save member media.");
 }
 
-export async function uploadMemberMedia({ token, member, file, dataBase64, orientation }) {
+export async function uploadMemberMedia({ token, member, file, dataBase64, orientation, cropY }) {
   let response;
 
   try {
@@ -63,6 +63,7 @@ export async function uploadMemberMedia({ token, member, file, dataBase64, orien
         contentType: file.type || "application/octet-stream",
         size: file.size,
         orientation,
+        cropY,
         dataBase64,
       }),
     });

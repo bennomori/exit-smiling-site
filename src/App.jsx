@@ -2096,10 +2096,19 @@ function MemberCard({ member, memberMediaOverrides }) {
     isHoveringBioImage ? visibleLighterSideImages[activeHoverImageIndex]?.credit : null;
   const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
   const primaryBioImage = visibleLighterSideImages[0] || null;
-  const getBioImageFrameStyle = (image) =>
-    member.name === "Lando" || image?.orientation === "portrait"
-      ? { objectPosition: "50% 0%", transformOrigin: "50% 0%" }
-      : undefined;
+  const getBioImageCropY = (image) => {
+    const customCropY = Number(image?.cropY);
+    if (Number.isFinite(customCropY)) return Math.min(100, Math.max(0, customCropY));
+    if (member.name === "Lando" || image?.orientation === "portrait") return 0;
+    return 50;
+  };
+  const getBioImageFrameStyle = (image) => {
+    const cropY = getBioImageCropY(image);
+    return {
+      objectPosition: `50% ${cropY}%`,
+      transformOrigin: `50% ${cropY}%`,
+    };
+  };
   const getHoverImageStyle = (image, index) => ({
     ...(getBioImageFrameStyle(image) || {}),
     ...(isHoveringBioImage && activeHoverImageIndex === index ? { opacity: 1 } : {}),

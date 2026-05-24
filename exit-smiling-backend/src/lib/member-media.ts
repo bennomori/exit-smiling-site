@@ -13,6 +13,7 @@ export type MemberMediaItem = {
   key: string
   className?: string
   orientation?: "portrait" | "landscape"
+  cropY?: number
   credit?: string
   uploadedAt?: string
 }
@@ -22,6 +23,7 @@ export type MemberMediaConfig = {
   order?: string[]
   customItems?: MemberMediaItem[]
   orientationOverrides?: Record<string, "portrait" | "landscape">
+  cropYOverrides?: Record<string, number>
   bioParagraphs?: string[]
 }
 
@@ -168,6 +170,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
           key: String(item?.key || "").trim(),
           className: String(item?.className || "").trim(),
           orientation: item?.orientation === "portrait" ? "portrait" : "landscape",
+          cropY: Number.isFinite(Number(item?.cropY)) ? Math.min(100, Math.max(0, Math.round(Number(item.cropY)))) : undefined,
           credit: String(item?.credit || "").trim(),
           uploadedAt: String(item?.uploadedAt || "").trim(),
         }))
@@ -184,6 +187,17 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
             .filter(([id]) => Boolean(id))
         )
       : {}
+  const cropYOverrides =
+    input?.cropYOverrides && typeof input.cropYOverrides === "object"
+      ? Object.fromEntries(
+          Object.entries(input.cropYOverrides)
+            .map(([id, cropY]) => [
+              String(id || "").trim(),
+              Math.min(100, Math.max(0, Math.round(Number(cropY)))),
+            ])
+            .filter(([id, cropY]) => Boolean(id) && Number.isFinite(Number(cropY)))
+        )
+      : {}
   const bioParagraphs = Array.isArray(input?.bioParagraphs)
     ? input.bioParagraphs
         .map((paragraph: unknown) => String(paragraph || "").trim())
@@ -191,7 +205,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
         .slice(0, 12)
     : []
 
-  return { hiddenIds, order, customItems, orientationOverrides, bioParagraphs }
+  return { hiddenIds, order, customItems, orientationOverrides, cropYOverrides, bioParagraphs }
 }
 
 function hmac(key: Buffer | string, value: string) {

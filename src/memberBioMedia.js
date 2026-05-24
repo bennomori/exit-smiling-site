@@ -113,12 +113,19 @@ export function mergeMemberBioMedia(memberNameOrSlug, overridesByMember = {}) {
     override.orientationOverrides && typeof override.orientationOverrides === "object"
       ? override.orientationOverrides
       : {};
+  const cropYOverrides =
+    override.cropYOverrides && typeof override.cropYOverrides === "object"
+      ? override.cropYOverrides
+      : {};
   const allItems = [...defaults, ...customItems]
     .filter((item) => item?.id && !hiddenIds.has(item.id))
     .map((item) => ({
       ...item,
       ...(orientationOverrides[item.id]
         ? { orientation: orientationOverrides[item.id] === "portrait" ? "portrait" : "landscape" }
+        : {}),
+      ...(Number.isFinite(Number(cropYOverrides[item.id]))
+        ? { cropY: Math.min(100, Math.max(0, Number(cropYOverrides[item.id]))) }
         : {}),
     }));
   const order = Array.isArray(override.order) ? override.order : [];

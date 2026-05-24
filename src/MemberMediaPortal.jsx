@@ -35,6 +35,10 @@ function getInitialMedia(slug, overrides) {
       existing.orientationOverrides && typeof existing.orientationOverrides === "object"
         ? existing.orientationOverrides
         : {},
+    cropYOverrides:
+      existing.cropYOverrides && typeof existing.cropYOverrides === "object"
+        ? existing.cropYOverrides
+        : {},
     bioParagraphs: Array.isArray(existing.bioParagraphs) && existing.bioParagraphs.length
       ? existing.bioParagraphs
       : defaultMemberBioParagraphs[slug] || [],
@@ -58,10 +62,26 @@ function getOrientation(value) {
   return value === "portrait" ? "portrait" : "landscape";
 }
 
+function clampCropY(value) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return null;
+  return Math.min(100, Math.max(0, Math.round(numeric)));
+}
+
+function getDefaultCropY(item) {
+  return getOrientation(item?.orientation) === "portrait" ? 0 : 50;
+}
+
+function getCropY(item) {
+  return clampCropY(item?.cropY) ?? getDefaultCropY(item);
+}
+
 function getFrameStyle(item) {
-  return getOrientation(item?.orientation) === "portrait"
-    ? { objectPosition: "50% 0%", transformOrigin: "50% 0%" }
-    : undefined;
+  const cropY = getCropY(item);
+  return {
+    objectPosition: `50% ${cropY}%`,
+    transformOrigin: `50% ${cropY}%`,
+  };
 }
 
 function MediaPreview({ item }) {
@@ -127,10 +147,14 @@ export default function MemberMediaPortal() {
     const customItems = draft.customItems || [];
     const defaults = defaultMemberBioMedia[selectedMember] || [];
     const orientationOverrides = draft.orientationOverrides || {};
+    const cropYOverrides = draft.cropYOverrides || {};
     const merged = [...defaults, ...customItems].map((item) => ({
       ...item,
       ...(orientationOverrides[item.id]
         ? { orientation: getOrientation(orientationOverrides[item.id]) }
+        : {}),
+      ...(Number.isFinite(Number(cropYOverrides[item.id]))
+        ? { cropY: clampCropY(cropYOverrides[item.id]) }
         : {}),
     }));
     const draftOverrides = {
@@ -227,14 +251,49 @@ export default function MemberMediaPortal() {
 
   const updateItemOrientation = (id, orientation) => {
     const nextOrientation = getOrientation(orientation);
+    const existingCropY = clampCropY(draft.cropYOverrides?.[id]);
     updateDraft({
       ...draft,
       orientationOverrides: {
         ...(draft.orientationOverrides || {}),
         [id]: nextOrientation,
       },
+      cropYOverrides: {
+        ...(draft.cropYOverrides || {}),
+        [id]: existingCropY ?? (nextOrientation === "portrait" ? 0 : 50),
+      },
       customItems: (draft.customItems || []).map((item) =>
-        item.id === id ? { ...item, orientation: nextOrientation } : item
+        item.id === id
+          ? { ...item, orientation: nextOrientation, cropY: existingCropY ?? (nextOrientation === "portrait" ? 0 : 50) }
+          : item
+      ),
+    });
+  };
+
+  const updateItemCropY = (id, currentCropY, delta) => {
+    const nextCropY = clampCropY((currentCropY ?? 50) + delta);
+    updateDraft({
+      ...draft,
+      cropYOverrides: {
+        ...(draft.cropYOverrides || {}),
+        [id]: nextCropY,
+      },
+      customItems: (draft.customItems || []).map((item) =>
+        item.id === id ? { ...item, cropY: nextCropY } : item
+      ),
+    });
+  };
+
+  const resetItemCropY = (item) => {
+    const nextCropY = getDefaultCropY(item);
+    updateDraft({
+      ...draft,
+      cropYOverrides: {
+        ...(draft.cropYOverrides || {}),
+        [item.id]: nextCropY,
+      },
+      customItems: (draft.customItems || []).map((customItem) =>
+        customItem.id === item.id ? { ...customItem, cropY: nextCropY } : customItem
       ),
     });
   };
@@ -310,14 +369,19 @@ export default function MemberMediaPortal() {
         file: uploadFile,
         dataBase64,
         orientation: prepared.orientation,
+        cropY: prepared.orientation === "portrait" ? 0 : 50,
       });
-      const item = { ...result.item, orientation: prepared.orientation };
+      const item = { ...result.item, orientation: prepared.orientation, cropY: prepared.orientation === "portrait" ? 0 : 50 };
       const nextDraft = {
         ...draft,
         customItems: [...(draft.customItems || []), item],
         orientationOverrides: {
           ...(draft.orientationOverrides || {}),
           [item.id]: prepared.orientation,
+        },
+        cropYOverrides: {
+          ...(draft.cropYOverrides || {}),
+          [item.id]: prepared.orientation === "portrait" ? 0 : 50,
         },
         order: [...(draft.order || []), item.id],
       };
@@ -517,6 +581,38 @@ export default function MemberMediaPortal() {
                         <p className="mt-2 text-[11px] leading-4 text-white/38">
                           Portrait keeps the top edge visible in the site tile and hover rotation.
                         </p>
+                        <div className="mt-4 border-t border-white/10 pt-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/45">Crop position</p>
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">{getCropY(item)}%</p>
+                          </div>
+                          <div className="mt-2 grid grid-cols-3 gap-2">
+                            <button
+                              type="button"
+                              onClick={() => updateItemCropY(item.id, getCropY(item), -5)}
+                              className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/65 transition hover:border-white/35 hover:text-white"
+                            >
+                              Higher
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => resetItemCropY(item)}
+                              className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/50 transition hover:border-white/35 hover:text-white"
+                            >
+                              Reset
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => updateItemCropY(item.id, getCropY(item), 5)}
+                              className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] text-white/65 transition hover:border-white/35 hover:text-white"
+                            >
+                              Lower
+                            </button>
+                          </div>
+                          <p className="mt-2 text-[11px] leading-4 text-white/38">
+                            Adjust until the square Site crop shows the best part of the photo, then save.
+                          </p>
+                        </div>
                       </div>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <button

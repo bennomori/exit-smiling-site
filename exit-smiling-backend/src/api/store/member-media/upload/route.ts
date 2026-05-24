@@ -18,6 +18,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       contentType?: string
       dataBase64?: string
       orientation?: string
+      cropY?: number
       size?: number
     }
     const member = normalizeMemberSlug(body.member)
@@ -72,6 +73,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       src: `${mediaBaseUrl}/${key}`,
       className: "",
       orientation: body.orientation === "portrait" ? "portrait" : "landscape",
+      cropY: Number.isFinite(Number(body.cropY)) ? Math.min(100, Math.max(0, Math.round(Number(body.cropY)))) : body.orientation === "portrait" ? 0 : 50,
       uploadedAt: new Date().toISOString(),
     }
 
