@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { dateLabelFromIso, getPublicGigs, hideGig, saveGig } from "./gigAdminApi";
-import { loginMemberMedia } from "./memberMediaApi";
+import { dateLabelFromIso, getPublicGigs, hideGig, saveGig, uploadGigPoster } from "./gigAdminApi";
+import { loginMemberMedia, prepareImageForUpload, readFileAsBase64 } from "./memberMediaApi";
 import { memberNamesBySlug, memberSlugs } from "./memberBioMedia";
 
 const memberOptions = Object.entries(memberSlugs).map(([name, slug]) => ({ name, slug }));
+const maxSourcePosterBytes = 40 * 1024 * 1024;
+const maxOptimizedPosterBytes = 8 * 1024 * 1024;
 const defaultSiteGigs = [
   {
     id: "default-2026-04-18-battle-of-the-bands",
@@ -96,6 +98,7 @@ export default function GigAdmin() {
   const [form, setForm] = useState(() => emptyGig());
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [saving, setSaving] = useState(false);
+  const [uploadingPoster, setUploadingPoster] = useState(false);
 
   const memberName = memberNamesBySlug[selectedMember] || selectedMember;
   const isLoggedIn = Boolean(token);
@@ -198,6 +201,48 @@ export default function GigAdmin() {
       setStatus({ tone: "success", message: "Gig removed from the public GIGS section." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Remove failed." });
+    }
+  };
+
+  const uploadPoster = async (event) => {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+
+    if (!file) return;
+    if (!token) {
+      setStatus({ tone: "error", message: "Log in before uploading a poster." });
+      return;
+    }
+    if (file.size > maxSourcePosterBytes) {
+      setStatus({ tone: "error", message: "Poster file is over 40MB. Use a smaller image." });
+      return;
+    }
+    if (!file.type.startsWith("image/")) {
+      setStatus({ tone: "error", message: "Upload an image file for the gig poster." });
+      return;
+    }
+
+    setUploadingPoster(true);
+    setStatus({ tone: "pending", message: "Preparing poster image..." });
+
+    try {
+      const uploadFile = await prepareImageForUpload(file);
+
+      if (uploadFile.size > maxOptimizedPosterBytes) {
+        setStatus({ tone: "error", message: "Prepared poster is still too large. Try a smaller or simpler image." });
+        return;
+      }
+
+      setStatus({ tone: "pending", message: "Uploading poster to R2..." });
+
+      const dataBase64 = await readFileAsBase64(uploadFile);
+      const result = await uploadGigPoster({ token, member: selectedMember, file: uploadFile, dataBase64 });
+      updateForm("posterImage", result.url || "");
+      setStatus({ tone: "success", message: "Poster uploaded. The Poster Image URL has been filled in." });
+    } catch (error) {
+      setStatus({ tone: "error", message: error.message || "Poster upload failed." });
+    } finally {
+      setUploadingPoster(false);
     }
   };
 
@@ -382,6 +427,26 @@ export default function GigAdmin() {
                   disabled={!isLoggedIn || saving}
                 />
               </label>
+              <div className="rounded-2xl border border-white/10 bg-black/35 p-4 sm:col-span-2">
+                <p className="text-xs font-black uppercase tracking-[0.18em] text-white/45">Or upload poster image</p>
+                <p className="mt-2 text-xs leading-5 text-white/42">
+                  This optimises the image, uploads it to R2, then fills the Poster Image URL field above.
+                </p>
+                <label className={`mt-4 inline-flex cursor-pointer rounded-full border px-4 py-2 text-xs font-black uppercase tracking-[0.16em] transition ${
+                  isLoggedIn && !saving && !uploadingPoster
+                    ? "border-white/25 bg-white/8 text-white hover:border-white/50"
+                    : "cursor-not-allowed border-white/10 text-white/30"
+                }`}>
+                  {uploadingPoster ? "Uploading..." : "Choose poster"}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    disabled={!isLoggedIn || saving || uploadingPoster}
+                    onChange={uploadPoster}
+                    className="hidden"
+                  />
+                </label>
+              </div>
               <label className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/35 p-4 text-sm text-white/65 sm:col-span-2">
                 <input
                   type="checkbox"

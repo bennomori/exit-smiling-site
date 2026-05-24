@@ -46,6 +46,29 @@ export async function hideGig({ token, member, id }) {
   return parseResponse(response, "Failed to remove gig.");
 }
 
+export async function uploadGigPoster({ token, member, file, dataBase64 }) {
+  let response;
+
+  try {
+    response = await fetch(`${baseUrl}/store/gigs/upload-poster`, {
+      method: "POST",
+      headers: commonHeaders,
+      body: JSON.stringify({
+        token,
+        member,
+        fileName: file.name,
+        contentType: file.type || "application/octet-stream",
+        size: file.size,
+        dataBase64,
+      }),
+    });
+  } catch (error) {
+    throw new Error("Poster upload could not reach the backend. Try refreshing the page, then upload a smaller image.");
+  }
+
+  return parseResponse(response, "Failed to upload gig poster.");
+}
+
 export function dateLabelFromIso(dateIso) {
   const date = new Date(`${dateIso}T00:00:00`);
 

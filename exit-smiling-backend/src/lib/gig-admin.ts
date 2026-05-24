@@ -140,3 +140,16 @@ export function hiddenDefaultGigIds(store: GigStore) {
     ? store.hiddenDefaultGigIds.map((id) => String(id || "").trim()).filter(Boolean)
     : []
 }
+
+export function buildGigPosterKey(fileName: string) {
+  const extension = fileName.split(".").pop()?.toLowerCase() || "jpg"
+  const safeExtension = ["jpg", "jpeg", "png", "webp"].includes(extension) ? extension : "jpg"
+  const baseName = fileName
+    .replace(/\.[^.]+$/, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60) || "gig-poster"
+
+  return `gigs/posters/member-uploads/${Date.now()}-${baseName}.${safeExtension}`
+}
