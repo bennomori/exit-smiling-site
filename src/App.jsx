@@ -2319,7 +2319,7 @@ function MemberCard({ member, memberMediaOverrides }) {
             style={{ animation: 'livePulseZoom 7s ease-in-out infinite' }}
           />
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/75 via-black/20 to-transparent px-4 pb-4 pt-10">
-            <p className="text-[10px] uppercase tracking-[0.28em] text-white/55">Bombtrack Live Snippet</p>
+            <p className="text-[10px] uppercase tracking-[0.28em] text-white/55">Live Performance Snippet</p>
             <p className="mt-1 text-sm font-semibold uppercase text-white">{liveVideoLabel}</p>
           </div>
         </button>
