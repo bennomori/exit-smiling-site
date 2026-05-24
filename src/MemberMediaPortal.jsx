@@ -76,14 +76,30 @@ function MediaPreview({ item }) {
   }
 
   return (
-    <img
-      src={item.src}
-      alt=""
-      loading="lazy"
-      decoding="async"
-      className={`aspect-square w-full rounded-2xl bg-black object-cover ${item.className || ""}`}
-      style={getFrameStyle(item)}
-    />
+    <div className="space-y-2">
+      <div className="rounded-2xl border border-white/10 bg-black/45 p-2">
+        <img
+          src={item.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className="max-h-72 w-full rounded-xl bg-black object-contain"
+        />
+      </div>
+      <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black">
+        <img
+          src={item.src}
+          alt=""
+          loading="lazy"
+          decoding="async"
+          className={`aspect-square w-full object-cover ${item.className || ""}`}
+          style={getFrameStyle(item)}
+        />
+        <div className="pointer-events-none absolute left-3 top-3 rounded-full border border-white/15 bg-black/65 px-3 py-1 text-[9px] font-black uppercase tracking-[0.14em] text-white/70">
+          Site crop
+        </div>
+      </div>
+    </div>
   );
 }
 
