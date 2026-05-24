@@ -13,6 +13,7 @@ export type MemberMediaItem = {
   key: string
   className?: string
   orientation?: "portrait" | "landscape"
+  cropX?: number
   cropY?: number
   credit?: string
   uploadedAt?: string
@@ -23,6 +24,7 @@ export type MemberMediaConfig = {
   order?: string[]
   customItems?: MemberMediaItem[]
   orientationOverrides?: Record<string, "portrait" | "landscape">
+  cropXOverrides?: Record<string, number>
   cropYOverrides?: Record<string, number>
   bioParagraphs?: string[]
 }
@@ -170,6 +172,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
           key: String(item?.key || "").trim(),
           className: String(item?.className || "").trim(),
           orientation: item?.orientation === "portrait" ? "portrait" : "landscape",
+          cropX: Number.isFinite(Number(item?.cropX)) ? Math.min(100, Math.max(0, Math.round(Number(item.cropX)))) : undefined,
           cropY: Number.isFinite(Number(item?.cropY)) ? Math.min(100, Math.max(0, Math.round(Number(item.cropY)))) : undefined,
           credit: String(item?.credit || "").trim(),
           uploadedAt: String(item?.uploadedAt || "").trim(),
@@ -185,6 +188,17 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
               orientation === "portrait" ? "portrait" : "landscape",
             ])
             .filter(([id]) => Boolean(id))
+        )
+      : {}
+  const cropXOverrides =
+    input?.cropXOverrides && typeof input.cropXOverrides === "object"
+      ? Object.fromEntries(
+          Object.entries(input.cropXOverrides)
+            .map(([id, cropX]) => [
+              String(id || "").trim(),
+              Math.min(100, Math.max(0, Math.round(Number(cropX)))),
+            ])
+            .filter(([id, cropX]) => Boolean(id) && Number.isFinite(Number(cropX)))
         )
       : {}
   const cropYOverrides =
@@ -205,7 +219,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
         .slice(0, 12)
     : []
 
-  return { hiddenIds, order, customItems, orientationOverrides, cropYOverrides, bioParagraphs }
+  return { hiddenIds, order, customItems, orientationOverrides, cropXOverrides, cropYOverrides, bioParagraphs }
 }
 
 function hmac(key: Buffer | string, value: string) {

@@ -117,6 +117,10 @@ export function mergeMemberBioMedia(memberNameOrSlug, overridesByMember = {}) {
     override.cropYOverrides && typeof override.cropYOverrides === "object"
       ? override.cropYOverrides
       : {};
+  const cropXOverrides =
+    override.cropXOverrides && typeof override.cropXOverrides === "object"
+      ? override.cropXOverrides
+      : {};
   const allItems = [...defaults, ...customItems]
     .filter((item) => item?.id && !hiddenIds.has(item.id))
     .map((item) => ({
@@ -126,6 +130,9 @@ export function mergeMemberBioMedia(memberNameOrSlug, overridesByMember = {}) {
         : {}),
       ...(Number.isFinite(Number(cropYOverrides[item.id]))
         ? { cropY: Math.min(100, Math.max(0, Number(cropYOverrides[item.id]))) }
+        : {}),
+      ...(Number.isFinite(Number(cropXOverrides[item.id]))
+        ? { cropX: Math.min(100, Math.max(0, Number(cropXOverrides[item.id]))) }
         : {}),
     }));
   const order = Array.isArray(override.order) ? override.order : [];

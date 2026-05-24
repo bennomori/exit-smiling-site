@@ -18,6 +18,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       contentType?: string
       dataBase64?: string
       orientation?: string
+      cropX?: number
       cropY?: number
       size?: number
     }
@@ -73,6 +74,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       src: `${mediaBaseUrl}/${key}`,
       className: "",
       orientation: body.orientation === "portrait" ? "portrait" : "landscape",
+      cropX: Number.isFinite(Number(body.cropX)) ? Math.min(100, Math.max(0, Math.round(Number(body.cropX)))) : 50,
       cropY: Number.isFinite(Number(body.cropY)) ? Math.min(100, Math.max(0, Math.round(Number(body.cropY)))) : body.orientation === "portrait" ? 0 : 50,
       uploadedAt: new Date().toISOString(),
     }
