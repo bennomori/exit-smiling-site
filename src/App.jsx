@@ -2097,9 +2097,7 @@ function MemberCard({ member, memberMediaOverrides }) {
   const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
   const primaryBioImage = visibleLighterSideImages[0] || null;
   const getHoverImageStyle = (image, index) => ({
-    ...(member.name === "Lando" && !(image.className || "").includes("object-")
-      ? { objectPosition: "50% 18%" }
-      : {}),
+    ...(member.name === "Lando" ? { objectPosition: "50% 18%" } : {}),
     ...(isHoveringBioImage && activeHoverImageIndex === index ? { opacity: 1 } : {}),
   });
 
