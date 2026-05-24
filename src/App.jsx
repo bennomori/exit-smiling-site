@@ -21,7 +21,7 @@ import {
 import { registerFanUpdatesAccess, verifyFanUpdatesAccess } from "./fanUpdates";
 import { getPublicGigs } from "./gigAdminApi";
 import { getPublicMemberMedia } from "./memberMediaApi";
-import { mergeMemberBioMedia } from "./memberBioMedia";
+import { getMemberBioParagraphs, mergeMemberBioMedia } from "./memberBioMedia";
 
 const primaryLogo = 'https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-white-on-black.png';
 const markLogo = 'https://exit-smiling-media.bennoclark.workers.dev/logos/exit-smiling-logo-yellow-transparent.png';
@@ -1899,6 +1899,10 @@ function MemberCard({ member, memberMediaOverrides }) {
     () => mergeMemberBioMedia(member.name, memberMediaOverrides),
     [member.name, memberMediaOverrides]
   );
+  const memberBioParagraphs = useMemo(
+    () => getMemberBioParagraphs(member.name, memberMediaOverrides),
+    [member.name, memberMediaOverrides]
+  );
   const hoverImageSegmentDuration = 2.1;
   const liveVideoRef = useRef(null);
   const bioClipVideoRef = useRef(null);
@@ -2335,44 +2339,12 @@ function MemberCard({ member, memberMediaOverrides }) {
         )
       ) : null}
 
-      {member.name === 'Cadence' ? (
-        <>
-          <p className="mt-3 text-sm text-white/70">Cadence is a young vocalist known for her powerful tone, wide range, and natural ability to adapt across a broad spectrum of musical styles. Her voice carries strength and emotion with dynamic versatility, leaving a lasting impact on her listeners.</p>
-          <p className="mt-3 text-sm text-white/70">Cadence draws strong inspiration from iconic vocal artists such as Amy Lee of Evanescence and Emily Armstrong of Linkin Park, with these influences shaping her connection to a wide range of rock styles. However, her love of country, pop, and indie music follows closely behind, fuelling a musical journey that remains unconfined to any one genre, allowing her evolving skill to continually grow.</p>
-          <p className="mt-3 text-sm text-white/70">Born and raised on the South Coast, Cadence's passion for singing and music began at a young age, naturally guiding her into the creative young artist she is quickly becoming. At the age of 13 she joined the band that later became Exit Smiling, marking the beginning of her experience as a live performer and lead vocalist.</p>
-          <p className="mt-3 text-sm text-white/70">Although still early in her formal training, Cadence began receiving professional vocal coaching in August 2025 from a renowned opera singer based in the UK. A blend of modern with classical training continues to refine her natural ability, further develop her technique, and support her growth as an emerging musician.</p>
-        </>
-      ) : member.name === 'Joey' ? (
-        <>
-          <p className="mt-3 text-sm text-white/70">Joey is a 14-year-old lead guitarist bringing raw energy and a rapidly evolving sound to modern rock.</p>
-          <p className="mt-3 text-sm text-white/70">Born in Niseko, Japan, Joey picked up his first right-handed acoustic guitar at just seven years old. After relocating to Australia in 2018, he made the switch to left-handed electric guitar, a transition that helped shape his distinctive playing style and musical identity.</p>
-          <p className="mt-3 text-sm text-white/70">Drawing influence from a wide range of alternative, nu-metal, and hard rock artists, Joey's playing blends tight, driving rhythm work with expressive lead lines. His approach is instinctive and feel-driven, always pushing beyond his years as he continues to develop both technically and creatively.</p>
-          <p className="mt-3 text-sm text-white/70">As lead guitarist, Joey plays a key role in shaping the band's sound, balancing melody, aggression, and tone across both live performances and original music.</p>
-          <p className="mt-3 text-sm text-white/70">He is the proud caretaker of a growing guitar lineup, including a Fender Telecaster, Fender Stratocaster, and a Gibson SG, each contributing to his expanding tonal range. His guitar quiver reflects his music mentors: Tom Morello (RATM), Jimi Hendrix (The Hendrix Experience), and Tony Iommi (Black Sabbath).</p>
-          <p className="mt-3 text-sm text-white/70">Still early in his journey, Joey is focused on writing, performing, and carving out his place in the next generation of rock musicians.</p>
-        </>
-      ) : member.name === 'Max' ? (
-        <>
-          <p className="mt-3 text-sm text-white/70">Max is the Exit Smiling bassist and has loved it since it all began in Julian's office, struggling through a 12-bar blues. Now he brings a funky, solid element to the band, both musically and socially, getting lost in jams with Julian, writing with the band, and heading out to switch off and have fun when he can (not too much fun).</p>
-          <p className="mt-3 text-sm text-white/70">Max also enjoys mountain biking, skiing, hunting, and soccer, which he fuels with a lot of music, from shredding a pow day blasting Rage Against the Machine (not too loud, his parents don't want him to damage his ears) to listening to Hilltop Hoods to focus before a game.</p>
-          <p className="mt-3 text-sm text-white/70">Max has a very wide taste in music, with bands like Rage Against the Machine, Linkin Park, Black Sabbath, The Beatles, Audioslave, Hilltop Hoods, and Powderfinger forming the backbone of his influence. However, local influences such as the legendary Dave Berry and The Spindrift Saga have been just as important. He takes lessons from Dave Berry in practical elements, from setting up an overdrive pedal to understanding the genius of an AC/DC song, while members of The Spindrift Saga have taught him the cold, hard theory required to tackle a range of musical challenges, no matter how repetitive it may seem. These local legends give him and the band real insight into the music industry and how bands operate within it.</p>
-          <p className="mt-3 text-sm text-white/70">Max is from the South Coast and brings a regional approach to problems, with a laid-back, fun-loving energy that is a core part of the band and a big reason why he and the others have formed such a strong bond.</p>
-        </>
-      ) : member.name === 'Julian' ? (
-        <>
-          <p className="mt-3 text-sm text-white/70">Julian is 14 years old and was born in Manchester, UK, the heart of music in 90s England, where big bands like Oasis, The Smiths, and The Stone Roses came from. Julian moved to Australia when he was just 1 and started drumming at the age of 5. The first gig he watched was Henge in England in 2017. He also learned to play the piano through COVID and continues to grow his musical skill set beyond just rhythm.</p>
-          <p className="mt-3 text-sm text-white/70">Julian's main drumming influence comes from drummers such as Brad Wilks (RATM), Ringo Starr (The Beatles), and John Otto (Limp Bizkit). This influence brings a wide range of styles, such as hip hop, funk, and nu metal, into his drumming.</p>
-          <p className="mt-3 text-sm text-white/70">Julian started writing and creating music with his younger brother during lockdown at age 10 and released a couple of music videos, which can still be tracked down on YouTube if you search hard enough. These videos gained enough attention to make it to the front page of the local paper, feature in The Canberra Times, and the boys were interviewed, with their songs played on ABC Radio.</p>
-          <p className="mt-3 text-sm text-white/70">Julian has also competed and won the local St Cecilia Music Scholarships and competed with the top 20 drummers in Years 7-9 in NSW in the final of the OSIC drum competition. He has been taking lessons from one of Australia's best jazz drummers, a former ANU drum teacher, using this to blend classical technique with more modern rock styles.</p>
-          <p className="mt-3 text-sm text-white/70">Julian's ambition would be to one day get sponsored by Heinz and Adidas, and he would like to receive unlimited free products from both companies.</p>
-        </>
-      ) : member.name === 'Lando' ? (
-        <>
-          <p className="mt-3 text-sm text-white/70">Sharing the role of vocals, Lando brings high energy with a good dose of swagger to the stage.</p>
-          <p className="mt-3 text-sm text-white/70">An eclectic mix of musical styles from his early years has helped him develop a powerful and vibrant vocal tone, punching out rhymes in style.</p>
-          <p className="mt-3 text-sm text-white/70">Complementing his powerhouse vocals, Lando also delivers rhythm and artistic flair through backing guitar.</p>
-          <p className="mt-3 text-sm text-white/70">Drawing influence and inspiration from legendary bands such as Nirvana, Rage Against the Machine, and Linkin Park, Lando aspires to bring raw and honest energy to the stage.</p>
-        </>
+      {memberBioParagraphs.length ? (
+        memberBioParagraphs.map((paragraph, index) => (
+          <p key={`${member.name}-bio-${index}`} className="mt-3 text-sm text-white/70">
+            {paragraph}
+          </p>
+        ))
       ) : (
         <p className="mt-3 text-sm text-white/60">Bio coming soon.</p>
       )}

@@ -20,6 +20,7 @@ export type MemberMediaConfig = {
   hiddenIds?: string[]
   order?: string[]
   customItems?: MemberMediaItem[]
+  bioParagraphs?: string[]
 }
 
 export type MemberMediaStore = Record<string, MemberMediaConfig>
@@ -169,8 +170,14 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
         }))
         .filter((item: MemberMediaItem) => item.id && item.src && item.key)
     : []
+  const bioParagraphs = Array.isArray(input?.bioParagraphs)
+    ? input.bioParagraphs
+        .map((paragraph: unknown) => String(paragraph || "").trim())
+        .filter(Boolean)
+        .slice(0, 12)
+    : []
 
-  return { hiddenIds, order, customItems }
+  return { hiddenIds, order, customItems, bioParagraphs }
 }
 
 function hmac(key: Buffer | string, value: string) {

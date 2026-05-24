@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   defaultMemberBioMedia,
+  defaultMemberBioParagraphs,
   memberNamesBySlug,
   memberSlugs,
   mergeMemberBioMedia,
@@ -30,6 +31,9 @@ function getInitialMedia(slug, overrides) {
     hiddenIds: Array.isArray(existing.hiddenIds) ? existing.hiddenIds : [],
     order: Array.isArray(existing.order) && existing.order.length ? existing.order : getDefaultIds(slug),
     customItems: Array.isArray(existing.customItems) ? existing.customItems : [],
+    bioParagraphs: Array.isArray(existing.bioParagraphs) && existing.bioParagraphs.length
+      ? existing.bioParagraphs
+      : defaultMemberBioParagraphs[slug] || [],
   };
 }
 
@@ -147,6 +151,16 @@ export default function MemberMediaPortal() {
   const updateDraft = (nextDraft) => {
     setDraft(nextDraft);
     setStatus({ tone: "idle", message: "" });
+  };
+
+  const updateBioText = (value) => {
+    updateDraft({
+      ...draft,
+      bioParagraphs: value
+        .split(/\n{2,}/)
+        .map((paragraph) => paragraph.trim())
+        .filter(Boolean),
+    });
   };
 
   const hideItem = (id) => {
@@ -322,6 +336,36 @@ export default function MemberMediaPortal() {
           <div>
             {isLoggedIn ? (
               <>
+                <div className="mb-8 rounded-3xl border border-white/10 bg-white/[0.035] p-5">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-2xl font-black uppercase">{memberName} bio text</h2>
+                      <p className="mt-1 text-sm text-white/50">
+                        Separate paragraphs with a blank line. Press Save Changes to publish.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        updateDraft({
+                          ...draft,
+                          bioParagraphs: defaultMemberBioParagraphs[selectedMember] || [],
+                        })
+                      }
+                      className="rounded-full border border-white/15 px-3 py-2 text-[10px] font-black uppercase tracking-[0.14em] text-white/55 transition hover:border-white/35 hover:text-white"
+                    >
+                      Reset text
+                    </button>
+                  </div>
+                  <textarea
+                    value={(draft.bioParagraphs || []).join("\n\n")}
+                    onChange={(event) => updateBioText(event.target.value)}
+                    rows={12}
+                    className="mt-4 min-h-[280px] w-full rounded-2xl border border-white/12 bg-black/55 px-4 py-4 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-yellow-100/55"
+                    placeholder="Write bio text here..."
+                  />
+                </div>
+
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h2 className="text-2xl font-black uppercase">{memberName} live rotation</h2>
