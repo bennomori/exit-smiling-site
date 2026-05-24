@@ -188,20 +188,33 @@ export default function MemberMediaPortal() {
     });
   };
 
-  const save = async () => {
+  const save = async (mode = "all") => {
     if (!token) {
       setStatus({ tone: "error", message: "Log in before saving changes." });
       return;
     }
 
-    setStatus({ tone: "pending", message: "Saving changes..." });
+    const isBioSave = mode === "bio";
+    const isPhotoSave = mode === "photos";
+
+    setStatus({
+      tone: "pending",
+      message: isBioSave ? "Saving bio text..." : isPhotoSave ? "Saving photo rotation..." : "Saving changes...",
+    });
 
     try {
       const result = await saveMemberMedia({ token, member: selectedMember, media: draft });
       const nextOverrides = result.media || {};
       setOverrides(nextOverrides);
       setDraft(getInitialMedia(selectedMember, nextOverrides));
-      setStatus({ tone: "success", message: "Saved. The public bio rotation will use these settings." });
+      setStatus({
+        tone: "success",
+        message: isBioSave
+          ? "Bio text saved. The public band card will use this text."
+          : isPhotoSave
+            ? "Photo rotation saved. The public bio rotation will use these settings."
+            : "Saved. The public bio and photo rotation will use these settings.",
+      });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Save failed." });
     }
@@ -247,7 +260,7 @@ export default function MemberMediaPortal() {
         order: [...(draft.order || []), item.id],
       };
       setDraft(nextDraft);
-      setStatus({ tone: "success", message: "Uploaded. Press Save Changes to publish this rotation update." });
+      setStatus({ tone: "success", message: "Uploaded. Press Save Photo Rotation to publish this rotation update." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Upload failed." });
     } finally {
@@ -275,7 +288,8 @@ export default function MemberMediaPortal() {
               <span className="block">Media Portal</span>
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-white/60">
-              Manage your own bio rotation. Hide anything you do not want shown, upload new media, and save the order.
+              Manage your own bio text and image rotation. Update your written bio, hide anything you do not want shown,
+              upload new media, and save the order.
             </p>
           </div>
           <Link to="/" className="rounded-full border border-white/20 px-4 py-2 text-xs font-black uppercase tracking-[0.18em] text-white/70 transition hover:border-white/45 hover:text-white">
@@ -344,7 +358,7 @@ export default function MemberMediaPortal() {
                     <div>
                       <h2 className="text-2xl font-black uppercase">{memberName} bio text</h2>
                       <p className="mt-1 text-sm text-white/50">
-                        Separate paragraphs with a blank line. Press Save Changes to publish.
+                        Separate paragraphs with a blank line. Press Save Bio Text to publish written changes.
                       </p>
                     </div>
                     <div className="flex max-w-xs flex-col items-start gap-2 sm:items-end">
@@ -372,6 +386,14 @@ export default function MemberMediaPortal() {
                     className="mt-4 min-h-[280px] w-full rounded-2xl border border-white/12 bg-black/55 px-4 py-4 text-sm leading-6 text-white outline-none transition placeholder:text-white/25 focus:border-yellow-100/55"
                     placeholder="Write bio text here..."
                   />
+                  <button
+                    type="button"
+                    onClick={() => save("bio")}
+                    disabled={!token}
+                    className="mt-4 rounded-full bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
+                  >
+                    Save bio text
+                  </button>
                 </div>
 
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -396,11 +418,11 @@ export default function MemberMediaPortal() {
                     </label>
                     <button
                       type="button"
-                      onClick={save}
+                      onClick={() => save("photos")}
                       disabled={!token}
                       className="rounded-full bg-yellow-100 px-4 py-2 text-xs font-black uppercase tracking-[0.16em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
                     >
-                      Save changes
+                      Save photo rotation
                     </button>
                   </div>
                 </div>
