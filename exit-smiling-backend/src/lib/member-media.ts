@@ -21,6 +21,7 @@ export type MemberMediaConfig = {
   hiddenIds?: string[]
   order?: string[]
   customItems?: MemberMediaItem[]
+  orientationOverrides?: Record<string, "portrait" | "landscape">
   bioParagraphs?: string[]
 }
 
@@ -172,6 +173,17 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
         }))
         .filter((item: MemberMediaItem) => item.id && item.src && item.key)
     : []
+  const orientationOverrides =
+    input?.orientationOverrides && typeof input.orientationOverrides === "object"
+      ? Object.fromEntries(
+          Object.entries(input.orientationOverrides)
+            .map(([id, orientation]) => [
+              String(id || "").trim(),
+              orientation === "portrait" ? "portrait" : "landscape",
+            ])
+            .filter(([id]) => Boolean(id))
+        )
+      : {}
   const bioParagraphs = Array.isArray(input?.bioParagraphs)
     ? input.bioParagraphs
         .map((paragraph: unknown) => String(paragraph || "").trim())
@@ -179,7 +191,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
         .slice(0, 12)
     : []
 
-  return { hiddenIds, order, customItems, bioParagraphs }
+  return { hiddenIds, order, customItems, orientationOverrides, bioParagraphs }
 }
 
 function hmac(key: Buffer | string, value: string) {

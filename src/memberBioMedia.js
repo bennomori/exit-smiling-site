@@ -109,7 +109,18 @@ export function mergeMemberBioMedia(memberNameOrSlug, overridesByMember = {}) {
   const override = overridesByMember?.[slug] || {};
   const hiddenIds = new Set(Array.isArray(override.hiddenIds) ? override.hiddenIds : []);
   const customItems = Array.isArray(override.customItems) ? override.customItems : [];
-  const allItems = [...defaults, ...customItems].filter((item) => item?.id && !hiddenIds.has(item.id));
+  const orientationOverrides =
+    override.orientationOverrides && typeof override.orientationOverrides === "object"
+      ? override.orientationOverrides
+      : {};
+  const allItems = [...defaults, ...customItems]
+    .filter((item) => item?.id && !hiddenIds.has(item.id))
+    .map((item) => ({
+      ...item,
+      ...(orientationOverrides[item.id]
+        ? { orientation: orientationOverrides[item.id] === "portrait" ? "portrait" : "landscape" }
+        : {}),
+    }));
   const order = Array.isArray(override.order) ? override.order : [];
 
   if (!order.length) return allItems;

@@ -31,6 +31,10 @@ function getInitialMedia(slug, overrides) {
     hiddenIds: Array.isArray(existing.hiddenIds) ? existing.hiddenIds : [],
     order: Array.isArray(existing.order) && existing.order.length ? existing.order : getDefaultIds(slug),
     customItems: Array.isArray(existing.customItems) ? existing.customItems : [],
+    orientationOverrides:
+      existing.orientationOverrides && typeof existing.orientationOverrides === "object"
+        ? existing.orientationOverrides
+        : {},
     bioParagraphs: Array.isArray(existing.bioParagraphs) && existing.bioParagraphs.length
       ? existing.bioParagraphs
       : defaultMemberBioParagraphs[slug] || [],
@@ -122,7 +126,13 @@ export default function MemberMediaPortal() {
     const visibleIds = new Set(draft.order || []);
     const customItems = draft.customItems || [];
     const defaults = defaultMemberBioMedia[selectedMember] || [];
-    const merged = [...defaults, ...customItems];
+    const orientationOverrides = draft.orientationOverrides || {};
+    const merged = [...defaults, ...customItems].map((item) => ({
+      ...item,
+      ...(orientationOverrides[item.id]
+        ? { orientation: getOrientation(orientationOverrides[item.id]) }
+        : {}),
+    }));
     const draftOverrides = {
       [selectedMember]: draft,
     };
@@ -219,6 +229,10 @@ export default function MemberMediaPortal() {
     const nextOrientation = getOrientation(orientation);
     updateDraft({
       ...draft,
+      orientationOverrides: {
+        ...(draft.orientationOverrides || {}),
+        [id]: nextOrientation,
+      },
       customItems: (draft.customItems || []).map((item) =>
         item.id === id ? { ...item, orientation: nextOrientation } : item
       ),
@@ -301,6 +315,10 @@ export default function MemberMediaPortal() {
       const nextDraft = {
         ...draft,
         customItems: [...(draft.customItems || []), item],
+        orientationOverrides: {
+          ...(draft.orientationOverrides || {}),
+          [item.id]: prepared.orientation,
+        },
         order: [...(draft.order || []), item.id],
       };
       setDraft(nextDraft);
@@ -486,12 +504,11 @@ export default function MemberMediaPortal() {
                               key={`${item.id}-${orientation}`}
                               type="button"
                               onClick={() => updateItemOrientation(item.id, orientation)}
-                              disabled={!String(item.id).startsWith("custom:")}
                               className={`rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] transition ${
                                 getOrientation(item.orientation) === orientation
                                   ? "border-yellow-100 bg-yellow-100 text-black"
                                   : "border-white/15 text-white/60 hover:border-white/35 hover:text-white"
-                              } ${String(item.id).startsWith("custom:") ? "" : "cursor-not-allowed opacity-45"}`}
+                              }`}
                             >
                               {orientation}
                             </button>
