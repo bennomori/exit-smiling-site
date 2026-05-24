@@ -2027,8 +2027,8 @@ function MemberCard({ member, memberMediaOverrides }) {
       : member.name === 'Lando'
         ? {
             title: null,
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-vocals-video.mp4',
-            poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-vocals-poster.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-bio-feature-2026.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-bio-feature-2026-poster.jpg',
           }
       : member.name === 'Max'
         ? {

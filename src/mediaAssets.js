@@ -337,6 +337,16 @@ export const mediaAssets = [
     "description": "Lando vocals bio video"
   },
   {
+    "oldFile": "lando_bio_knxuv8.mov",
+    "key": "bio/lando/lando-bio-feature-2026.mp4",
+    "description": "Lando updated lower bio video converted from MOV"
+  },
+  {
+    "oldFile": "lando_bio_knxuv8.mov",
+    "key": "bio/lando/lando-bio-feature-2026-poster.jpg",
+    "description": "Lando updated lower bio video poster frame"
+  },
+  {
     "oldFile": "lando_white_vo0dok.png",
     "key": "animations/band-silhouettes/lando-white.png",
     "description": "Lando white silhouette"
