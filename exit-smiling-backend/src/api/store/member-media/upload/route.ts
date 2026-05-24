@@ -17,6 +17,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       fileName?: string
       contentType?: string
       dataBase64?: string
+      orientation?: string
       size?: number
     }
     const member = normalizeMemberSlug(body.member)
@@ -70,6 +71,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       key,
       src: `${mediaBaseUrl}/${key}`,
       className: "",
+      orientation: body.orientation === "portrait" ? "portrait" : "landscape",
       uploadedAt: new Date().toISOString(),
     }
 

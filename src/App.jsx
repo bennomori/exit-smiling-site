@@ -2096,10 +2096,12 @@ function MemberCard({ member, memberMediaOverrides }) {
     isHoveringBioImage ? visibleLighterSideImages[activeHoverImageIndex]?.credit : null;
   const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
   const primaryBioImage = visibleLighterSideImages[0] || null;
-  const landoTopEdgeStyle =
-    member.name === "Lando" ? { objectPosition: "50% 0%", transformOrigin: "50% 0%" } : undefined;
+  const getBioImageFrameStyle = (image) =>
+    member.name === "Lando" || image?.orientation === "portrait"
+      ? { objectPosition: "50% 0%", transformOrigin: "50% 0%" }
+      : undefined;
   const getHoverImageStyle = (image, index) => ({
-    ...(landoTopEdgeStyle || {}),
+    ...(getBioImageFrameStyle(image) || {}),
     ...(isHoveringBioImage && activeHoverImageIndex === index ? { opacity: 1 } : {}),
   });
 
@@ -2247,7 +2249,7 @@ function MemberCard({ member, memberMediaOverrides }) {
             loading="lazy"
             decoding="async"
             className={`${imageClassName} object-cover ${primaryBioImage.className || ""} ${visibleLighterSideImages?.length ? "group-hover:opacity-0" : ""}`}
-            style={landoTopEdgeStyle}
+            style={getBioImageFrameStyle(primaryBioImage)}
           />
         ) : null}
         {visibleLighterSideImages?.length ? (

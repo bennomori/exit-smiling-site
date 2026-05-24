@@ -12,6 +12,7 @@ export type MemberMediaItem = {
   src: string
   key: string
   className?: string
+  orientation?: "portrait" | "landscape"
   credit?: string
   uploadedAt?: string
 }
@@ -165,6 +166,7 @@ export function sanitizeMemberMediaConfig(input: any): MemberMediaConfig {
           src: String(item?.src || "").trim(),
           key: String(item?.key || "").trim(),
           className: String(item?.className || "").trim(),
+          orientation: item?.orientation === "portrait" ? "portrait" : "landscape",
           credit: String(item?.credit || "").trim(),
           uploadedAt: String(item?.uploadedAt || "").trim(),
         }))

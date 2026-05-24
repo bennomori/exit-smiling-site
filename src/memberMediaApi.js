@@ -49,7 +49,7 @@ export async function saveMemberMedia({ token, member, media }) {
   return parseResponse(response, "Failed to save member media.");
 }
 
-export async function uploadMemberMedia({ token, member, file, dataBase64 }) {
+export async function uploadMemberMedia({ token, member, file, dataBase64, orientation }) {
   let response;
 
   try {
@@ -62,6 +62,7 @@ export async function uploadMemberMedia({ token, member, file, dataBase64 }) {
         fileName: file.name,
         contentType: file.type || "application/octet-stream",
         size: file.size,
+        orientation,
         dataBase64,
       }),
     });
@@ -140,10 +141,17 @@ export async function prepareImageForUpload(file) {
         .replace(/^-+|-+$/g, "")
         .toLowerCase() || "member-bio-image";
 
-    return new File([blob], `${baseName}.jpg`, {
+    const optimizedFile = new File([blob], `${baseName}.jpg`, {
       type: "image/jpeg",
       lastModified: Date.now(),
     });
+
+    return {
+      file: optimizedFile,
+      width,
+      height,
+      orientation: height > width ? "portrait" : "landscape",
+    };
   } finally {
     loaded.close();
   }

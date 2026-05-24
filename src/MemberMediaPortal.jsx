@@ -50,6 +50,16 @@ function moveItem(order, id, direction) {
   return next;
 }
 
+function getOrientation(value) {
+  return value === "portrait" ? "portrait" : "landscape";
+}
+
+function getFrameStyle(item) {
+  return getOrientation(item?.orientation) === "portrait"
+    ? { objectPosition: "50% 0%", transformOrigin: "50% 0%" }
+    : undefined;
+}
+
 function MediaPreview({ item }) {
   const isVideo = item.type === "video" || /\.(mp4|mov)$/i.test(item.src || "");
 
@@ -72,6 +82,7 @@ function MediaPreview({ item }) {
       loading="lazy"
       decoding="async"
       className={`aspect-square w-full rounded-2xl bg-black object-cover ${item.className || ""}`}
+      style={getFrameStyle(item)}
     />
   );
 }
@@ -188,6 +199,16 @@ export default function MemberMediaPortal() {
     });
   };
 
+  const updateItemOrientation = (id, orientation) => {
+    const nextOrientation = getOrientation(orientation);
+    updateDraft({
+      ...draft,
+      customItems: (draft.customItems || []).map((item) =>
+        item.id === id ? { ...item, orientation: nextOrientation } : item
+      ),
+    });
+  };
+
   const save = async (mode = "all") => {
     if (!token) {
       setStatus({ tone: "error", message: "Log in before saving changes." });
@@ -242,7 +263,8 @@ export default function MemberMediaPortal() {
     setStatus({ tone: "pending", message: "Preparing image for upload..." });
 
     try {
-      const uploadFile = await prepareImageForUpload(file);
+      const prepared = await prepareImageForUpload(file);
+      const uploadFile = prepared.file;
 
       if (uploadFile.size > maxOptimizedUploadBytes) {
         setStatus({ tone: "error", message: "Prepared image is still too large. Try a smaller or simpler image." });
@@ -252,8 +274,14 @@ export default function MemberMediaPortal() {
       setStatus({ tone: "pending", message: "Uploading optimized image to the media bucket..." });
 
       const dataBase64 = await readFileAsBase64(uploadFile);
-      const result = await uploadMemberMedia({ token, member: selectedMember, file: uploadFile, dataBase64 });
-      const item = result.item;
+      const result = await uploadMemberMedia({
+        token,
+        member: selectedMember,
+        file: uploadFile,
+        dataBase64,
+        orientation: prepared.orientation,
+      });
+      const item = { ...result.item, orientation: prepared.orientation };
       const nextDraft = {
         ...draft,
         customItems: [...(draft.customItems || []), item],
@@ -434,6 +462,29 @@ export default function MemberMediaPortal() {
                       {item.credit ? (
                         <p className="mt-2 text-xs text-white/45">{item.credit}</p>
                       ) : null}
+                      <div className="mt-3 rounded-2xl border border-white/10 bg-black/25 p-3">
+                        <p className="text-[10px] font-black uppercase tracking-[0.18em] text-white/45">Image shape</p>
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          {["portrait", "landscape"].map((orientation) => (
+                            <button
+                              key={`${item.id}-${orientation}`}
+                              type="button"
+                              onClick={() => updateItemOrientation(item.id, orientation)}
+                              disabled={!String(item.id).startsWith("custom:")}
+                              className={`rounded-full border px-3 py-2 text-[10px] font-black uppercase tracking-[0.12em] transition ${
+                                getOrientation(item.orientation) === orientation
+                                  ? "border-yellow-100 bg-yellow-100 text-black"
+                                  : "border-white/15 text-white/60 hover:border-white/35 hover:text-white"
+                              } ${String(item.id).startsWith("custom:") ? "" : "cursor-not-allowed opacity-45"}`}
+                            >
+                              {orientation}
+                            </button>
+                          ))}
+                        </div>
+                        <p className="mt-2 text-[11px] leading-4 text-white/38">
+                          Portrait keeps the top edge visible in the site tile and hover rotation.
+                        </p>
+                      </div>
                       <div className="mt-3 flex flex-wrap gap-2">
                         <button
                           type="button"
