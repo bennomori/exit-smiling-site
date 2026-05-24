@@ -2096,6 +2096,12 @@ function MemberCard({ member, memberMediaOverrides }) {
     isHoveringBioImage ? visibleLighterSideImages[activeHoverImageIndex]?.credit : null;
   const activeHoverGalleryCredit = visibleLighterSideImages[activeHoverGalleryIndex]?.credit;
   const primaryBioImage = visibleLighterSideImages[0] || null;
+  const getHoverImageStyle = (image, index) => ({
+    ...(member.name === "Lando" && !(image.className || "").includes("object-")
+      ? { objectPosition: "50% 18%" }
+      : {}),
+    ...(isHoveringBioImage && activeHoverImageIndex === index ? { opacity: 1 } : {}),
+  });
 
   useEffect(() => {
     if (!isHoveringBioImage || visibleLighterSideImages.length <= 1) {
@@ -2263,11 +2269,7 @@ function MemberCard({ member, memberMediaOverrides }) {
                 loading="lazy"
                 decoding="async"
                 className={`absolute inset-0 h-full w-full scale-105 object-cover opacity-0 transition duration-500 ease-out [filter:contrast(1.08)_saturate(1.08)_brightness(1.02)] group-hover:scale-[1.12] ${image.className}`}
-                style={
-                  isHoveringBioImage && activeHoverImageIndex === index
-                    ? { opacity: 1 }
-                    : undefined
-                }
+                style={getHoverImageStyle(image, index)}
               />
             ))}
             <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-black/52 via-black/8 to-black/18 opacity-0 transition duration-300 group-hover:opacity-100" />
