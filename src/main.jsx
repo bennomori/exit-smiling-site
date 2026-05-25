@@ -3,6 +3,7 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import CheckoutSuccess from "./CheckoutSuccess";
+import CoverArtSurvey from "./CoverArtSurvey";
 import EpkPage from "./EpkPage";
 import GigAdmin from "./GigAdmin";
 import MediaAdmin from "./MediaAdmin";
@@ -39,6 +40,14 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           element={
             <PreviewGate>
               <GigAdmin />
+            </PreviewGate>
+          }
+        />
+        <Route
+          path="/cover-art"
+          element={
+            <PreviewGate>
+              <CoverArtSurvey />
             </PreviewGate>
           }
         />
