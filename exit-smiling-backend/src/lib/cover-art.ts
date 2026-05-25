@@ -50,28 +50,7 @@ export type CoverArtStore = {
   feedback?: Record<string, Record<string, CoverArtFeedback>>
 }
 
-export const defaultCoverArtDesigns: CoverArtDesign[] = [
-  {
-    id: "starter:exit-smiling-cover-rounded",
-    title: "Rounded Debut Cover",
-    src: `${mediaBaseUrl}/cover-art/debut-single/exit-smiling-cover-rounded.png`,
-    key: "cover-art/debut-single/exit-smiling-cover-rounded.png",
-    uploadedBy: "Joey",
-    uploadedByMember: "joey",
-    uploadedAt: "2026-05-25T00:00:00.000Z",
-    source: "starter",
-  },
-  {
-    id: "starter:es-wrinkled-logo-quality",
-    title: "Wrinkled Logo Cover",
-    src: `${mediaBaseUrl}/cover-art/debut-single/es-wrinkled-logo-quality.png`,
-    key: "cover-art/debut-single/es-wrinkled-logo-quality.png",
-    uploadedBy: "Joey",
-    uploadedByMember: "joey",
-    uploadedAt: "2026-05-25T00:00:00.000Z",
-    source: "starter",
-  },
-]
+export const defaultCoverArtDesigns: CoverArtDesign[] = []
 
 function getDataPath() {
   if (process.env.COVER_ART_DATA_PATH) {
