@@ -81,12 +81,14 @@ function CoverArtCard({
   onSaveVote,
   savingVote,
   deletingCommentKey,
+  agreeingCommentKey,
   attributionOptions,
   editDraft,
   onEditDraftChange,
   onSaveDesign,
   savingDesign,
   onDeleteComment,
+  onAgreeComment,
 }) {
   const averageScore = getAverageScore(feedbackByMember);
   const voteCount = getVoteCount(feedbackByMember);
@@ -238,28 +240,60 @@ function CoverArtCard({
                     </div>
                     {getVoteComments(vote).length ? (
                       <div className="mt-3 space-y-2">
-                        {getVoteComments(vote).map((comment, index) => (
+                        {getVoteComments(vote).map((comment, index) => {
+                          const agreedBy = Array.isArray(comment.agreedBy)
+                            ? comment.agreedBy.filter((item) => item && item !== member)
+                            : [];
+                          const hasAgreed = currentMember ? agreedBy.includes(currentMember) : false;
+                          const agreeKey = `${design.id}:${member}:${index}`;
+                          const agreedNames = agreedBy
+                            .map((item) => memberNamesBySlug[item] || item)
+                            .join(", ");
+
+                          return (
                           <div key={`${design.id}-${member}-comment-${index}`} className="rounded-xl border border-white/8 bg-black/24 px-3 py-2">
                             <p className="whitespace-pre-wrap text-sm leading-6 text-white/58">{comment.text}</p>
+                            {agreedBy.length ? (
+                              <p className="mt-2 rounded-full border border-yellow-100/15 bg-yellow-100/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-yellow-100/78">
+                                Thumbs up from {agreedNames}
+                              </p>
+                            ) : null}
                             <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
                               {comment.createdAt ? (
                                 <p className="text-[10px] uppercase tracking-[0.14em] text-white/28">
                                   {formatDate(comment.createdAt)}
                                 </p>
                               ) : <span />}
-                              {currentMember === member ? (
-                                <button
-                                  type="button"
-                                  onClick={() => onDeleteComment(design.id, index)}
-                                  disabled={deletingCommentKey === `${design.id}:${index}`}
-                                  className="rounded-full border border-red-300/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-red-100/70 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
-                                >
-                                  {deletingCommentKey === `${design.id}:${index}` ? "Deleting..." : "Delete"}
-                                </button>
-                              ) : null}
+                              <div className="flex flex-wrap items-center gap-2">
+                                {currentMember && currentMember !== member ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => onAgreeComment(design.id, member, index)}
+                                    disabled={agreeingCommentKey === agreeKey}
+                                    className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] transition disabled:cursor-not-allowed disabled:opacity-35 ${
+                                      hasAgreed
+                                        ? "border-yellow-100 bg-yellow-100 text-black hover:opacity-90"
+                                        : "border-yellow-100/25 text-yellow-100/76 hover:border-yellow-100/60 hover:text-yellow-50"
+                                    }`}
+                                  >
+                                    {agreeingCommentKey === agreeKey ? "Saving..." : hasAgreed ? "Agreed" : "Click here if you agree"}
+                                  </button>
+                                ) : null}
+                                {currentMember === member ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => onDeleteComment(design.id, index)}
+                                    disabled={deletingCommentKey === `${design.id}:${index}`}
+                                    className="rounded-full border border-red-300/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-red-100/70 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
+                                  >
+                                    {deletingCommentKey === `${design.id}:${index}` ? "Deleting..." : "Delete"}
+                                  </button>
+                                ) : null}
+                              </div>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     ) : null}
                   </div>
@@ -291,6 +325,7 @@ export default function CoverArtSurvey() {
   const [savingDesignId, setSavingDesignId] = useState("");
   const [savingEditDesignId, setSavingEditDesignId] = useState("");
   const [deletingCommentKey, setDeletingCommentKey] = useState("");
+  const [agreeingCommentKey, setAgreeingCommentKey] = useState("");
   const [voteDrafts, setVoteDrafts] = useState({});
   const [editDrafts, setEditDrafts] = useState({});
 
@@ -427,6 +462,28 @@ export default function CoverArtSurvey() {
       setStatus({ tone: "error", message: error.message || "Comment delete failed." });
     } finally {
       setDeletingCommentKey("");
+    }
+  };
+
+  const handleAgreeComment = async (designId, commentMember, commentIndex) => {
+    const agreeKey = `${designId}:${commentMember}:${commentIndex}`;
+    setAgreeingCommentKey(agreeKey);
+    setStatus({ tone: "pending", message: "Saving agreement..." });
+
+    try {
+      const result = await saveCoverArtVote({
+        token,
+        member: selectedMember,
+        designId,
+        agreeCommentMember: commentMember,
+        agreeCommentIndex: commentIndex,
+      });
+      setFeedback(result.feedback || {});
+      setStatus({ tone: "success", message: "Agreement saved." });
+    } catch (error) {
+      setStatus({ tone: "error", message: error.message || "Agreement save failed." });
+    } finally {
+      setAgreeingCommentKey("");
     }
   };
 
@@ -598,12 +655,14 @@ export default function CoverArtSurvey() {
                 onSaveVote={handleSaveVote}
                 savingVote={savingDesignId === design.id}
                 deletingCommentKey={deletingCommentKey}
+                agreeingCommentKey={agreeingCommentKey}
                 attributionOptions={attributionOptions}
                 editDraft={editDrafts[design.id]}
                 onEditDraftChange={handleEditDraftChange}
                 onSaveDesign={handleSaveDesign}
                 savingDesign={savingEditDesignId === design.id}
                 onDeleteComment={handleDeleteComment}
+                onAgreeComment={handleAgreeComment}
               />
             ))
           ) : (

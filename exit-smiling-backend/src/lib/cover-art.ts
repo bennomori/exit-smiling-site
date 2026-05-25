@@ -40,6 +40,7 @@ export type CoverArtFeedback = {
   comments?: Array<{
     text: string
     createdAt: string
+    agreedBy?: string[]
   }>
   updatedAt: string
 }

@@ -1,5 +1,6 @@
 import { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import {
+  coverArtMembers,
   getAllCoverArtDesigns,
   readCoverArtStore,
   sanitizeScore,
@@ -16,6 +17,8 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       score?: number
       comment?: string
       deleteCommentIndex?: number
+      agreeCommentMember?: string
+      agreeCommentIndex?: number
     }
     const member = verifyCoverArtToken(body.token, body.member)
     const designId = String(body.designId || "").trim()
@@ -24,6 +27,60 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     if (!designs.some((design) => design.id === designId)) {
       return res.status(404).json({ message: "Cover design not found." })
+    }
+
+    const agreeCommentMember = String(body.agreeCommentMember || "").trim()
+    if (agreeCommentMember) {
+      if (!(agreeCommentMember in coverArtMembers)) {
+        return res.status(400).json({ message: "Comment member was not recognised." })
+      }
+      if (agreeCommentMember === member) {
+        return res.status(400).json({ message: "You cannot agree with your own comment." })
+      }
+
+      const targetFeedback = store.feedback?.[designId]?.[agreeCommentMember]
+      const targetComments = Array.isArray(targetFeedback?.comments)
+        ? targetFeedback.comments.filter((comment) => String(comment?.text || "").trim())
+        : targetFeedback?.comment
+          ? [{ text: String(targetFeedback.comment), createdAt: targetFeedback.updatedAt || new Date().toISOString(), agreedBy: [] }]
+          : []
+      const agreeCommentIndex = Number(body.agreeCommentIndex)
+
+      if (!Number.isInteger(agreeCommentIndex) || !targetComments[agreeCommentIndex]) {
+        return res.status(404).json({ message: "Comment not found." })
+      }
+
+      const currentAgreedBy = Array.isArray(targetComments[agreeCommentIndex].agreedBy)
+        ? targetComments[agreeCommentIndex].agreedBy
+        : []
+      const alreadyAgreed = currentAgreedBy.includes(member)
+      const nextAgreedBy = alreadyAgreed
+        ? currentAgreedBy.filter((item) => item !== member)
+        : [...currentAgreedBy, member]
+      const nextComments = targetComments.map((comment, index) => (
+        index === agreeCommentIndex
+          ? { ...comment, agreedBy: nextAgreedBy }
+          : comment
+      ))
+      const latestComment = nextComments.length ? String(nextComments[nextComments.length - 1]?.text || "") : ""
+
+      store.feedback = store.feedback || {}
+      store.feedback[designId] = {
+        ...(store.feedback[designId] || {}),
+        [agreeCommentMember]: {
+          score: sanitizeScore(targetFeedback?.score),
+          comment: latestComment,
+          comments: nextComments,
+          updatedAt: new Date().toISOString(),
+        },
+      }
+
+      await writeCoverArtStore(store)
+
+      return res.status(200).json({
+        ok: true,
+        feedback: store.feedback,
+      })
     }
 
     const existingFeedback = store.feedback?.[designId]?.[member]
