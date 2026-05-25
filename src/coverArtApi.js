@@ -32,20 +32,26 @@ export async function uploadCoverArtDesign({ token, member, file, title, uploade
   const prepared = await prepareImageForUpload(file);
   const dataBase64 = await readFileAsBase64(prepared.file);
 
-  const response = await fetch(`${baseUrl}/store/cover-art/upload`, {
-    method: "POST",
-    headers: commonHeaders,
-    body: JSON.stringify({
-      token,
-      member,
-      title,
-      uploadedBy,
-      fileName: prepared.file.name,
-      contentType: prepared.file.type || "image/jpeg",
-      size: prepared.file.size,
-      dataBase64,
-    }),
-  });
+  let response;
+
+  try {
+    response = await fetch(`${baseUrl}/store/cover-art/upload`, {
+      method: "POST",
+      headers: commonHeaders,
+      body: JSON.stringify({
+        token,
+        member,
+        title,
+        uploadedBy,
+        fileName: prepared.file.name,
+        contentType: prepared.file.type || "image/jpeg",
+        size: prepared.file.size,
+        dataBase64,
+      }),
+    });
+  } catch (error) {
+    throw new Error("Upload could not reach the backend. Try refreshing the page, then upload a smaller image.");
+  }
 
   return parseResponse(response, "Failed to upload cover-art design.");
 }

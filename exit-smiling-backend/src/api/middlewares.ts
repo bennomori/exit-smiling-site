@@ -23,5 +23,12 @@ export default defineMiddlewares({
         sizeLimit: process.env.GIG_POSTER_UPLOAD_BODY_LIMIT || process.env.MEDIA_ADMIN_UPLOAD_BODY_LIMIT || "35mb",
       },
     },
+    {
+      matcher: "/store/cover-art/upload",
+      methods: ["POST"],
+      bodyParser: {
+        sizeLimit: process.env.COVER_ART_UPLOAD_BODY_LIMIT || process.env.MEDIA_ADMIN_UPLOAD_BODY_LIMIT || "35mb",
+      },
+    },
   ],
 })
