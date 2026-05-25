@@ -28,7 +28,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
 
     const existingFeedback = store.feedback?.[designId]?.[member]
     const previousComments = Array.isArray(existingFeedback?.comments)
-      ? existingFeedback.comments
+      ? existingFeedback.comments.filter((comment) => String(comment?.text || "").trim())
       : existingFeedback?.comment
         ? [{ text: String(existingFeedback.comment), createdAt: existingFeedback.updatedAt || new Date().toISOString() }]
         : []

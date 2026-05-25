@@ -21,6 +21,10 @@ function getAverageScore(feedbackByMember) {
   return scores.reduce((sum, score) => sum + score, 0) / scores.length;
 }
 
+function getVoteCount(feedbackByMember) {
+  return Object.values(feedbackByMember || {}).filter((vote) => Number(vote?.score || 0) > 0).length;
+}
+
 function formatDate(value) {
   if (!value) return "";
   try {
@@ -37,7 +41,7 @@ function formatDate(value) {
 
 function getVoteComments(vote) {
   if (Array.isArray(vote?.comments) && vote.comments.length) {
-    return vote.comments;
+    return vote.comments.filter((comment) => String(comment?.text || "").trim());
   }
 
   if (vote?.comment) {
@@ -85,7 +89,7 @@ function CoverArtCard({
   onDeleteComment,
 }) {
   const averageScore = getAverageScore(feedbackByMember);
-  const voteCount = Object.values(feedbackByMember || {}).filter((vote) => Number(vote?.score || 0) > 0).length;
+  const voteCount = getVoteCount(feedbackByMember);
   const memberVote = currentMember ? feedbackByMember?.[currentMember] : null;
   const draft = voteDraft || {
     score: memberVote?.score || 0,
@@ -295,9 +299,16 @@ export default function CoverArtSurvey() {
 
   const rankedDesigns = useMemo(() => {
     return [...designs].sort((a, b) => {
-      const aAverage = getAverageScore(getFeedbackForDesign(feedback, a.id)) || 0;
-      const bAverage = getAverageScore(getFeedbackForDesign(feedback, b.id)) || 0;
+      const aFeedback = getFeedbackForDesign(feedback, a.id);
+      const bFeedback = getFeedbackForDesign(feedback, b.id);
+      const aAverage = getAverageScore(aFeedback) || 0;
+      const bAverage = getAverageScore(bFeedback) || 0;
       if (aAverage !== bAverage) return bAverage - aAverage;
+
+      const aVoteCount = getVoteCount(aFeedback);
+      const bVoteCount = getVoteCount(bFeedback);
+      if (aVoteCount !== bVoteCount) return bVoteCount - aVoteCount;
+
       return new Date(a.uploadedAt).getTime() - new Date(b.uploadedAt).getTime();
     });
   }, [designs, feedback]);
