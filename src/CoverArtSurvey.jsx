@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { memberNamesBySlug, memberSlugs } from "./memberBioMedia";
 import { loginMemberMedia } from "./memberMediaApi";
-import { getCoverArtSurvey, saveCoverArtVote, uploadCoverArtDesign } from "./coverArtApi";
+import { getCoverArtSurvey, saveCoverArtVote, updateCoverArtDesign, uploadCoverArtDesign } from "./coverArtApi";
 
 const memberOptions = Object.entries(memberSlugs).map(([name, slug]) => ({ name, slug }));
 const scoreOptions = [5, 4, 3, 2, 1];
@@ -35,7 +35,20 @@ function formatDate(value) {
   }
 }
 
-function CoverArtCard({ design, feedbackByMember, currentMember, voteDraft, onDraftChange, onSaveVote, savingVote }) {
+function CoverArtCard({
+  design,
+  feedbackByMember,
+  currentMember,
+  voteDraft,
+  onDraftChange,
+  onSaveVote,
+  savingVote,
+  attributionOptions,
+  editDraft,
+  onEditDraftChange,
+  onSaveDesign,
+  savingDesign,
+}) {
   const averageScore = getAverageScore(feedbackByMember);
   const voteCount = Object.values(feedbackByMember || {}).filter((vote) => Number(vote?.score || 0) > 0).length;
   const memberVote = currentMember ? feedbackByMember?.[currentMember] : null;
@@ -83,6 +96,47 @@ function CoverArtCard({ design, feedbackByMember, currentMember, voteDraft, onDr
               </p>
               <p className="text-[10px] uppercase tracking-[0.18em] text-white/35">{voteCount} votes</p>
             </div>
+          </div>
+
+          <div className="mt-5 rounded-3xl border border-white/10 bg-white/[0.025] p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="text-xs font-black uppercase tracking-[0.22em] text-white/52">Artwork details</p>
+              <p className="text-[10px] uppercase tracking-[0.16em] text-white/32">Edit title / attribution</p>
+            </div>
+            <div className="mt-3 grid gap-3 md:grid-cols-[1fr_190px]">
+              <input
+                type="text"
+                value={editDraft?.title ?? design.title}
+                disabled={!currentMember}
+                onChange={(event) => onEditDraftChange(design.id, {
+                  title: event.target.value,
+                  uploadedBy: editDraft?.uploadedBy ?? design.uploadedBy,
+                })}
+                className="rounded-full border border-white/12 bg-black/45 px-4 py-3 text-sm text-white outline-none transition placeholder:text-white/24 focus:border-yellow-100/55 disabled:cursor-not-allowed disabled:opacity-40"
+                placeholder="Artwork title"
+              />
+              <select
+                value={editDraft?.uploadedBy ?? design.uploadedBy}
+                disabled={!currentMember}
+                onChange={(event) => onEditDraftChange(design.id, {
+                  title: editDraft?.title ?? design.title,
+                  uploadedBy: event.target.value,
+                })}
+                className="rounded-full border border-white/12 bg-black/45 px-4 py-3 text-sm text-white outline-none transition focus:border-yellow-100/55 disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {(attributionOptions.length ? attributionOptions : ["Joey", "Cadence", "Lando", "Julian", "Max", "Band"]).map((option) => (
+                  <option key={`${design.id}-${option}`} value={option}>{option}</option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              disabled={!currentMember || savingDesign}
+              onClick={() => onSaveDesign(design.id)}
+              className="mt-3 w-full rounded-full border border-white/16 px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-white/72 transition hover:border-white/35 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-35"
+            >
+              {savingDesign ? "Saving details..." : "Save artwork details"}
+            </button>
           </div>
 
           <div className="mt-6 rounded-3xl border border-white/10 bg-black/28 p-4">
@@ -174,7 +228,9 @@ export default function CoverArtSurvey() {
   const [status, setStatus] = useState({ tone: "idle", message: "" });
   const [uploading, setUploading] = useState(false);
   const [savingDesignId, setSavingDesignId] = useState("");
+  const [savingEditDesignId, setSavingEditDesignId] = useState("");
   const [voteDrafts, setVoteDrafts] = useState({});
+  const [editDrafts, setEditDrafts] = useState({});
 
   const memberName = memberNamesBySlug[selectedMember] || selectedMember;
   const isLoggedIn = Boolean(token);
@@ -220,6 +276,36 @@ export default function CoverArtSurvey() {
       ...current,
       [designId]: draft,
     }));
+  };
+
+  const handleEditDraftChange = (designId, draft) => {
+    setEditDrafts((current) => ({
+      ...current,
+      [designId]: draft,
+    }));
+  };
+
+  const handleSaveDesign = async (designId) => {
+    const design = designs.find((item) => item.id === designId);
+    const draft = editDrafts[designId] || design;
+    setSavingEditDesignId(designId);
+    setStatus({ tone: "pending", message: "Saving artwork details..." });
+
+    try {
+      const result = await updateCoverArtDesign({
+        token,
+        member: selectedMember,
+        designId,
+        title: draft.title || design?.title || "",
+        uploadedBy: draft.uploadedBy || design?.uploadedBy || "Band",
+      });
+      setDesigns(result.designs || []);
+      setStatus({ tone: "success", message: "Artwork details saved." });
+    } catch (error) {
+      setStatus({ tone: "error", message: error.message || "Artwork update failed." });
+    } finally {
+      setSavingEditDesignId("");
+    }
   };
 
   const handleSaveVote = async (designId) => {
@@ -412,6 +498,11 @@ export default function CoverArtSurvey() {
                 onDraftChange={handleDraftChange}
                 onSaveVote={handleSaveVote}
                 savingVote={savingDesignId === design.id}
+                attributionOptions={attributionOptions}
+                editDraft={editDrafts[design.id]}
+                onEditDraftChange={handleEditDraftChange}
+                onSaveDesign={handleSaveDesign}
+                savingDesign={savingEditDesignId === design.id}
               />
             ))
           ) : (

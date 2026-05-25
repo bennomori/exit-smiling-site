@@ -50,6 +50,22 @@ export async function uploadCoverArtDesign({ token, member, file, title, uploade
   return parseResponse(response, "Failed to upload cover-art design.");
 }
 
+export async function updateCoverArtDesign({ token, member, designId, title, uploadedBy }) {
+  const response = await fetch(`${baseUrl}/store/cover-art/update`, {
+    method: "POST",
+    headers: commonHeaders,
+    body: JSON.stringify({
+      token,
+      member,
+      designId,
+      title,
+      uploadedBy,
+    }),
+  });
+
+  return parseResponse(response, "Failed to update cover-art design.");
+}
+
 export async function saveCoverArtVote({ token, member, designId, score, comment }) {
   const response = await fetch(`${baseUrl}/store/cover-art/vote`, {
     method: "POST",

@@ -42,6 +42,7 @@ export type CoverArtFeedback = {
 
 export type CoverArtStore = {
   designs?: CoverArtDesign[]
+  designOverrides?: Record<string, Partial<Pick<CoverArtDesign, "title" | "uploadedBy">> & { updatedAt?: string }>
   feedback?: Record<string, Record<string, CoverArtFeedback>>
 }
 
@@ -99,7 +100,16 @@ export async function writeCoverArtStore(store: CoverArtStore) {
 
 export function getAllCoverArtDesigns(store: CoverArtStore) {
   const customDesigns = Array.isArray(store.designs) ? store.designs : []
-  return [...defaultCoverArtDesigns, ...customDesigns]
+  const overrides = store.designOverrides && typeof store.designOverrides === "object" ? store.designOverrides : {}
+
+  return [...defaultCoverArtDesigns, ...customDesigns].map((design) => {
+    const override = overrides[design.id] || {}
+    return {
+      ...design,
+      ...(override.title ? { title: override.title } : {}),
+      ...(override.uploadedBy ? { uploadedBy: override.uploadedBy } : {}),
+    }
+  })
 }
 
 export function sanitizeAttribution(value: unknown, fallback: string) {
