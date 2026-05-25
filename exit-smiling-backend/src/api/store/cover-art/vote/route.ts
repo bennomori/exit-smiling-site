@@ -15,6 +15,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       designId?: string
       score?: number
       comment?: string
+      deleteCommentIndex?: number
     }
     const member = verifyCoverArtToken(body.token, body.member)
     const designId = String(body.designId || "").trim()
@@ -32,12 +33,18 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
         ? [{ text: String(existingFeedback.comment), createdAt: existingFeedback.updatedAt || new Date().toISOString() }]
         : []
     const nextComment = String(body.comment || "").trim().slice(0, 1200)
+    const deleteCommentIndex = Number(body.deleteCommentIndex)
+    const keptComments = Number.isInteger(deleteCommentIndex)
+      ? previousComments.filter((_comment, index) => index !== deleteCommentIndex)
+      : previousComments
+    const nextComments = nextComment
+      ? [...keptComments, { text: nextComment, createdAt: new Date().toISOString() }]
+      : keptComments
+    const latestComment = nextComments.length ? String(nextComments[nextComments.length - 1]?.text || "") : ""
     const feedback = {
       score: sanitizeScore(body.score),
-      comment: nextComment || String(existingFeedback?.comment || ""),
-      comments: nextComment
-        ? [...previousComments, { text: nextComment, createdAt: new Date().toISOString() }]
-        : previousComments,
+      comment: latestComment,
+      comments: nextComments,
       updatedAt: new Date().toISOString(),
     }
 

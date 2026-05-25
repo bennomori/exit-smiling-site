@@ -66,7 +66,7 @@ export async function updateCoverArtDesign({ token, member, designId, title, upl
   return parseResponse(response, "Failed to update cover-art design.");
 }
 
-export async function saveCoverArtVote({ token, member, designId, score, comment }) {
+export async function saveCoverArtVote({ token, member, designId, score, comment, deleteCommentIndex }) {
   const response = await fetch(`${baseUrl}/store/cover-art/vote`, {
     method: "POST",
     headers: commonHeaders,
@@ -76,6 +76,7 @@ export async function saveCoverArtVote({ token, member, designId, score, comment
       designId,
       score,
       comment,
+      deleteCommentIndex,
     }),
   });
 

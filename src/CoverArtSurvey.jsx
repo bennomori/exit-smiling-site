@@ -76,11 +76,13 @@ function CoverArtCard({
   onDraftChange,
   onSaveVote,
   savingVote,
+  deletingCommentKey,
   attributionOptions,
   editDraft,
   onEditDraftChange,
   onSaveDesign,
   savingDesign,
+  onDeleteComment,
 }) {
   const averageScore = getAverageScore(feedbackByMember);
   const voteCount = Object.values(feedbackByMember || {}).filter((vote) => Number(vote?.score || 0) > 0).length;
@@ -94,9 +96,6 @@ function CoverArtCard({
     <article className="group overflow-hidden rounded-[2rem] border border-white/10 bg-white/[0.035] shadow-[0_24px_70px_rgba(0,0,0,0.34)]">
       <div className="grid gap-0 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="relative bg-black/60 p-4">
-          <div className="absolute left-5 top-5 z-10 rounded-full border border-yellow-100/30 bg-black/60 px-3 py-1 text-[10px] font-black uppercase tracking-[0.18em] text-yellow-100/85 backdrop-blur">
-            {design.source === "starter" ? "Starter concept" : "Uploaded concept"}
-          </div>
           <button
             type="button"
             className="block w-full overflow-hidden rounded-[1.5rem] border border-white/10 bg-black text-left"
@@ -122,12 +121,12 @@ function CoverArtCard({
                 {design.uploadedAt ? ` / ${formatDate(design.uploadedAt)}` : ""}
               </p>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-right">
+            <div className="animate-pulse rounded-2xl border border-yellow-100/30 bg-yellow-100/10 px-4 py-3 text-right shadow-[0_0_34px_rgba(250,204,21,0.18)] transition duration-300 group-hover:scale-[1.04] group-hover:shadow-[0_0_48px_rgba(250,204,21,0.28)]">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/35">Band average</p>
               <p className="mt-1 text-3xl font-black text-yellow-100">
                 {averageScore ? averageScore.toFixed(1) : "-"}
               </p>
-              <p className="text-[10px] uppercase tracking-[0.18em] text-white/35">{voteCount} votes</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-yellow-100/70">{voteCount} votes</p>
             </div>
           </div>
 
@@ -237,12 +236,24 @@ function CoverArtCard({
                       <div className="mt-3 space-y-2">
                         {getVoteComments(vote).map((comment, index) => (
                           <div key={`${design.id}-${member}-comment-${index}`} className="rounded-xl border border-white/8 bg-black/24 px-3 py-2">
-                            <p className="text-sm leading-6 text-white/58">{comment.text}</p>
-                            {comment.createdAt ? (
-                              <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/28">
-                                {formatDate(comment.createdAt)}
-                              </p>
-                            ) : null}
+                            <p className="whitespace-pre-wrap text-sm leading-6 text-white/58">{comment.text}</p>
+                            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                              {comment.createdAt ? (
+                                <p className="text-[10px] uppercase tracking-[0.14em] text-white/28">
+                                  {formatDate(comment.createdAt)}
+                                </p>
+                              ) : <span />}
+                              {currentMember === member ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onDeleteComment(design.id, index)}
+                                  disabled={deletingCommentKey === `${design.id}:${index}`}
+                                  className="rounded-full border border-red-300/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-red-100/70 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
+                                >
+                                  {deletingCommentKey === `${design.id}:${index}` ? "Deleting..." : "Delete"}
+                                </button>
+                              ) : null}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -275,6 +286,7 @@ export default function CoverArtSurvey() {
   const [uploading, setUploading] = useState(false);
   const [savingDesignId, setSavingDesignId] = useState("");
   const [savingEditDesignId, setSavingEditDesignId] = useState("");
+  const [deletingCommentKey, setDeletingCommentKey] = useState("");
   const [voteDrafts, setVoteDrafts] = useState({});
   const [editDrafts, setEditDrafts] = useState({});
 
@@ -381,6 +393,29 @@ export default function CoverArtSurvey() {
       setStatus({ tone: "error", message: error.message || "Vote save failed." });
     } finally {
       setSavingDesignId("");
+    }
+  };
+
+  const handleDeleteComment = async (designId, commentIndex) => {
+    const existing = feedback?.[designId]?.[selectedMember] || {};
+    setDeletingCommentKey(`${designId}:${commentIndex}`);
+    setStatus({ tone: "pending", message: "Deleting comment..." });
+
+    try {
+      const result = await saveCoverArtVote({
+        token,
+        member: selectedMember,
+        designId,
+        score: existing.score || 0,
+        comment: "",
+        deleteCommentIndex: commentIndex,
+      });
+      setFeedback(result.feedback || {});
+      setStatus({ tone: "success", message: "Comment deleted." });
+    } catch (error) {
+      setStatus({ tone: "error", message: error.message || "Comment delete failed." });
+    } finally {
+      setDeletingCommentKey("");
     }
   };
 
@@ -551,11 +586,13 @@ export default function CoverArtSurvey() {
                 onDraftChange={handleDraftChange}
                 onSaveVote={handleSaveVote}
                 savingVote={savingDesignId === design.id}
+                deletingCommentKey={deletingCommentKey}
                 attributionOptions={attributionOptions}
                 editDraft={editDrafts[design.id]}
                 onEditDraftChange={handleEditDraftChange}
                 onSaveDesign={handleSaveDesign}
                 savingDesign={savingEditDesignId === design.id}
+                onDeleteComment={handleDeleteComment}
               />
             ))
           ) : (
