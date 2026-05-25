@@ -2033,8 +2033,8 @@ function MemberCard({ member, memberMediaOverrides }) {
       : member.name === 'Max'
         ? {
             title: null,
-            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026.mp4',
-            poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026-poster.jpg',
+            src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026-v2.mp4',
+            poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026-v2-poster.jpg',
           }
       : null;
 

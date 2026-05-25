@@ -397,6 +397,16 @@ export const mediaAssets = [
     "description": "Max updated lower bio bass video poster frame"
   },
   {
+    "oldFile": "new_max_bass_ts6yth.mov",
+    "key": "bio/max/max-bass-feature-2026-v2.mp4",
+    "description": "Max replacement lower bio bass video converted from MOV"
+  },
+  {
+    "oldFile": "new_max_bass_ts6yth.mov",
+    "key": "bio/max/max-bass-feature-2026-v2-poster.jpg",
+    "description": "Max replacement lower bio bass video poster frame"
+  },
+  {
     "oldFile": "max_closeup_vrzhqx.mp4",
     "key": "bio/max/max-closeup-bass.mp4",
     "description": "Max closeup bass video"
