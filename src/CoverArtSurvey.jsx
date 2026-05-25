@@ -35,6 +35,39 @@ function formatDate(value) {
   }
 }
 
+function getVoteComments(vote) {
+  if (Array.isArray(vote?.comments) && vote.comments.length) {
+    return vote.comments;
+  }
+
+  if (vote?.comment) {
+    return [{ text: vote.comment, createdAt: vote.updatedAt }];
+  }
+
+  return [];
+}
+
+function AutoGrowTextarea({ value, onChange, ...props }) {
+  const resize = (element) => {
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  };
+
+  return (
+    <textarea
+      {...props}
+      value={value}
+      onChange={(event) => {
+        onChange(event);
+        resize(event.currentTarget);
+      }}
+      onInput={(event) => resize(event.currentTarget)}
+      ref={resize}
+    />
+  );
+}
+
 function CoverArtCard({
   design,
   feedbackByMember,
@@ -54,7 +87,7 @@ function CoverArtCard({
   const memberVote = currentMember ? feedbackByMember?.[currentMember] : null;
   const draft = voteDraft || {
     score: memberVote?.score || 0,
-    comment: memberVote?.comment || "",
+    comment: "",
   };
 
   return (
@@ -168,13 +201,13 @@ function CoverArtCard({
               ))}
             </div>
 
-            <textarea
+            <AutoGrowTextarea
               value={draft.comment}
               disabled={!currentMember}
               onChange={(event) => onDraftChange(design.id, { ...draft, comment: event.target.value })}
-              rows={4}
-              className="mt-3 w-full rounded-2xl border border-white/12 bg-black/55 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/24 focus:border-yellow-100/55 disabled:cursor-not-allowed disabled:opacity-40"
-              placeholder="Leave notes: what works, what does not, what feels most Exit Smiling?"
+              rows={2}
+              className="mt-3 min-h-[72px] w-full resize-none overflow-hidden rounded-2xl border border-white/12 bg-black/55 px-4 py-3 text-sm leading-6 text-white outline-none transition placeholder:text-white/24 focus:border-yellow-100/55 disabled:cursor-not-allowed disabled:opacity-40"
+              placeholder="Add a new comment. Earlier comments are kept below."
             />
             <button
               type="button"
@@ -182,7 +215,7 @@ function CoverArtCard({
               onClick={() => onSaveVote(design.id)}
               className="mt-3 w-full rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.18em] text-black transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-35"
             >
-              {savingVote ? "Saving..." : "Save my vote"}
+              {savingVote ? "Saving..." : "Save vote / add comment"}
             </button>
           </div>
 
@@ -200,7 +233,20 @@ function CoverArtCard({
                         {vote.score}/5
                       </p>
                     </div>
-                    {vote.comment ? <p className="mt-2 text-sm leading-6 text-white/55">{vote.comment}</p> : null}
+                    {getVoteComments(vote).length ? (
+                      <div className="mt-3 space-y-2">
+                        {getVoteComments(vote).map((comment, index) => (
+                          <div key={`${design.id}-${member}-comment-${index}`} className="rounded-xl border border-white/8 bg-black/24 px-3 py-2">
+                            <p className="text-sm leading-6 text-white/58">{comment.text}</p>
+                            {comment.createdAt ? (
+                              <p className="mt-1 text-[10px] uppercase tracking-[0.14em] text-white/28">
+                                {formatDate(comment.createdAt)}
+                              </p>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 ))
               ) : (
@@ -323,6 +369,13 @@ export default function CoverArtSurvey() {
         comment: draft.comment || "",
       });
       setFeedback(result.feedback || {});
+      setVoteDrafts((current) => ({
+        ...current,
+        [designId]: {
+          score: draft.score || 0,
+          comment: "",
+        },
+      }));
       setStatus({ tone: "success", message: "Vote saved." });
     } catch (error) {
       setStatus({ tone: "error", message: error.message || "Vote save failed." });

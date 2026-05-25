@@ -37,6 +37,10 @@ export type CoverArtDesign = {
 export type CoverArtFeedback = {
   score: number
   comment: string
+  comments?: Array<{
+    text: string
+    createdAt: string
+  }>
   updatedAt: string
 }
 

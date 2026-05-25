@@ -25,9 +25,19 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       return res.status(404).json({ message: "Cover design not found." })
     }
 
+    const existingFeedback = store.feedback?.[designId]?.[member]
+    const previousComments = Array.isArray(existingFeedback?.comments)
+      ? existingFeedback.comments
+      : existingFeedback?.comment
+        ? [{ text: String(existingFeedback.comment), createdAt: existingFeedback.updatedAt || new Date().toISOString() }]
+        : []
+    const nextComment = String(body.comment || "").trim().slice(0, 1200)
     const feedback = {
       score: sanitizeScore(body.score),
-      comment: String(body.comment || "").trim().slice(0, 1200),
+      comment: nextComment || String(existingFeedback?.comment || ""),
+      comments: nextComment
+        ? [...previousComments, { text: nextComment, createdAt: new Date().toISOString() }]
+        : previousComments,
       updatedAt: new Date().toISOString(),
     }
 
