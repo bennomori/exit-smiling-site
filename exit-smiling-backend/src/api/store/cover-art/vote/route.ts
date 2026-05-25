@@ -8,6 +8,33 @@ import {
   writeCoverArtStore,
 } from "../../../../lib/cover-art"
 
+function normalizeComments(comments: any, fallbackComment?: any, fallbackUpdatedAt?: any) {
+  if (Array.isArray(comments) && comments.length) {
+    return comments
+      .map((comment) => {
+        if (typeof comment === "string") {
+          return {
+            text: comment.trim(),
+            createdAt: fallbackUpdatedAt || new Date().toISOString(),
+            agreedBy: [],
+          }
+        }
+
+        return {
+          text: String(comment?.text || "").trim(),
+          createdAt: comment?.createdAt || fallbackUpdatedAt || new Date().toISOString(),
+          agreedBy: Array.isArray(comment?.agreedBy) ? comment.agreedBy : [],
+        }
+      })
+      .filter((comment) => comment.text)
+  }
+
+  const fallbackText = String(fallbackComment || "").trim()
+  return fallbackText
+    ? [{ text: fallbackText, createdAt: fallbackUpdatedAt || new Date().toISOString(), agreedBy: [] }]
+    : []
+}
+
 export async function POST(req: MedusaRequest, res: MedusaResponse) {
   try {
     const body = (req.body || {}) as {
@@ -39,11 +66,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
       }
 
       const targetFeedback = store.feedback?.[designId]?.[agreeCommentMember]
-      const targetComments = Array.isArray(targetFeedback?.comments)
-        ? targetFeedback.comments.filter((comment) => String(comment?.text || "").trim())
-        : targetFeedback?.comment
-          ? [{ text: String(targetFeedback.comment), createdAt: targetFeedback.updatedAt || new Date().toISOString(), agreedBy: [] }]
-          : []
+      const targetComments = normalizeComments(
+        targetFeedback?.comments,
+        targetFeedback?.comment,
+        targetFeedback?.updatedAt
+      )
       const agreeCommentIndex = Number(body.agreeCommentIndex)
 
       if (!Number.isInteger(agreeCommentIndex) || !targetComments[agreeCommentIndex]) {
@@ -84,11 +111,11 @@ export async function POST(req: MedusaRequest, res: MedusaResponse) {
     }
 
     const existingFeedback = store.feedback?.[designId]?.[member]
-    const previousComments = Array.isArray(existingFeedback?.comments)
-      ? existingFeedback.comments.filter((comment) => String(comment?.text || "").trim())
-      : existingFeedback?.comment
-        ? [{ text: String(existingFeedback.comment), createdAt: existingFeedback.updatedAt || new Date().toISOString() }]
-        : []
+    const previousComments = normalizeComments(
+      existingFeedback?.comments,
+      existingFeedback?.comment,
+      existingFeedback?.updatedAt
+    )
     const nextComment = String(body.comment || "").trim().slice(0, 1200)
     const deleteCommentIndex = Number(body.deleteCommentIndex)
     const keptComments = Number.isInteger(deleteCommentIndex)

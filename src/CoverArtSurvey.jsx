@@ -41,7 +41,19 @@ function formatDate(value) {
 
 function getVoteComments(vote) {
   if (Array.isArray(vote?.comments) && vote.comments.length) {
-    return vote.comments.filter((comment) => String(comment?.text || "").trim());
+    return vote.comments
+      .map((comment) => {
+        if (typeof comment === "string") {
+          return { text: comment, createdAt: vote?.updatedAt, agreedBy: [] };
+        }
+
+        return {
+          text: String(comment?.text || "").trim(),
+          createdAt: comment?.createdAt || vote?.updatedAt,
+          agreedBy: Array.isArray(comment?.agreedBy) ? comment.agreedBy : [],
+        };
+      })
+      .filter((comment) => comment.text);
   }
 
   if (vote?.comment) {
@@ -252,7 +264,19 @@ function CoverArtCard({
 
                           return (
                           <div key={`${design.id}-${member}-comment-${index}`} className="rounded-xl border border-white/8 bg-black/24 px-3 py-2">
-                            <p className="whitespace-pre-wrap text-sm leading-6 text-white/58">{comment.text}</p>
+                            <div className="flex items-start justify-between gap-3">
+                              <p className="min-w-0 flex-1 whitespace-pre-wrap text-sm leading-6 text-white/58">{comment.text}</p>
+                              {currentMember === member ? (
+                                <button
+                                  type="button"
+                                  onClick={() => onDeleteComment(design.id, index)}
+                                  disabled={deletingCommentKey === `${design.id}:${index}`}
+                                  className="shrink-0 rounded-full border border-red-300/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-red-100/70 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
+                                >
+                                  {deletingCommentKey === `${design.id}:${index}` ? "Deleting..." : "Delete"}
+                                </button>
+                              ) : null}
+                            </div>
                             {agreedBy.length ? (
                               <p className="mt-2 rounded-full border border-yellow-100/15 bg-yellow-100/8 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-yellow-100/78">
                                 Thumbs up from {agreedNames}
@@ -277,16 +301,6 @@ function CoverArtCard({
                                     }`}
                                   >
                                     {agreeingCommentKey === agreeKey ? "Saving..." : hasAgreed ? "Agreed" : "Click here if you agree"}
-                                  </button>
-                                ) : null}
-                                {currentMember === member ? (
-                                  <button
-                                    type="button"
-                                    onClick={() => onDeleteComment(design.id, index)}
-                                    disabled={deletingCommentKey === `${design.id}:${index}`}
-                                    className="rounded-full border border-red-300/20 px-3 py-1 text-[10px] font-black uppercase tracking-[0.12em] text-red-100/70 transition hover:border-red-200/60 hover:text-red-50 disabled:cursor-not-allowed disabled:opacity-35"
-                                  >
-                                    {deletingCommentKey === `${design.id}:${index}` ? "Deleting..." : "Delete"}
                                   </button>
                                 ) : null}
                               </div>
