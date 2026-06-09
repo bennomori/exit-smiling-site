@@ -42,6 +42,8 @@ const previewPassword = "bakedbeans";
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
+const sitePublic = true;
+const merchComingSoon = true;
 
 const defaultSlideDurationMs = 3000;
 const heroImages = [
@@ -339,7 +341,7 @@ function ComingSoonMusicButton({ ariaLabel, className, popupPlacement = "top", c
   );
 }
 
-function Header({ cart, onToggleMiniCart }) {
+function Header({ cart, onToggleMiniCart, merchComingSoon = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [touchLandscape, setTouchLandscape] = useState(false);
   const socialButtonClass = 'flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-white/75 transition duration-500 hover:border-white/35 hover:bg-white/10 hover:text-white hover:shadow-[0_0_20px_rgba(255,255,255,0.08)]';
@@ -436,18 +438,20 @@ function Header({ cart, onToggleMiniCart }) {
             >
               Menu
             </button>
-            <button
-              onClick={onToggleMiniCart}
-              className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition hover:bg-white/10"
-              aria-label="Open cart"
-            >
-              <CartIcon className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-black">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+            {!merchComingSoon ? (
+              <button
+                onClick={onToggleMiniCart}
+                className="relative flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white transition hover:bg-white/10"
+                aria-label="Open cart"
+              >
+                <CartIcon className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-[20px] items-center justify-center rounded-full bg-white px-1 text-[10px] font-bold text-black">
+                    {cartCount}
+                  </span>
+                )}
+              </button>
+            ) : null}
             <a href="https://events.humanitix.com/exit-smiling/tickets" target="_blank" rel="noreferrer" className="hidden rounded-full border border-white px-4 py-2 text-xs uppercase tracking-[0.2em] transition hover:bg-white hover:text-black sm:inline-flex">
               Get Tickets
             </a>
@@ -564,7 +568,7 @@ function HeroQuickActions() {
   const actions = [
     { href: "#music", label: "Listen", note: "Single teasers" },
     { href: "#videos", label: "Watch", note: "Live sessions" },
-    { href: "#store", label: "Buy Merch", note: "Ships from Australia" },
+    { href: "#store", label: "Merch Soon", note: "Shop reopening soon" },
     { href: "#fan-list", label: "Join List", note: "Gigs and release drops" },
   ];
 
@@ -1221,6 +1225,51 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
             </div>
           </article>
         ))}
+      </div>
+    </section>
+  );
+}
+
+function StoreComingSoon() {
+  return (
+    <section id="store" className="scroll-mt-32 border-t border-white/10 px-6 py-24">
+      <div className="mx-auto max-w-7xl">
+        <div className="max-w-3xl">
+          <p className="text-xs uppercase tracking-[0.35em] text-yellow-200/70">Merch</p>
+          <SectionTitle className="mt-3">Coming Soon</SectionTitle>
+          <p className="mt-6 text-base leading-8 text-white/68 md:text-lg">
+            The online merch shop is temporarily paused while checkout and fulfilment are being finalised.
+            New tees, hoodies, posters and small-batch drops are on the way.
+          </p>
+        </div>
+
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {[
+            ["Shop paused", "Online checkout is disabled for now, so no orders or payments can be placed through the site."],
+            ["Drops incoming", "Tour tees, hoodies, caps and signed pieces will return once everything is ready behind the scenes."],
+            ["Get notified", "Join the list and we will send gig updates, release news and merch drop announcements."],
+          ].map(([title, copy]) => (
+            <div key={title} className="rounded-2xl border border-white/10 bg-white/[0.035] p-5">
+              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-white/45">{title}</p>
+              <p className="mt-3 text-sm leading-6 text-white/66">{copy}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 flex flex-wrap gap-3">
+          <a
+            href="#fan-list"
+            className="rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-black transition hover:opacity-90"
+          >
+            Join the List
+          </a>
+          <a
+            href="mailto:merch@exitsmiling.com.au"
+            className="rounded-full border border-white/18 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-white/75 transition hover:bg-white/10 hover:text-white"
+          >
+            Merch Enquiries
+          </a>
+        </div>
       </div>
     </section>
   );
@@ -3902,10 +3951,10 @@ function Footer() {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Shipping + Timing</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Shop Timing</p>
           <p className="mt-3 text-sm leading-6 text-white/68">
-            In-stock items are packed as soon as practical. Print-on-demand items require an extra custom print run and
-            may take about 7 additional days before shipping.
+            The online shop is temporarily paused while checkout and fulfilment are finalised. Merch drops will return
+            once the store is ready.
           </p>
         </div>
 
@@ -3918,10 +3967,10 @@ function Footer() {
         </div>
 
         <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Privacy + Payments</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-white/45">Privacy + Updates</p>
           <p className="mt-3 text-sm leading-6 text-white/68">
-            Checkout payments are processed securely by Stripe. We only use customer details to process orders, shipping,
-            support, and opted-in band updates.
+            We only use customer and fan-list details for support, opted-in band updates, release news, gig reminders,
+            and future merch announcements.
           </p>
         </div>
       </div>
@@ -4710,7 +4759,7 @@ function MiniCart({
 
 export default function App() {
   const studioAccessStorageKey = "exit_smiling_studio_access_token";
-  const [previewAuthorized, setPreviewAuthorized] = useState(false);
+  const [previewAuthorized, setPreviewAuthorized] = useState(sitePublic);
   const [previewUserInput, setPreviewUserInput] = useState("");
   const [previewPasswordInput, setPreviewPasswordInput] = useState("");
   const [previewAccessError, setPreviewAccessError] = useState("");
@@ -5608,7 +5657,7 @@ export default function App() {
     setPreviewAccessError("Incorrect username or password.");
   };
 
-  if (!previewAuthorized) {
+  if (!sitePublic && !previewAuthorized) {
     return (
       <div className="min-h-screen bg-black text-white selection:bg-white selection:text-black">
         <div className="mx-auto flex min-h-screen max-w-md items-center px-6 py-12">
@@ -5657,6 +5706,7 @@ export default function App() {
       <Header
         cart={cart}
         onToggleMiniCart={() => setMiniCartOpen((prev) => !prev)}
+        merchComingSoon={merchComingSoon}
       />
       <Hero
         currentImage={currentImage}
@@ -5679,20 +5729,24 @@ export default function App() {
       {/* Studio Sessions temporarily disabled; keep component/modal code for later reinstatement. */}
       <Band memberMediaOverrides={memberMediaOverrides} />
       <FanListSignup />
-      <Store
-        products={products}
-        productsLoading={productsLoading}
-        productsError={productsError}
-        onAddToCart={handleAddToCart}
-        onOpenMerchImage={(image, title, mode = "garment") => {
-          setSelectedMerchImage(image);
-          setSelectedMerchTitle(title);
-          setSelectedMerchImageMode(mode);
-          setMerchImageOpen(true);
-        }}
-        selectedOptionsByProduct={selectedOptionsByProduct}
-        setSelectedOptionsByProduct={setSelectedOptionsByProduct}
-      />
+      {merchComingSoon ? (
+        <StoreComingSoon />
+      ) : (
+        <Store
+          products={products}
+          productsLoading={productsLoading}
+          productsError={productsError}
+          onAddToCart={handleAddToCart}
+          onOpenMerchImage={(image, title, mode = "garment") => {
+            setSelectedMerchImage(image);
+            setSelectedMerchTitle(title);
+            setSelectedMerchImageMode(mode);
+            setMerchImageOpen(true);
+          }}
+          selectedOptionsByProduct={selectedOptionsByProduct}
+          setSelectedOptionsByProduct={setSelectedOptionsByProduct}
+        />
+      )}
       <PressKit />
       <MobileSocialBar />
       
@@ -5723,6 +5777,7 @@ export default function App() {
         error={studioError}
         selectedStudioVideo={selectedStudioVideo}
       />
+      {!merchComingSoon ? (
         <MiniCart
           open={miniCartOpen}
           cart={cart}
@@ -5745,7 +5800,9 @@ export default function App() {
           onSelectShippingOption={handleSelectShippingOption}
           checkoutError={checkoutError}
         />
-      <StripeCheckoutModal
+      ) : null}
+      {!merchComingSoon ? (
+        <StripeCheckoutModal
         open={stripeModalOpen}
         clientSecret={stripeClientSecret}
         cartId={cartId}
@@ -5755,6 +5812,7 @@ export default function App() {
         }}
         onSuccess={handleStripeSuccess}
       />
+      ) : null}
       <FeaturedAudioImageModal
         item={selectedFeaturedAudioImage}
         onClose={() => setSelectedFeaturedAudioImage(null)}
