@@ -3856,8 +3856,8 @@ function Footer() {
     <footer className="border-t border-white/10 px-6 py-10 text-sm text-white/50">
       <div className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-4 xl:items-start">
         <div>
-          <div className="flex items-center gap-3">
-            <img src={brand.markLogo} alt={brand.logoAlt} loading="lazy" decoding="async" className="h-8 w-8 rounded-full border border-white/10 object-cover" />
+          <div className="flex items-center gap-4">
+            <img src={brand.markLogo} alt={brand.logoAlt} loading="lazy" decoding="async" className="h-14 w-14 object-contain" />
             <span>(c) 2026 {brand.name}</span>
           </div>
           <a
