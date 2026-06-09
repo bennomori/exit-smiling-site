@@ -140,9 +140,9 @@ const pastGigPosterImages = [
 ];
 
 const exitSmilingDebutSingleCover =
-  "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-cover.png";
+  "/press-kit/images/exit-smiling-single-cover.png";
 const exitSmilingDebutSingleCoverLarge =
-  "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-single-cover-large.png";
+  "/press-kit/images/exit-smiling-single-cover.png";
 const debutSinglePreviewReleaseText =
   "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
 const debutSinglePreviewMedia = {
