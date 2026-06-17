@@ -77,7 +77,7 @@ const defaultSiteGigs = [
   {
     id: "default-2026-06-21-moruya-sage-winter-festival",
     dateIso: "2026-06-21",
-    date: "JUN 21",
+    date: "TBD",
     city: "Moruya, NSW",
     venue: "Moruya Sage Winter Festival - Moruya Riverside Park (TBD)",
     time: "Times TBD",
