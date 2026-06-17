@@ -146,20 +146,20 @@ const exitSmilingDebutSingleCover =
 const exitSmilingDebutSingleCoverLarge =
   "/press-kit/images/exit-smiling-single-cover.png";
 const debutSinglePreviewReleaseText =
-  "PREVIEW ONLY - RELEASING ON SPOTIFY & APPLE MUSIC JUNE 12TH 2026";
+  "DEBUT SINGLE LAUNCHED JUNE 12TH 2026";
 const debutSinglePreviewMedia = {
   src: "https://exit-smiling-media.bennoclark.workers.dev/releases/exit-smiling-debut-single-preview.wav",
   visualSrc: "https://exit-smiling-media.bennoclark.workers.dev/releases/vinyl-spin-audio-preview-loop.mp4",
   type: "audio",
-  disclaimer: "AUDIO PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE COMING SOON",
+  disclaimer: "AUDIO PREVIEW OF 'EXIT SMILING' by EXIT SMILING - OFFICIAL MASTERED SINGLE LAUNCHED JUNE 12, 2026",
 };
 
 const releases = [
   {
     title: 'Debut Single - Exit Smiling',
-    meta: 'Single - Releases Friday June 12, 2026',
+    meta: 'Single - Launched Friday June 12, 2026',
     href: 'https://events.humanitix.com/exit-smiling/tickets',
-    blurb: 'Launching live at Starfish Sessions in Batemans Bay.',
+    blurb: 'Launched live at Starfish Sessions in Batemans Bay.',
     image: exitSmilingDebutSingleCover,
     imageAlt: 'Exit Smiling Debut Single',
     previewVideo: debutSinglePreviewMedia,
@@ -332,7 +332,7 @@ function ComingSoonMusicButton({ ariaLabel, className, popupPlacement = "top", c
               : "bottom-full left-1/2 mb-2 -translate-x-1/2"
           }`}
         >
-          Coming June 12
+          Launched June 12
         </span>
       ) : null}
     </span>
@@ -671,9 +671,9 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
               />
             </div>
           </div>
-          <p className="mb-4 inline-block rounded-full px-2 py-1 text-xs uppercase tracking-[0.35em] text-white/60 transition duration-300 hover:bg-[radial-gradient(circle_at_center,rgba(255,214,10,0.22),transparent_72%)] hover:text-white hover:drop-shadow-[0_0_14px_rgba(255,214,10,0.22)]">Debut single releases Friday June 12, 2026</p>
+          <p className="mb-4 inline-block rounded-full px-2 py-1 text-xs uppercase tracking-[0.35em] text-white/60 transition duration-300 hover:bg-[radial-gradient(circle_at_center,rgba(255,214,10,0.22),transparent_72%)] hover:text-white hover:drop-shadow-[0_0_14px_rgba(255,214,10,0.22)]">Debut single launched Friday June 12, 2026</p>
           <h1 className="max-w-6xl text-5xl font-black uppercase leading-none transition duration-300 hover:drop-shadow-[0_0_26px_rgba(255,214,10,0.18)] md:text-7xl lg:text-8xl">
-            <span className="block text-white/92">Debut single launch</span>
+            <span className="block text-white/92">Debut single launched</span>
             <span className="relative mt-2 block text-white/55 md:mt-3">
               <span className="pointer-events-none absolute inset-x-[18%] inset-y-[18%] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,214,10,0.42),rgba(255,214,10,0.12)_44%,transparent_78%)] blur-xl animate-[sectionTitleGlow_4.5s_ease-in-out_infinite]" />
               <span className="inline-block drop-shadow-[0_0_14px_rgba(255,214,10,0.22)] animate-[liveHeadlinePulse_4.2s_ease-in-out_infinite]">Live at</span>
@@ -728,7 +728,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
                   Debut Single
                 </h2>
                 <p className="text-sm text-white/60">
-                  Releases live on Friday June 12, 2026
+                  Launched live on Friday June 12, 2026
                 </p>
               </div>
               <button
@@ -3420,7 +3420,7 @@ export function PressKit({ standalone = false }) {
     { href: "https://www.tiktok.com/@exit_smiling", label: "TikTok" },
   ];
   const highlights = [
-    "Debut single launch: Starfish Sessions, Batemans Bay - June 12, 2026.",
+    "Debut single launched: Starfish Sessions, Batemans Bay - June 12, 2026.",
     "Original music played on ABC Radio, including live studio interview content.",
     "Winners of school Battle of the Bands and Eurobodalla Battle of the Bands.",
     "Live appearances at Smokey Dans, Starfish Deli Live, Nelligen Hotel, Narooma Oyster Festival, and more.",
@@ -3522,7 +3522,7 @@ export function PressKit({ standalone = false }) {
             <div className="mt-5 grid gap-3 text-sm text-white/68">
               <p><span className="font-semibold text-white">Location:</span> South Coast NSW, Australia</p>
               <p><span className="font-semibold text-white">Style:</span> Young alternative rock band, original songs, live covers, high-energy local shows</p>
-              <p><span className="font-semibold text-white">Current focus:</span> Debut single launch, live shows, studio sessions, and official merch</p>
+              <p><span className="font-semibold text-white">Current focus:</span> Debut single follow-up, live shows, studio sessions, and official merch</p>
               <p><span className="font-semibold text-white">Booking agent:</span> Good Vibes Entertainment - <a href="mailto:megan@goodvibesentertainment.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">megan@goodvibesentertainment.com.au</a></p>
               <p><span className="font-semibold text-white">Direct band bookings:</span> <a href="mailto:bookings@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">bookings@exitsmiling.com.au</a></p>
               <p><span className="font-semibold text-white">Press / EPK:</span> <a href="mailto:press@exitsmiling.com.au" className="text-white underline decoration-white/25 underline-offset-4 hover:decoration-white">press@exitsmiling.com.au</a></p>
