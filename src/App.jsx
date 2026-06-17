@@ -1959,6 +1959,7 @@ function MemberCard({ member, memberMediaOverrides }) {
       ? {
           src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-top-bio-video.mp4',
           label: 'Cadence on vocals',
+          endAtSeconds: 20,
         }
       : member.name === 'Joey'
         ? {
@@ -1984,6 +1985,7 @@ function MemberCard({ member, memberMediaOverrides }) {
       : null;
   const liveVideoSrc = livePreview?.src || null;
   const liveVideoTrimSeconds = Number(livePreview?.trimEndSeconds || 0);
+  const liveVideoEndAtSeconds = Number(livePreview?.endAtSeconds || 0);
   const liveVideoLabel = livePreview?.label || '';
   const liveClipVideo =
     liveVideoSrc
@@ -2119,6 +2121,12 @@ function MemberCard({ member, memberMediaOverrides }) {
   const handleLiveVideoTimeUpdate = () => {
     const video = liveVideoRef.current;
     if (!video || video.muted || !video.duration) return;
+
+    if (liveVideoEndAtSeconds > 0 && video.currentTime >= liveVideoEndAtSeconds) {
+      video.currentTime = 0;
+      video.volume = 1;
+      return;
+    }
 
     const loopEndTime = Math.max(0, video.duration - liveVideoTrimSeconds);
     const remaining = loopEndTime - video.currentTime;
