@@ -682,7 +682,7 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
               Starfish Sessions.
             </span>
           </h1>
-          <p className="mt-6 max-w-2xl rounded-2xl px-3 py-2 text-base text-white/70 transition duration-300 hover:bg-[radial-gradient(circle_at_center,rgba(255,214,10,0.16),transparent_78%)] hover:text-white/86 hover:drop-shadow-[0_0_16px_rgba(255,214,10,0.16)] md:text-lg">Exit Smiling launch their debut single on Friday, June 12, 2026 at Starfish Sessions (Upstairs) inside The Starfish Deli, Batemans Bay.</p>
+          <p className="mt-6 max-w-2xl rounded-2xl px-3 py-2 text-base text-white/70 transition duration-300 hover:bg-[radial-gradient(circle_at_center,rgba(255,214,10,0.16),transparent_78%)] hover:text-white/86 hover:drop-shadow-[0_0_16px_rgba(255,214,10,0.16)] md:text-lg">Exit Smiling launched their debut single on Friday, June 12, 2026 at Starfish Sessions (Upstairs) inside The Starfish Deli, Batemans Bay.</p>
           <div className="mt-8 flex flex-wrap gap-4">
             <a href="https://www.starfishwaterfront.com/stafishsessions" target="_blank" rel="noreferrer" className="rounded-full bg-white px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-black transition hover:scale-[1.02]">Launch Event</a>
             <a href="https://humanitix.com/au/search/au--batemans-bay--2536/starfish%20sessions?dates=all" target="_blank" rel="noreferrer" className="rounded-full border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-[0.2em] text-white transition hover:border-white">Tickets</a>
