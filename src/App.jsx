@@ -3313,15 +3313,6 @@ export function PressKit({ standalone = false }) {
       alt: "Exit Smiling press photo 05B",
     },
     {
-      id: "band-press-photo",
-      title: "Band Press Photo",
-      category: "Press photo",
-      usage: "Primary image for press, posters, venue listings, and articles.",
-      href: "/press-kit/images/exit-smiling-band-press-photo.jpg",
-      fileName: "exit-smiling-band-press-photo.jpg",
-      alt: "Exit Smiling band press photo",
-    },
-    {
       id: "smoke-band",
       title: "Smoke Band Image",
       category: "Atmospheric band photo",
