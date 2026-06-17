@@ -36,6 +36,9 @@ const brand = {
   logoAlt: 'Exit Smiling official logo',
 };
 
+const spotifyArtistUrl = "https://open.spotify.com/artist/7xi5LQcxWWCeTS4TQ9isAq";
+const appleMusicArtistUrl = "https://music.apple.com/us/artist/exit-smiling/6777061437";
+
 const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "";
 const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishableKey) : null;
@@ -304,41 +307,6 @@ const studioSessions = [
   },
 ];
 
-function ComingSoonMusicButton({ ariaLabel, className, popupPlacement = "top", children }) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (!open) return undefined;
-
-    const timeout = window.setTimeout(() => setOpen(false), 1800);
-    return () => window.clearTimeout(timeout);
-  }, [open]);
-
-  return (
-    <span className="relative inline-flex">
-      <button
-        type="button"
-        aria-label={ariaLabel}
-        className={className}
-        onClick={() => setOpen(true)}
-      >
-        {children}
-      </button>
-      {open ? (
-        <span
-          className={`pointer-events-none absolute z-[200] whitespace-nowrap rounded-full border border-yellow-200/45 bg-black/92 px-3 py-1.5 text-[10px] font-black uppercase tracking-[0.2em] text-yellow-100 shadow-[0_10px_30px_rgba(0,0,0,0.45)] ${
-            popupPlacement === "left"
-              ? "right-full top-1/2 mr-2 -translate-y-1/2"
-              : "bottom-full left-1/2 mb-2 -translate-x-1/2"
-          }`}
-        >
-          Launched June 12
-        </span>
-      ) : null}
-    </span>
-  );
-}
-
 function Header({ cart, onToggleMiniCart, merchComingSoon = false }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [touchLandscape, setTouchLandscape] = useState(false);
@@ -415,13 +383,13 @@ function Header({ cart, onToggleMiniCart, merchComingSoon = false }) {
                 <YoutubeIcon className="h-4 w-4" />
               </a>
 
-              <ComingSoonMusicButton ariaLabel="Spotify" className={socialButtonClass}>
+              <a href={spotifyArtistUrl} target="_blank" rel="noreferrer" aria-label="Spotify" className={socialButtonClass}>
                 <SiSpotify className="h-4 w-4" />
-              </ComingSoonMusicButton>
+              </a>
 
-              <ComingSoonMusicButton ariaLabel="Apple Music" className={socialButtonClass}>
+              <a href={appleMusicArtistUrl} target="_blank" rel="noreferrer" aria-label="Apple Music" className={socialButtonClass}>
                 <SiApplemusic className="h-4 w-4" />
-              </ComingSoonMusicButton>
+              </a>
 
               <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
                 <TikTokIcon className="h-4 w-4" />
@@ -3878,13 +3846,13 @@ function Footer() {
             <YoutubeIcon className="h-4 w-4" />
           </a>
 
-          <ComingSoonMusicButton ariaLabel="Spotify" className={socialButtonClass}>
+          <a href={spotifyArtistUrl} target="_blank" rel="noreferrer" aria-label="Spotify" className={socialButtonClass}>
             <SiSpotify className="h-4 w-4" />
-          </ComingSoonMusicButton>
+          </a>
 
-          <ComingSoonMusicButton ariaLabel="Apple Music" className={socialButtonClass}>
+          <a href={appleMusicArtistUrl} target="_blank" rel="noreferrer" aria-label="Apple Music" className={socialButtonClass}>
             <SiApplemusic className="h-4 w-4" />
-          </ComingSoonMusicButton>
+          </a>
 
           <a href="https://www.tiktok.com/@exit_smiling" target="_blank" rel="noreferrer" aria-label="TikTok" className={socialButtonClass}>
             <TikTokIcon className="h-4 w-4" />
@@ -3983,13 +3951,25 @@ function MobileSocialBar() {
           <YoutubeIcon className="h-5 w-5" />
         </a>
 
-        <ComingSoonMusicButton ariaLabel="Spotify" className={socialButtonClass} popupPlacement="left">
+        <a
+          href={spotifyArtistUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Spotify"
+          className={socialButtonClass}
+        >
           <SiSpotify className="h-5 w-5" />
-        </ComingSoonMusicButton>
+        </a>
 
-        <ComingSoonMusicButton ariaLabel="Apple Music" className={socialButtonClass} popupPlacement="left">
+        <a
+          href={appleMusicArtistUrl}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Apple Music"
+          className={socialButtonClass}
+        >
           <SiApplemusic className="h-5 w-5" />
-        </ComingSoonMusicButton>
+        </a>
 
         <a
           href="https://www.tiktok.com/@exit_smiling"
