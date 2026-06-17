@@ -42,6 +42,8 @@ const addressStripePromise = stripePublishableKey ? loadStripe(stripePublishable
 const merchComingSoon = true;
 
 const defaultSlideDurationMs = 3000;
+const cadenceVocalAudioSrc = "https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-vocal-feature.wav";
+const cadenceBioPhotoSrc = "https://exit-smiling-media.bennoclark.workers.dev/bio/cadence/cadence-main.jpg";
 const heroImages = [
   { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-01.jpg', position: 'center' },
   { type: 'image', src: 'https://exit-smiling-media.bennoclark.workers.dev/hero/band-hero-03.jpg', position: 'center' },
@@ -2056,27 +2058,36 @@ function MemberCard({ member, memberMediaOverrides }) {
       : [];
   const bioClipVideo =
     member.name === 'Cadence'
-      ? null
+      ? {
+          type: 'audio',
+          title: 'Cadence vocals',
+          src: cadenceVocalAudioSrc,
+          poster: cadenceBioPhotoSrc,
+        }
       : member.name === 'Joey'
       ? {
+          type: 'video',
           title: null,
           src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-hendrix-video.mp4',
           poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/joey/joey-hendrix-video-poster.jpg',
         }
       : member.name === 'Julian'
         ? {
+            type: 'video',
             title: null,
             src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-drums-video.mp4',
             poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/julian/julian-drums-poster.jpg',
           }
       : member.name === 'Lando'
         ? {
+            type: 'video',
             title: null,
             src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-bio-feature-2026.mp4',
             poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/lando/lando-bio-feature-2026-poster.jpg',
           }
       : member.name === 'Max'
         ? {
+            type: 'video',
             title: null,
             src: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026-v2.mp4',
             poster: 'https://exit-smiling-media.bennoclark.workers.dev/bio/max/max-bass-feature-2026-v2-poster.jpg',
@@ -2190,26 +2201,30 @@ function MemberCard({ member, memberMediaOverrides }) {
   }, [hoverGalleryOpen, visibleLighterSideImages.length, hoverImageSegmentDuration]);
 
   const handleBioClipEnter = async () => {
-    const video = bioClipVideoRef.current;
-    if (!video) return;
+    const media = bioClipVideoRef.current;
+    if (!media) return;
 
     try {
-      video.muted = false;
-      video.volume = 1;
-      await video.play();
+      media.muted = false;
+      media.volume = 1;
+      await media.play();
     } catch {
-      video.muted = true;
-      video.volume = 1;
-      await video.play().catch(() => {});
+      media.muted = true;
+      media.volume = 1;
+      await media.play().catch(() => {});
     }
   };
 
   const handleBioClipLeave = () => {
-    const video = bioClipVideoRef.current;
-    if (!video) return;
+    const media = bioClipVideoRef.current;
+    if (!media) return;
 
-    video.muted = true;
-    video.volume = 1;
+    media.muted = true;
+    media.volume = 1;
+    if (media.tagName === "AUDIO") {
+      media.pause();
+      media.currentTime = 0;
+    }
   };
 
   const handleBioClipTimeUpdate = () => {
@@ -2425,24 +2440,41 @@ function MemberCard({ member, memberMediaOverrides }) {
           <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover/bioclip:opacity-100" />
           <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-100 transition duration-300 group-hover/bioclip:opacity-0">
             <div className="rounded-full border border-white/35 bg-black/65 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-white shadow-[0_0_24px_rgba(255,255,255,0.14)] backdrop-blur-sm">
-              Hover for audio + motion
+              {bioClipVideo.type === 'audio' ? 'Hover for vocals' : 'Hover for audio + motion'}
             </div>
           </div>
-          <video
-            ref={bioClipVideoRef}
-            src={bioClipVideo.src}
-            poster={bioClipVideo.poster}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            onTimeUpdate={handleBioClipTimeUpdate}
-            className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/bioclip:scale-[1.03] group-hover/bioclip:brightness-110"
-          />
+          {bioClipVideo.type === 'audio' ? (
+            <>
+              <img
+                src={bioClipVideo.poster}
+                alt={bioClipVideo.title || `${member.name} vocal clip`}
+                loading="lazy"
+                decoding="async"
+                className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/bioclip:scale-[1.03] group-hover/bioclip:brightness-110"
+              />
+              <audio
+                ref={bioClipVideoRef}
+                src={bioClipVideo.src}
+                preload="metadata"
+              />
+            </>
+          ) : (
+            <video
+              ref={bioClipVideoRef}
+              src={bioClipVideo.src}
+              poster={bioClipVideo.poster}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              onTimeUpdate={handleBioClipTimeUpdate}
+              className="aspect-video w-full object-cover transition duration-500 ease-out group-hover/bioclip:scale-[1.03] group-hover/bioclip:brightness-110"
+            />
+          )}
           <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex justify-center bg-gradient-to-t from-black/80 via-black/30 to-transparent px-4 pb-4 pt-10">
             <div className="rounded-full border border-white/30 bg-black/60 px-5 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-white shadow-[0_0_20px_rgba(255,255,255,0.12)] backdrop-blur-sm">
-              Click to enlarge
+              {bioClipVideo.type === 'audio' ? 'Click to play' : 'Click to enlarge'}
             </div>
           </div>
         </button>
@@ -2617,28 +2649,44 @@ function MemberCard({ member, memberMediaOverrides }) {
               Close
             </button>
             <div className={`pr-24 ${selectedBioClip.title ? "mb-4" : "mb-1"}`}>
-              <p className="text-[10px] uppercase tracking-[0.32em] text-white/45">Video Clip</p>
+              <p className="text-[10px] uppercase tracking-[0.32em] text-white/45">
+                {selectedBioClip.type === 'audio' ? 'Audio Clip' : 'Video Clip'}
+              </p>
               {selectedBioClip.title ? (
                 <h4 className="mt-2 text-2xl font-black uppercase text-white">{selectedBioClip.title}</h4>
               ) : null}
             </div>
-            <video
-              src={selectedBioClip.src}
-              poster={selectedBioClip.poster}
-              controls
-              autoPlay
-              playsInline
-              onTimeUpdate={(event) => {
-                const endAtSeconds = Number(selectedBioClip.endAtSeconds || 0);
-                if (!endAtSeconds) return;
+            {selectedBioClip.type === 'audio' ? (
+              <div className="overflow-hidden rounded-2xl bg-black">
+                <img
+                  src={selectedBioClip.poster}
+                  alt={selectedBioClip.title || "Cadence vocals"}
+                  decoding="async"
+                  className="max-h-[64vh] w-full object-cover"
+                />
+                <div className="border-t border-white/10 bg-black/88 p-4">
+                  <audio src={selectedBioClip.src} controls autoPlay className="w-full" />
+                </div>
+              </div>
+            ) : (
+              <video
+                src={selectedBioClip.src}
+                poster={selectedBioClip.poster}
+                controls
+                autoPlay
+                playsInline
+                onTimeUpdate={(event) => {
+                  const endAtSeconds = Number(selectedBioClip.endAtSeconds || 0);
+                  if (!endAtSeconds) return;
 
-                if (event.currentTarget.currentTime >= endAtSeconds) {
-                  event.currentTarget.pause();
-                  event.currentTarget.currentTime = 0;
-                }
-              }}
-              className="max-h-[78vh] w-full rounded-2xl bg-black object-contain"
-            />
+                  if (event.currentTarget.currentTime >= endAtSeconds) {
+                    event.currentTarget.pause();
+                    event.currentTarget.currentTime = 0;
+                  }
+                }}
+                className="max-h-[78vh] w-full rounded-2xl bg-black object-contain"
+              />
+            )}
           </div>
         </div>
       ) : null}
