@@ -592,8 +592,6 @@ function HeroQuickActions() {
 
 function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpenHeroSingleImage }) {
   const currentHeroMedia = heroImages[currentImage];
-  const [showHeroManifestoTile, setShowHeroManifestoTile] = useState(false);
-  // Temporarily keep the hero locked on the featured release while leaving the figure animation active.
 
   return (
     <section className="relative overflow-hidden border-b border-white/10">
@@ -606,18 +604,6 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
           26%, 74% {
             opacity: 0;
             transform: rotate(-24deg) scale(0.9);
-          }
-        }
-        @keyframes heroCatch22ImagePulse {
-          0%, 12%, 88%, 100% {
-            opacity: 0;
-            transform: rotate(-14deg) scale(0.86);
-            filter: grayscale(100%) contrast(1.2) brightness(0.88);
-          }
-          24%, 72% {
-            opacity: 0.48;
-            transform: rotate(-14deg) scale(1.04);
-            filter: grayscale(100%) contrast(1.38) brightness(1.15) drop-shadow(0 0 18px rgba(255,255,255,0.22));
           }
         }
       `}</style>
@@ -709,94 +695,49 @@ function Hero({ currentImage, onSlideDurationChange, onOpenReleasePreview, onOpe
           </div>
           <div className="rounded-3xl border border-white/10 bg-black/60 p-6 shadow-2xl backdrop-blur">
             <p className="text-xs uppercase tracking-[0.3em] text-white/50">
-              {showHeroManifestoTile ? "Why Exit Smiling?" : "Featured release"}
+              Featured release
             </p>
-            {showHeroManifestoTile ? (
-              <div className="relative mt-4 flex aspect-square w-full flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-yellow-100/18 bg-[#11100b] p-5 shadow-[inset_0_0_40px_rgba(250,204,21,0.05)] animate-[fadeIn_0.55s_ease_forwards]">
-                <div className="pointer-events-none absolute inset-0 opacity-55 bg-[radial-gradient(circle_at_15%_10%,rgba(250,204,21,0.18),transparent_34%),linear-gradient(135deg,rgba(255,255,255,0.08),transparent_28%),repeating-linear-gradient(0deg,rgba(255,255,255,0.035)_0px,rgba(255,255,255,0.035)_1px,transparent_1px,transparent_18px)]" />
-                <img
-                  src="https://exit-smiling-media.bennoclark.workers.dev/manifesto/catch-22-origin-image.png"
-                  alt=""
-                  aria-hidden="true"
-                  decoding="async"
-                  className="pointer-events-none absolute right-[-12%] top-[10%] w-[78%] max-w-[24rem] mix-blend-screen"
-                  style={{
-                    animation: 'heroCatch22ImagePulse 8.4s ease-in-out infinite',
-                  }}
-                />
-                <div className="relative">
-                  <p className="text-[10px] font-black uppercase tracking-[0.34em] text-yellow-100/70">
-                    Deeper than just a smile
-                  </p>
-                  <h2 className="mt-2 max-w-[13rem] -rotate-2 text-3xl font-black uppercase leading-[0.92] text-white drop-shadow-[0_0_18px_rgba(250,204,21,0.12)] md:text-4xl">
-                    No forced smiles.
-                  </h2>
-                </div>
-                <div className="relative space-y-2.5 text-[13px] leading-5 text-white/74 md:text-sm md:leading-[1.45rem]">
-                  <p>
-                    Max&apos;s avid reading inspired the name Exit Smiling. He uncovered the paradox at the heart of Catch-22: trapped by rules that contradict themselves where even our escape depends on playing along with the system. Perhaps you can relate?
-                  </p>
-                  <p className="font-black uppercase tracking-[0.12em] text-yellow-50">
-                    Smile. Agree. Move on.
-                  </p>
-                  <p>
-                    While that might work for our world systems, it won&apos;t work for us. As a band, we have no filters, no fake exits. Just our creativity and noise telling the truth.
+            <button
+              type="button"
+              onClick={() => onOpenHeroSingleImage?.()}
+              className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left animate-[fadeIn_0.55s_ease_forwards]"
+            >
+              <div
+                className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
+                style={{
+                  backgroundImage: `url(${exitSmilingDebutSingleCover})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center 70%',
+                }}
+              />
+              <div className="absolute inset-0 bg-black/20 transition duration-500 group-hover:opacity-0" />
+              <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
+                <div
+                  className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
+                  style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
+                >
+                  <p className="max-w-[12rem] text-center text-[0.68rem] font-black uppercase leading-tight tracking-[0.1em] text-white md:max-w-[14rem] md:text-sm">
+                    {debutSinglePreviewReleaseText}
                   </p>
                 </div>
               </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => onOpenHeroSingleImage?.()}
-                className="group relative mt-4 block w-full aspect-square overflow-hidden rounded-2xl border border-white/10 bg-transparent p-0 text-left animate-[fadeIn_0.55s_ease_forwards]"
-              >
-                <div
-                  className="absolute inset-0 transition duration-500 ease-out group-hover:scale-[1.02] filter contrast-110 brightness-105 sepia-[0.18] saturate-[1.15] hue-rotate-[338deg] group-hover:grayscale group-hover:sepia-0 group-hover:saturate-0 group-hover:brightness-110"
-                  style={{
-                    backgroundImage: `url(${exitSmilingDebutSingleCover})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center 70%',
-                  }}
-                />
-                <div className="absolute inset-0 bg-black/20 transition duration-500 group-hover:opacity-0" />
-                <div className="pointer-events-none absolute inset-[-12%] flex items-center justify-center">
-                  <div
-                    className="-rotate-[24deg] rounded-2xl border border-white/18 bg-black/45 px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.32)] backdrop-blur-sm"
-                    style={{ animation: 'heroReleaseOverlayPulse 4.8s ease-in-out infinite' }}
-                  >
-                    <p className="max-w-[12rem] text-center text-[0.68rem] font-black uppercase leading-tight tracking-[0.1em] text-white md:max-w-[14rem] md:text-sm">
-                      {debutSinglePreviewReleaseText}
-                    </p>
-                  </div>
-                </div>
-              </button>
-            )}
+            </button>
             <div className="mt-4 flex items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-bold uppercase">
-                  {showHeroManifestoTile ? "Band Manifesto" : "Debut Single"}
+                  Debut Single
                 </h2>
                 <p className="text-sm text-white/60">
-                  {showHeroManifestoTile ? "The name behind the noise" : "Releases live on Friday June 12, 2026"}
+                  Releases live on Friday June 12, 2026
                 </p>
               </div>
-              {showHeroManifestoTile ? (
-                <button
-                  type="button"
-                  onClick={() => setShowHeroManifestoTile(false)}
-                  className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
-                >
-                  View single
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => onOpenReleasePreview(debutSinglePreviewMedia)}
-                  className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
-                >
-                  Listen
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => onOpenReleasePreview(debutSinglePreviewMedia)}
+                className="rounded-full border border-white px-4 py-2 text-right text-xs uppercase tracking-[0.2em] hover:bg-white hover:text-black"
+              >
+                Listen
+              </button>
             </div>
           </div>
         </div>
@@ -3553,24 +3494,6 @@ export function PressKit({ standalone = false }) {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-white/58 md:text-base">
               For booking, press, festival, radio, school, and venue enquiries, use the contacts below or link directly to the official social channels.
             </p>
-            <div className="mt-6 rounded-3xl border border-yellow-200/18 bg-yellow-200/8 p-5">
-              <p className="text-xs font-black uppercase tracking-[0.28em] text-yellow-100/70">Why Exit Smiling?</p>
-              <h3 className="mt-3 text-2xl font-black uppercase leading-none text-white">
-                Deeper than just a smile
-              </h3>
-              <div className="mt-4 space-y-3 text-sm leading-6 text-white/68">
-                <p>
-                  Max&apos;s avid reading inspired the name Exit Smiling. He uncovered the paradox at the heart of Catch-22: trapped by rules that contradict themselves where even our escape depends on playing along with the system. Perhaps you can relate?
-                </p>
-                <p className="font-black uppercase tracking-[0.12em] text-yellow-50">
-                  Smile. Agree. Move on.
-                </p>
-                <p>
-                  While that might work for our world systems, it won&apos;t work for us. As a band, we have no filters, no fake exits. Just our creativity and noise telling the truth.
-                </p>
-              </div>
-            </div>
-
             <div className="mt-6 grid gap-3 sm:grid-cols-2">
               <button
                 type="button"
