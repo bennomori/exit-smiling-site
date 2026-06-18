@@ -1,0 +1,4 @@
+Contact: mailto:hello@exitsmiling.com.au
+Preferred-Languages: en
+Canonical: https://www.exitsmiling.com.au/.well-known/security.txt
+Policy: https://www.exitsmiling.com.au/privacy
