@@ -1140,6 +1140,14 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
 }
 
 function StoreComingSoon() {
+  const merchEnquiryHref =
+    "mailto:merch@exitsmiling.com.au?subject=Exit%20Smiling%20merch%20enquiry&body=Hi%20Exit%20Smiling%2C%0A%0AI%27m%20interested%20in%20merch%20updates.%0A%0AName%3A%0AItem%2Fsize%20interest%3A%0A";
+  const handleJoinListClick = (event) => {
+    event.preventDefault();
+    window.history.pushState(null, "", "#fan-list");
+    document.getElementById("fan-list")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
     <section id="store" className="scroll-mt-32 border-t border-white/10 px-6 py-24">
       <div className="mx-auto max-w-7xl">
@@ -1168,12 +1176,13 @@ function StoreComingSoon() {
         <div className="mt-10 flex flex-wrap gap-3">
           <a
             href="#fan-list"
+            onClick={handleJoinListClick}
             className="rounded-full bg-white px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-black transition hover:opacity-90"
           >
             Join the List
           </a>
           <a
-            href="mailto:merch@exitsmiling.com.au"
+            href={merchEnquiryHref}
             className="rounded-full border border-white/18 px-5 py-3 text-xs font-black uppercase tracking-[0.2em] text-white/75 transition hover:bg-white/10 hover:text-white"
           >
             Merch Enquiries
