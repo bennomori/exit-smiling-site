@@ -144,6 +144,12 @@ const featuredMusicVideo = {
   actionLabel: "Watch on YouTube",
 };
 
+const bombtrackLiveVideo = {
+  youtubeId: "nlqhNT8FOuk",
+  title: "Bombtrack RATM Cover by Exit Smiling",
+  actionLabel: "Watch on YouTube",
+};
+
 const pastGigPosterImages = [
   "https://exit-smiling-media.bennoclark.workers.dev/gigs/past/past-gig-poster-archive-01.jpg",
   "https://exit-smiling-media.bennoclark.workers.dev/gigs/posters/archie-smokey-dans-ep-release.jpg",
@@ -1085,7 +1091,7 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
             {i === 0 ? (
               <div
                 className="relative cursor-pointer overflow-hidden"
-                onClick={() => onOpenReleasePreview(debutSinglePreviewMedia)}
+                onClick={() => onOpenVideo(featuredMusicVideo)}
               >
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.12),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
                 <div className="aspect-video bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url(${exitSmilingDebutSingleCover})` }} />
@@ -1098,13 +1104,13 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
                 </div>
               </div>
             ) : i === 1 ? (
-              <div className="relative cursor-pointer overflow-hidden" onClick={onOpenVideo}>
+              <div className="relative cursor-pointer overflow-hidden" onClick={() => onOpenVideo(bombtrackLiveVideo)}>
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url('https://img.youtube.com/vi/${featuredMusicVideo.youtubeId}/maxresdefault.jpg')` }} />
+                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url('https://img.youtube.com/vi/${bombtrackLiveVideo.youtubeId}/maxresdefault.jpg')` }} />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition duration-300 group-hover:bg-black/15">
                   <div className="absolute bottom-4 left-4 text-left">
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/70 transition duration-300 group-hover:text-white/85">Music Video</p>
-                    <h4 className="text-lg font-bold uppercase transition duration-300 group-hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.22)]">Out Now</h4>
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/70 transition duration-300 group-hover:text-white/85">Live</p>
+                    <h4 className="text-lg font-bold uppercase transition duration-300 group-hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.22)]">Bombtrack (RATM Cover)</h4>
                   </div>
                   <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white bg-black/30 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:bg-white/10 group-hover:shadow-[0_0_24px_rgba(255,255,255,0.22)]">
                     <div className="ml-1 border-l-[10px] border-l-white border-y-[6px] border-y-transparent transition-transform duration-300 ease-out group-hover:translate-x-[1px]" />
@@ -4719,6 +4725,7 @@ function MiniCart({
 export default function App() {
   const studioAccessStorageKey = "exit_smiling_studio_access_token";
   const [videoOpen, setVideoOpen] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState(featuredMusicVideo);
   const [posterOpen, setPosterOpen] = useState(false);
   const [studioOpen, setStudioOpen] = useState(false);
   const [studioAuthorized, setStudioAuthorized] = useState(false);
@@ -5612,7 +5619,10 @@ export default function App() {
       <Releases onOpenReleasePreview={setReleasePreviewVideo} />
       <Gigs />
       <FeaturedContent
-        onOpenVideo={() => setVideoOpen(true)}
+        onOpenVideo={(video) => {
+          setSelectedVideo(video || featuredMusicVideo);
+          setVideoOpen(true);
+        }}
         onOpenAudioImage={setSelectedFeaturedAudioImage}
         onOpenReleasePreview={setReleasePreviewVideo}
       />
@@ -5641,7 +5651,7 @@ export default function App() {
       <MobileSocialBar />
       
       <Footer />
-      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} video={featuredMusicVideo} />
+      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} video={selectedVideo} />
       <PosterModal open={posterOpen} onClose={() => setPosterOpen(false)} />
       <MerchImageModal
         open={merchImageOpen}
