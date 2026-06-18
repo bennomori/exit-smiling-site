@@ -133,10 +133,16 @@ const tourDates = [
 ];
 
 const videos = [
-  { title: 'Music Video Coming Soon', label: 'Latest Single' },
+  { title: 'Music Video Out Now', label: 'Latest Single' },
   { title: 'Live Session', label: 'Behind the Scenes' },
   { title: 'ABC RADIO LIVE SHOW', label: 'LIVE IN ABC STUDIOS APRIL 29 2026' },
 ];
+
+const featuredMusicVideo = {
+  youtubeId: "ROjg0tM3qmg",
+  title: "Exit Smiling Music Video",
+  actionLabel: "Watch on YouTube",
+};
 
 const pastGigPosterImages = [
   "https://exit-smiling-media.bennoclark.workers.dev/gigs/past/past-gig-poster-archive-01.jpg",
@@ -1094,11 +1100,11 @@ function FeaturedContent({ onOpenVideo, onOpenAudioImage, onOpenReleasePreview }
             ) : i === 1 ? (
               <div className="relative cursor-pointer overflow-hidden" onClick={onOpenVideo}>
                 <div className="pointer-events-none absolute inset-0 z-10 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.14),transparent_65%)] opacity-0 transition duration-300 group-hover:opacity-100" />
-                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: "url('https://img.youtube.com/vi/nlqhNT8FOuk/maxresdefault.jpg')" }} />
+                <div className="aspect-video w-full bg-cover bg-center transition duration-500 ease-out group-hover:scale-[1.05] group-hover:brightness-110" style={{ backgroundImage: `url('https://img.youtube.com/vi/${featuredMusicVideo.youtubeId}/maxresdefault.jpg')` }} />
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 transition duration-300 group-hover:bg-black/15">
                   <div className="absolute bottom-4 left-4 text-left">
-                    <p className="text-xs uppercase tracking-[0.3em] text-white/70 transition duration-300 group-hover:text-white/85">Live</p>
-                    <h4 className="text-lg font-bold uppercase transition duration-300 group-hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.22)]">Bombtrack (RATM Cover)</h4>
+                    <p className="text-xs uppercase tracking-[0.3em] text-white/70 transition duration-300 group-hover:text-white/85">Music Video</p>
+                    <h4 className="text-lg font-bold uppercase transition duration-300 group-hover:drop-shadow-[0_0_16px_rgba(255,255,255,0.22)]">Out Now</h4>
                   </div>
                   <div className="flex h-16 w-16 items-center justify-center rounded-full border border-white bg-black/30 transition-transform duration-300 ease-out group-hover:scale-110 group-hover:bg-white/10 group-hover:shadow-[0_0_24px_rgba(255,255,255,0.22)]">
                     <div className="ml-1 border-l-[10px] border-l-white border-y-[6px] border-y-transparent transition-transform duration-300 ease-out group-hover:translate-x-[1px]" />
@@ -4000,7 +4006,7 @@ function MobileSocialBar() {
   );
 }
 
-function VideoModal({ open, onClose }) {
+function VideoModal({ open, onClose, video = featuredMusicVideo }) {
   useEffect(() => {
     if (!open) return;
 
@@ -4015,22 +4021,26 @@ function VideoModal({ open, onClose }) {
   }, [open, onClose]);
 
   if (!open) return null;
+  const youtubeId = video?.youtubeId || featuredMusicVideo.youtubeId;
+  const title = video?.title || featuredMusicVideo.title;
+  const actionLabel = video?.actionLabel || "Watch on YouTube";
+
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90">
       <div className="relative w-full max-w-7xl px-4 md:px-8">
         <a
-          href="https://www.youtube.com/watch?v=nlqhNT8FOuk"
+          href={`https://www.youtube.com/watch?v=${youtubeId}`}
           target="_blank"
           rel="noreferrer"
           onClick={onClose}
           className="absolute -top-10 left-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70"
         >
-          Watch on YouTube
+          {actionLabel}
         </a>
         <button onClick={onClose} className="absolute -top-10 right-0 text-sm font-semibold uppercase tracking-[0.2em] text-white hover:text-white/70">Close</button>
         <iframe
-          src="https://www.youtube-nocookie.com/embed/nlqhNT8FOuk?autoplay=1&rel=0"
-          title="Bombtrack RATM Cover by Exit Smiling"
+          src={`https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0`}
+          title={title}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           allowFullScreen
           className="aspect-video w-full rounded-2xl bg-black"
@@ -5631,7 +5641,7 @@ export default function App() {
       <MobileSocialBar />
       
       <Footer />
-      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} />
+      <VideoModal open={videoOpen} onClose={() => setVideoOpen(false)} video={featuredMusicVideo} />
       <PosterModal open={posterOpen} onClose={() => setPosterOpen(false)} />
       <MerchImageModal
         open={merchImageOpen}
