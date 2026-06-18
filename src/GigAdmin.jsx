@@ -130,11 +130,18 @@ export default function GigAdmin() {
       const defaultGigIds = new Set(defaultSiteGigs.map((gig) => gig.id));
       const builtInGigs = defaultSiteGigs
         .filter((gig) => !hiddenDefaultGigIds.includes(gig.id))
-        .map((gig) => ({
-          ...gig,
-          ...(savedGigById.get(gig.id) || {}),
-          source: savedGigById.has(gig.id) ? "Edited built-in site gig" : "Built-in site gig",
-        }));
+        .map((gig) => {
+          const override = savedGigById.get(gig.id);
+          const staleWinterSoulsticeOverride =
+            gig.id === "default-2026-06-21-moruya-sage-winter-festival" &&
+            override?.dateIso === "2026-06-21";
+
+          return {
+            ...gig,
+            ...(override && !staleWinterSoulsticeOverride ? override : {}),
+            source: override && !staleWinterSoulsticeOverride ? "Edited built-in site gig" : "Built-in site gig",
+          };
+        });
       const portalGigs = gigs
         .filter((gig) => !defaultGigIds.has(gig.id))
         .map((gig) => ({ ...gig, source: "Portal-added gig" }));

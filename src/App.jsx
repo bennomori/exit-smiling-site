@@ -816,9 +816,14 @@ function Gigs() {
     () => {
       const portalGigById = new Map(portalGigs.map((show) => [show.id, show]));
       const defaultGigIds = new Set(tourDates.map((show) => show.id));
-      const defaultGigsWithOverrides = tourDates.map((show) =>
-        portalGigById.has(show.id) ? { ...show, ...portalGigById.get(show.id) } : show
-      );
+      const defaultGigsWithOverrides = tourDates.map((show) => {
+        const override = portalGigById.get(show.id);
+        const staleWinterSoulsticeOverride =
+          show.id === 'default-2026-06-21-moruya-sage-winter-festival' &&
+          override?.dateIso === '2026-06-21';
+
+        return override && !staleWinterSoulsticeOverride ? { ...show, ...override } : show;
+      });
       const customGigs = portalGigs.filter((show) => !defaultGigIds.has(show.id));
 
       return [...defaultGigsWithOverrides, ...customGigs]
